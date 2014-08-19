@@ -1,6 +1,6 @@
 package com.yangc.bridge.bean;
 
-public class ProtocalFile extends Protocal {
+public class ProtocolFile extends Protocol {
 
 	private byte[] fileName;
 	private long fileSize;

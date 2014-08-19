@@ -1,6 +1,6 @@
 package com.yangc.bridge.bean;
 
-public class Protocal {
+public class Protocol {
 
 	private byte startTag;
 	private short dataLength;

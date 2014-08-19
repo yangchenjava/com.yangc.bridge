@@ -1,6 +1,6 @@
 package com.yangc.bridge.bean;
 
-public class ProtocalChat extends Protocal {
+public class ProtocolChat extends Protocol {
 
 	private String data;
 
