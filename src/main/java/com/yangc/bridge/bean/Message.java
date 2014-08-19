@@ -6,7 +6,7 @@ public class Message {
 	private String from;
 	private String to;
 	private String type;
-	private String body;
+	private Protocal body;
 
 	public String getId() {
 		return id;
@@ -40,11 +40,11 @@ public class Message {
 		this.type = type;
 	}
 
-	public String getBody() {
+	public Protocal getBody() {
 		return body;
 	}
 
-	public void setBody(String body) {
+	public void setBody(Protocal body) {
 		this.body = body;
 	}
 
