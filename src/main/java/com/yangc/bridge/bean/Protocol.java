@@ -2,17 +2,22 @@ package com.yangc.bridge.bean;
 
 public class Protocol {
 
-	private byte startTag;
-	private short dataLength;
-	private byte endTag;
-	private byte finalTag;
+	private final byte startTag = 0x68; // 1byte
+	private byte type; // 1byte 内容类型 0:chat 1:file
+	private short dataLength; // 2byte
+	private final byte endTag = 0x68; // 1byte
+	private final byte finalTag = 0x16; // 1byte
 
 	public byte getStartTag() {
 		return startTag;
 	}
 
-	public void setStartTag(byte startTag) {
-		this.startTag = startTag;
+	public byte getType() {
+		return type;
+	}
+
+	public void setType(byte type) {
+		this.type = type;
 	}
 
 	public short getDataLength() {
@@ -27,16 +32,8 @@ public class Protocol {
 		return endTag;
 	}
 
-	public void setEndTag(byte endTag) {
-		this.endTag = endTag;
-	}
-
 	public byte getFinalTag() {
 		return finalTag;
-	}
-
-	public void setFinalTag(byte finalTag) {
-		this.finalTag = finalTag;
 	}
 
 }

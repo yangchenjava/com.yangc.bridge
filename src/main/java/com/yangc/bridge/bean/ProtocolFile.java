@@ -2,10 +2,10 @@ package com.yangc.bridge.bean;
 
 public class ProtocolFile extends Protocol {
 
-	private byte[] fileName;
-	private long fileSize;
-	private byte[] fileMd5;
-	private int offset;
+	private byte[] fileName; // 60byte
+	private long fileSize; // 8byte
+	private byte[] fileMd5; // 32byte
+	private short offset; // 2byte
 	private byte[] data;
 
 	public byte[] getFileName() {
@@ -32,11 +32,11 @@ public class ProtocolFile extends Protocol {
 		this.fileMd5 = fileMd5;
 	}
 
-	public int getOffset() {
+	public short getOffset() {
 		return offset;
 	}
 
-	public void setOffset(int offset) {
+	public void setOffset(short offset) {
 		this.offset = offset;
 	}
 
