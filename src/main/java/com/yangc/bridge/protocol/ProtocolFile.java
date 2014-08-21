@@ -1,12 +1,21 @@
-package com.yangc.bridge.bean;
+package com.yangc.bridge.protocol;
 
 public class ProtocolFile extends Protocol {
 
-	private byte[] fileName; // 60byte
+	private short fileNameLength; // 2byte
+	private byte[] fileName;
 	private long fileSize; // 8byte
 	private byte[] fileMd5; // 32byte
 	private short offset; // 2byte
 	private byte[] data;
+
+	public short getFileNameLength() {
+		return fileNameLength;
+	}
+
+	public void setFileNameLength(short fileNameLength) {
+		this.fileNameLength = fileNameLength;
+	}
 
 	public byte[] getFileName() {
 		return fileName;

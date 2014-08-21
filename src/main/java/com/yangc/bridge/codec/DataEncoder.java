@@ -1,36 +1,52 @@
 package com.yangc.bridge.codec;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.util.UUID;
-
+import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.apache.mina.filter.codec.demux.MessageEncoder;
 
-import com.yangc.bridge.bean.ProtocolChat;
+import com.yangc.bridge.protocol.Protocol;
+import com.yangc.bridge.protocol.ProtocolChat;
+import com.yangc.bridge.protocol.ProtocolFile;
 
-public class DataEncoder extends ProtocolEncoderAdapter {
+public class DataEncoder implements MessageEncoder<Protocol> {
 
-	private Charset charset;
-
-	public DataEncoder(Charset charset) {
-		this.charset = charset;
-	}
+	private static final int CAPACITY = 4096;
 
 	@Override
-	public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
-		if (message instanceof String) {
-			String uuid = UUID.randomUUID().toString();
-			byte[] data = ((String) message).getBytes(charset);
+	public void encode(IoSession session, Protocol message, ProtocolEncoderOutput out) throws Exception {
+		IoBuffer buffer = IoBuffer.allocate(CAPACITY).setAutoExpand(true);
 
-			ProtocolChat chat = new ProtocolChat();
-			chat.setType((byte) 0);
-			chat.setUuid(uuid.getBytes());
+		buffer.put(Protocol.START_TAG);
+		buffer.putShort(message.getHeadLength());
+		buffer.putShort(message.getBodyLength());
+		buffer.put(Protocol.END_TAG);
+		buffer.put(message.getUuid());
+		buffer.put(message.getContentType());
+		buffer.putShort(message.getFromLength());
+		buffer.putShort(message.getToLength());
+		buffer.put(message.getFrom());
+		buffer.put(message.getTo());
 
-		} else if (message instanceof File) {
-
+		if (message instanceof ProtocolChat) {
+			ProtocolChat protocolChat = (ProtocolChat) message;
+			buffer.put(protocolChat.getData());
+		} else if (message instanceof ProtocolFile) {
+			ProtocolFile protocolFile = (ProtocolFile) message;
+			buffer.putShort(protocolFile.getFileNameLength());
+			buffer.put(protocolFile.getFileName());
+			buffer.putLong(protocolFile.getFileSize());
+			buffer.put(protocolFile.getFileMd5());
+			buffer.putShort(protocolFile.getOffset());
+			buffer.put(protocolFile.getData());
 		}
+
+		buffer.put(message.getCrc());
+		buffer.put(Protocol.FINAL_TAG);
+
+		buffer.flip();
+		out.write(buffer);
+		out.flush();
 	}
 
 }

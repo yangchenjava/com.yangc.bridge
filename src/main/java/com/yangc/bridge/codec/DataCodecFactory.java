@@ -2,30 +2,19 @@ package com.yangc.bridge.codec;
 
 import java.nio.charset.Charset;
 
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolCodecFactory;
-import org.apache.mina.filter.codec.ProtocolDecoder;
-import org.apache.mina.filter.codec.ProtocolEncoder;
+import org.apache.mina.filter.codec.demux.DemuxingProtocolCodecFactory;
 
-public class DataCodecFactory implements ProtocolCodecFactory {
+import com.yangc.bridge.protocol.Protocol;
 
-	private String charsetName = "UTF-8";
+public class DataCodecFactory extends DemuxingProtocolCodecFactory {
 
 	public DataCodecFactory() {
+		this("UTF-8");
 	}
 
 	public DataCodecFactory(String charsetName) {
-		this.charsetName = charsetName;
-	}
-
-	@Override
-	public ProtocolEncoder getEncoder(IoSession session) throws Exception {
-		return new DataEncoder(Charset.forName(charsetName));
-	}
-
-	@Override
-	public ProtocolDecoder getDecoder(IoSession session) throws Exception {
-		return new DataDecoder(Charset.forName(charsetName));
+		this.addMessageEncoder(Protocol.class, new DataEncoder());
+		this.addMessageDecoder(new DataDecoder(Charset.forName(charsetName)));
 	}
 
 }
