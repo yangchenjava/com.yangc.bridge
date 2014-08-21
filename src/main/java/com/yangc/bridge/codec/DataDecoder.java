@@ -8,6 +8,7 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.demux.MessageDecoder;
 import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 
+import com.yangc.bridge.bean.ChatBean;
 import com.yangc.bridge.protocol.Protocol;
 
 public class DataDecoder implements MessageDecoder {
@@ -41,24 +42,28 @@ public class DataDecoder implements MessageDecoder {
 
 	@Override
 	public MessageDecoderResult decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		byte startTag = in.get();
-		short headLength = in.getShort();
+		in.get(); // startTag
+		in.getShort(); // headLength
 		short bodyLength = in.getShort();
-		byte endTag = in.get();
+		in.get(); // endTag
 
-		byte[] uuid = new byte[36];
-		in.get(uuid, 0, uuid.length);
+		String uuid = in.getString(36, this.charset.newDecoder());
 
-		byte contentType = in.get();
+		in.get(); // contentType
 		short fromLength = in.getShort();
 		short toLength = in.getShort();
 
-		byte[] from = new byte[fromLength];
-		in.get(from, 0, fromLength);
-		byte[] to = new byte[toLength];
-		in.get(to, 0, toLength);
+		String from = in.getString(fromLength, this.charset.newDecoder());
+		String to = in.getString(toLength, this.charset.newDecoder());
+		String data = in.getString(bodyLength, this.charset.newDecoder());
 
-		return NOT_OK;
+		ChatBean chatBean = new ChatBean();
+		chatBean.setUuid(uuid);
+		chatBean.setFrom(from);
+		chatBean.setTo(to);
+		chatBean.setData(data);
+		out.write(chatBean);
+		return OK;
 	}
 
 	@Override

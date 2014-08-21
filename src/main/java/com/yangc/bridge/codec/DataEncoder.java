@@ -46,7 +46,6 @@ public class DataEncoder implements MessageEncoder<Protocol> {
 
 		buffer.flip();
 		out.write(buffer);
-		out.flush();
 	}
 
 }

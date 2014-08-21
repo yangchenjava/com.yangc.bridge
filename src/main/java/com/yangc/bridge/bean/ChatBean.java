@@ -5,7 +5,7 @@ public class ChatBean {
 	private String uuid;
 	private String from;
 	private String to;
-	private String content;
+	private String data;
 
 	public String getUuid() {
 		return uuid;
@@ -31,12 +31,12 @@ public class ChatBean {
 		this.to = to;
 	}
 
-	public String getContent() {
-		return content;
+	public String getData() {
+		return data;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setData(String data) {
+		this.data = data;
 	}
 
 }
