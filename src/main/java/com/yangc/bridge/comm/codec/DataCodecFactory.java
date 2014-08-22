@@ -1,10 +1,10 @@
-package com.yangc.bridge.codec;
+package com.yangc.bridge.comm.codec;
 
 import java.nio.charset.Charset;
 
 import org.apache.mina.filter.codec.demux.DemuxingProtocolCodecFactory;
 
-import com.yangc.bridge.protocol.Protocol;
+import com.yangc.bridge.comm.protocol.Protocol;
 
 public class DataCodecFactory extends DemuxingProtocolCodecFactory {
 

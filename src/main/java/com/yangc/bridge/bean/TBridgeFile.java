@@ -1,12 +1,16 @@
 package com.yangc.bridge.bean;
 
-public class FileBean {
+import com.yangc.bean.BaseBean;
+
+public class TBridgeFile extends BaseBean {
+
+	private static final long serialVersionUID = -801691268465177203L;
 
 	private String uuid;
 	private String from;
 	private String to;
 	private String fileName;
-	private long fileSize;
+	private Long fileSize;
 	private String fileMd5;
 	private String path;
 
@@ -42,11 +46,11 @@ public class FileBean {
 		this.fileName = fileName;
 	}
 
-	public long getFileSize() {
+	public Long getFileSize() {
 		return fileSize;
 	}
 
-	public void setFileSize(long fileSize) {
+	public void setFileSize(Long fileSize) {
 		this.fileSize = fileSize;
 	}
 

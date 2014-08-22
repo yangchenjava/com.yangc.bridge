@@ -1,4 +1,4 @@
-package com.yangc.bridge.protocol;
+package com.yangc.bridge.comm.protocol;
 
 public class ProtocolFile extends Protocol {
 

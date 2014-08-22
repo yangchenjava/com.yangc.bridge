@@ -1,13 +1,15 @@
-package com.yangc.bridge.codec;
+package com.yangc.bridge.comm.codec;
+
+import java.util.Arrays;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.apache.mina.filter.codec.demux.MessageEncoder;
 
-import com.yangc.bridge.protocol.Protocol;
-import com.yangc.bridge.protocol.ProtocolChat;
-import com.yangc.bridge.protocol.ProtocolFile;
+import com.yangc.bridge.comm.protocol.Protocol;
+import com.yangc.bridge.comm.protocol.ProtocolChat;
+import com.yangc.bridge.comm.protocol.ProtocolFile;
 
 public class DataEncoder implements MessageEncoder<Protocol> {
 
@@ -18,15 +20,14 @@ public class DataEncoder implements MessageEncoder<Protocol> {
 		IoBuffer buffer = IoBuffer.allocate(CAPACITY).setAutoExpand(true);
 
 		buffer.put(Protocol.START_TAG);
-		buffer.putShort(message.getHeadLength());
-		buffer.putShort(message.getBodyLength());
-		buffer.put(Protocol.END_TAG);
-		buffer.put(message.getUuid());
 		buffer.put(message.getContentType());
+		buffer.put(message.getUuid());
 		buffer.putShort(message.getFromLength());
 		buffer.putShort(message.getToLength());
+		buffer.putShort(message.getDataLength());
 		buffer.put(message.getFrom());
 		buffer.put(message.getTo());
+		buffer.put(Protocol.END_TAG);
 
 		if (message instanceof ProtocolChat) {
 			ProtocolChat protocolChat = (ProtocolChat) message;
@@ -41,7 +42,12 @@ public class DataEncoder implements MessageEncoder<Protocol> {
 			buffer.put(protocolFile.getData());
 		}
 
-		buffer.put(message.getCrc());
+		byte crc = 0;
+		byte[] b = Arrays.copyOfRange(buffer.array(), 0, buffer.position());
+		for (int i = 0; i < b.length; i++) {
+			crc += b[i];
+		}
+		buffer.put(crc);
 		buffer.put(Protocol.FINAL_TAG);
 
 		buffer.flip();

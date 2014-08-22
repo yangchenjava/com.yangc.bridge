@@ -1,6 +1,10 @@
 package com.yangc.bridge.bean;
 
-public class ChatBean {
+import com.yangc.bean.BaseBean;
+
+public class TBridgeChat extends BaseBean {
+
+	private static final long serialVersionUID = -8248931483988118867L;
 
 	private String uuid;
 	private String from;
