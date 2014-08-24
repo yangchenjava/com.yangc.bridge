@@ -33,7 +33,7 @@
 		</property>
 		<property name="status" type="java.lang.Long">
 			<column name="STATUS" precision="1" scale="0">
-				<comment>消息状态:0未读;已读</comment>
+				<comment>消息状态:0未读;1已读</comment>
 			</column>
 		</property>
 	</class>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sqlroot>
+	<sql name="bridge.chat.updateChatStatus" desc="修改消息状态">
+	<![CDATA[
+		UPDATE t_bridge_chat SET status = 1 WHERE ID = ?
+	]]>
+	</sql>
+</sqlroot>

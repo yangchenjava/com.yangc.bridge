@@ -10,6 +10,7 @@ public class TBridgeChat extends BaseBean {
 	private String from;
 	private String to;
 	private String data;
+	private Long status;
 
 	public String getUuid() {
 		return uuid;
@@ -41,6 +42,14 @@ public class TBridgeChat extends BaseBean {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public Long getStatus() {
+		return status;
+	}
+
+	public void setStatus(Long status) {
+		this.status = status;
 	}
 
 }

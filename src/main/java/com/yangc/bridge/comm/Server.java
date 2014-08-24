@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.comm.codec.DataCodecFactory;
 import com.yangc.bridge.comm.handler.ServerHandler;
-import com.yangc.system.service.UserService;
 import com.yangc.utils.Message;
 
 @Service("com.yangc.bridge.comm.Server")
@@ -27,7 +26,7 @@ public class Server {
 	private static final int TIMEOUT = Integer.parseInt(Message.getMessage("bridge.timeout"));
 
 	@Autowired
-	private UserService userService;
+	private ServerHandler serverHandler;
 
 	private IoAcceptor acceptor;
 
@@ -38,7 +37,7 @@ public class Server {
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
-		this.acceptor.setHandler(new ServerHandler());
+		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));
 		} catch (IOException e) {

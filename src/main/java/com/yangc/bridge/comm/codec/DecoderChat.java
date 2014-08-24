@@ -12,11 +12,11 @@ import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.comm.protocol.Protocol;
 
-public class DataDecoder implements MessageDecoder {
+public class DecoderChat implements MessageDecoder {
 
 	private Charset charset;
 
-	public DataDecoder(Charset charset) {
+	public DecoderChat(Charset charset) {
 		this.charset = charset;
 	}
 
@@ -26,7 +26,7 @@ public class DataDecoder implements MessageDecoder {
 			return NEED_DATA;
 		}
 		if (in.get() == Protocol.START_TAG) {
-			if (in.get() == 0) {
+			if (in.get() == 2) {
 				in.skip(36);
 				short fromLength = in.getShort();
 				short toLength = in.getShort();
@@ -34,7 +34,7 @@ public class DataDecoder implements MessageDecoder {
 				if (in.limit() >= 44 + fromLength + toLength + 1 + dataLength + 2) {
 					if (in.skip(fromLength + toLength).get() == Protocol.END_TAG) {
 						byte crc = 0;
-						byte[] b = Arrays.copyOfRange(in.array(), 0, in.limit() - 2);
+						byte[] b = Arrays.copyOfRange(in.array(), 0, 44 + fromLength + toLength + 1 + dataLength);
 						for (int i = 0; i < b.length; i++) {
 							crc += b[i];
 						}

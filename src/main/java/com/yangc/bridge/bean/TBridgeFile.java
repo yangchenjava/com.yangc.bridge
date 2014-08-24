@@ -14,6 +14,9 @@ public class TBridgeFile extends BaseBean {
 	private String fileMd5;
 	private String path;
 
+	private short offset;
+	private byte[] data;
+
 	public String getUuid() {
 		return uuid;
 	}
@@ -68,6 +71,22 @@ public class TBridgeFile extends BaseBean {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public short getOffset() {
+		return offset;
+	}
+
+	public void setOffset(short offset) {
+		this.offset = offset;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
 	}
 
 }
