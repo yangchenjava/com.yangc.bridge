@@ -12,6 +12,8 @@ public class DataCodecFactory extends DemuxingProtocolCodecFactory {
 
 	public DataCodecFactory() {
 		this.addMessageEncoder(Protocol.class, new EncoderData());
+		this.addMessageDecoder(new DecoderResult(Charset.forName(CHARSET_NAME)));
+		this.addMessageDecoder(new DecoderLogin(Charset.forName(CHARSET_NAME)));
 		this.addMessageDecoder(new DecoderChat(Charset.forName(CHARSET_NAME)));
 		this.addMessageDecoder(new DecoderFile(Charset.forName(CHARSET_NAME)));
 	}
