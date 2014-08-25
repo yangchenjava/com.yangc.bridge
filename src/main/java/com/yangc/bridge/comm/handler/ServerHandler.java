@@ -16,6 +16,7 @@ import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.protocol.ProtocolChat;
+import com.yangc.bridge.comm.protocol.ProtocolFile;
 import com.yangc.bridge.comm.protocol.ProtocolResult;
 import com.yangc.bridge.service.ChatService;
 import com.yangc.system.bean.TSysUser;
@@ -138,7 +139,10 @@ public class ServerHandler extends IoHandlerAdapter {
 	}
 
 	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
-
+		Long sessionId = SessionCache.getSessionId(file.getTo());
+		if (sessionId != null) {
+			ProtocolFile protocol = new ProtocolFile();
+		}
 	}
 
 }
