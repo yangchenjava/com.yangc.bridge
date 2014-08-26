@@ -9,20 +9,20 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.demux.MessageDecoder;
 import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 
-import com.yangc.bridge.bean.TBridgeFile;
+import com.yangc.bridge.bean.FileBean;
 import com.yangc.bridge.comm.protocol.Protocol;
 
-public class DecoderFile implements MessageDecoder {
+public class DecoderReadyFile implements MessageDecoder {
 
 	private Charset charset;
 
-	public DecoderFile(Charset charset) {
+	public DecoderReadyFile(Charset charset) {
 		this.charset = charset;
 	}
 
 	@Override
 	public MessageDecoderResult decodable(IoSession session, IoBuffer in) {
-		if (in.remaining() < 44) {
+		if (in.remaining() < 42) {
 			return NEED_DATA;
 		}
 		if (in.get() == Protocol.START_TAG) {
@@ -30,16 +30,20 @@ public class DecoderFile implements MessageDecoder {
 				in.skip(36);
 				short fromLength = in.getShort();
 				short toLength = in.getShort();
-				short dataLength = in.getShort();
-				if (in.limit() >= 44 + fromLength + toLength + 1 + dataLength + 2) {
+				if (in.limit() >= 42 + fromLength + toLength + 3) {
 					if (in.skip(fromLength + toLength).get() == Protocol.END_TAG) {
-						byte crc = 0;
-						byte[] b = Arrays.copyOfRange(in.array(), 0, 44 + fromLength + toLength + 1 + dataLength);
-						for (int i = 0; i < b.length; i++) {
-							crc += b[i];
-						}
-						if (in.skip(dataLength).get() == crc && in.get() == Protocol.FINAL_TAG) {
-							return OK;
+						short fileNameLength = in.getShort();
+						if (in.limit() >= 42 + fromLength + toLength + 3 + fileNameLength + 10) {
+							byte crc = 0;
+							byte[] b = Arrays.copyOfRange(in.array(), 0, 42 + fromLength + toLength + 3 + fileNameLength + 8);
+							for (int i = 0; i < b.length; i++) {
+								crc += b[i];
+							}
+							if (in.skip(fileNameLength + 8).get() == crc && in.get() == Protocol.FINAL_TAG) {
+								return OK;
+							}
+						} else {
+							return NEED_DATA;
 						}
 					}
 				} else {
@@ -53,33 +57,26 @@ public class DecoderFile implements MessageDecoder {
 	@Override
 	public MessageDecoderResult decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 		in.get(); // startTag
-		in.get(); // contentType
+		byte contentType = in.get(); // contentType
 		String uuid = in.getString(36, this.charset.newDecoder());
 		short fromLength = in.getShort();
 		short toLength = in.getShort();
-		short dataLength = in.getShort();
 		String from = in.getString(fromLength, this.charset.newDecoder());
 		String to = in.getString(toLength, this.charset.newDecoder());
 		in.get(); // endTag
 		short fileNameLength = in.getShort();
 		String fileName = in.getString(fileNameLength, this.charset.newDecoder());
 		long fileSize = in.getLong();
-		String fileMd5 = in.getString(32, this.charset.newDecoder());
-		short offset = in.getShort();
-		byte[] data = new byte[dataLength - fileNameLength - 44];
-		in.get(data);
 		in.get(); // crc
 		in.get(); // finalTag
 
-		TBridgeFile file = new TBridgeFile();
+		FileBean file = new FileBean();
+		file.setContentType(contentType);
 		file.setUuid(uuid);
 		file.setFrom(from);
 		file.setTo(to);
 		file.setFileName(fileName);
 		file.setFileSize(fileSize);
-		file.setFileMd5(fileMd5);
-		file.setOffset(offset);
-		file.setData(data);
 		out.write(file);
 		return OK;
 	}

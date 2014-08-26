@@ -35,7 +35,7 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public void updateChatStatus(Long[] ids) {
+	public void updateChatStatus(List<Long> ids) {
 		String sql = JdbcDao.SQL_MAPPING.get("bridge.chat.updateChatStatus");
 		List<Object[]> paramList = new ArrayList<Object[]>();
 		for (Long id : ids) {

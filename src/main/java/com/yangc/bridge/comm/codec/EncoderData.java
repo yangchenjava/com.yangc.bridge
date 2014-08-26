@@ -48,7 +48,7 @@ public class EncoderData implements MessageEncoder<Protocol> {
 		buffer.put(protocol.getContentType());
 		buffer.put(protocol.getUuid());
 		buffer.putShort(protocol.getToLength());
-		buffer.putShort(protocol.getDataLength());
+		buffer.putInt(protocol.getDataLength());
 		buffer.put(protocol.getTo());
 		buffer.put(Protocol.END_TAG);
 		buffer.put(protocol.getSuccess());
@@ -72,7 +72,7 @@ public class EncoderData implements MessageEncoder<Protocol> {
 		buffer.put(protocol.getUuid());
 		buffer.putShort(protocol.getFromLength());
 		buffer.putShort(protocol.getToLength());
-		buffer.putShort(protocol.getDataLength());
+		buffer.putInt(protocol.getDataLength());
 		buffer.put(protocol.getFrom());
 		buffer.put(protocol.getTo());
 		buffer.put(Protocol.END_TAG);
@@ -80,21 +80,38 @@ public class EncoderData implements MessageEncoder<Protocol> {
 	}
 
 	private void encodeFile(IoBuffer buffer, ProtocolFile protocol) {
-		buffer.put(Protocol.START_TAG);
-		buffer.put(protocol.getContentType());
-		buffer.put(protocol.getUuid());
-		buffer.putShort(protocol.getFromLength());
-		buffer.putShort(protocol.getToLength());
-		buffer.putShort(protocol.getDataLength());
-		buffer.put(protocol.getFrom());
-		buffer.put(protocol.getTo());
-		buffer.put(Protocol.END_TAG);
-		buffer.putShort(protocol.getFileNameLength());
-		buffer.put(protocol.getFileName());
-		buffer.putLong(protocol.getFileSize());
-		buffer.put(protocol.getFileMd5());
-		buffer.putShort(protocol.getOffset());
-		buffer.put(protocol.getData());
+		// 准备发送文件
+		if (protocol.getContentType() == 3) {
+			buffer.put(Protocol.START_TAG);
+			buffer.put(protocol.getContentType());
+			buffer.put(protocol.getUuid());
+			buffer.putShort(protocol.getFromLength());
+			buffer.putShort(protocol.getToLength());
+			buffer.put(protocol.getFrom());
+			buffer.put(protocol.getTo());
+			buffer.put(Protocol.END_TAG);
+			buffer.putShort(protocol.getFileNameLength());
+			buffer.put(protocol.getFileName());
+			buffer.putLong(protocol.getFileSize());
+		}
+		// 传输文件
+		else if (protocol.getContentType() == 4) {
+			buffer.put(Protocol.START_TAG);
+			buffer.put(protocol.getContentType());
+			buffer.put(protocol.getUuid());
+			buffer.putShort(protocol.getFromLength());
+			buffer.putShort(protocol.getToLength());
+			buffer.putInt(protocol.getDataLength());
+			buffer.put(protocol.getFrom());
+			buffer.put(protocol.getTo());
+			buffer.put(Protocol.END_TAG);
+			buffer.putShort(protocol.getFileNameLength());
+			buffer.put(protocol.getFileName());
+			buffer.putLong(protocol.getFileSize());
+			buffer.put(protocol.getFileMd5());
+			buffer.putShort(protocol.getOffset());
+			buffer.put(protocol.getData());
+		}
 	}
 
 }

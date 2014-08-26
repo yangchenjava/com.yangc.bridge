@@ -15,12 +15,12 @@
 			</column>
 		</property>
 		<property name="from" type="java.lang.String">
-			<column name="FROM" length="200">
+			<column name="FROM_USERNAME" length="200">
 				<comment>发送人</comment>
 			</column>
 		</property>
 		<property name="to" type="java.lang.String">
-			<column name="TO" length="200">
+			<column name="TO_USERNAME" length="200">
 				<comment>接收人</comment>
 			</column>
 		</property>

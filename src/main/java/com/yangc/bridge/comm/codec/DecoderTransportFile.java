@@ -9,14 +9,14 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.demux.MessageDecoder;
 import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 
-import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.FileBean;
 import com.yangc.bridge.comm.protocol.Protocol;
 
-public class DecoderChat implements MessageDecoder {
+public class DecoderTransportFile implements MessageDecoder {
 
 	private Charset charset;
 
-	public DecoderChat(Charset charset) {
+	public DecoderTransportFile(Charset charset) {
 		this.charset = charset;
 	}
 
@@ -26,7 +26,7 @@ public class DecoderChat implements MessageDecoder {
 			return NEED_DATA;
 		}
 		if (in.get() == Protocol.START_TAG) {
-			if (in.get() == 2) {
+			if (in.get() == 4) {
 				in.skip(36);
 				short fromLength = in.getShort();
 				short toLength = in.getShort();
@@ -53,7 +53,7 @@ public class DecoderChat implements MessageDecoder {
 	@Override
 	public MessageDecoderResult decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 		in.get(); // startTag
-		in.get(); // contentType
+		byte contentType = in.get(); // contentType
 		String uuid = in.getString(36, this.charset.newDecoder());
 		short fromLength = in.getShort();
 		short toLength = in.getShort();
@@ -61,16 +61,27 @@ public class DecoderChat implements MessageDecoder {
 		String from = in.getString(fromLength, this.charset.newDecoder());
 		String to = in.getString(toLength, this.charset.newDecoder());
 		in.get(); // endTag
-		String data = in.getString(dataLength, this.charset.newDecoder());
+		short fileNameLength = in.getShort();
+		String fileName = in.getString(fileNameLength, this.charset.newDecoder());
+		long fileSize = in.getLong();
+		String fileMd5 = in.getString(32, this.charset.newDecoder());
+		short offset = in.getShort();
+		byte[] data = new byte[dataLength - fileNameLength - 44];
+		in.get(data);
 		in.get(); // crc
 		in.get(); // finalTag
 
-		TBridgeChat chat = new TBridgeChat();
-		chat.setUuid(uuid);
-		chat.setFrom(from);
-		chat.setTo(to);
-		chat.setData(data);
-		out.write(chat);
+		FileBean file = new FileBean();
+		file.setContentType(contentType);
+		file.setUuid(uuid);
+		file.setFrom(from);
+		file.setTo(to);
+		file.setFileName(fileName);
+		file.setFileSize(fileSize);
+		file.setFileMd5(fileMd5);
+		file.setOffset(offset);
+		file.setData(data);
+		out.write(file);
 		return OK;
 	}
 

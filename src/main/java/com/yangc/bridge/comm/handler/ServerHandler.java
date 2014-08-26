@@ -1,5 +1,6 @@
 package com.yangc.bridge.comm.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -10,9 +11,9 @@ import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.yangc.bridge.bean.FileBean;
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
-import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.protocol.ProtocolChat;
@@ -67,24 +68,46 @@ public class ServerHandler extends IoHandlerAdapter {
 			this.loginReceived(session, (UserBean) message);
 		} else if (message instanceof TBridgeChat) {
 			this.chatReceived(session, (TBridgeChat) message);
-		} else if (message instanceof TBridgeFile) {
-			this.fileReceived(session, (TBridgeFile) message);
+		} else if (message instanceof FileBean) {
+			this.fileReceived(session, (FileBean) message);
 		}
 	}
 
+	/**
+	 * @功能: 接收结果并转发
+	 * @作者: yangc
+	 * @创建日期: 2014年8月26日 上午10:39:03
+	 * @param session
+	 * @param result
+	 * @throws Exception
+	 */
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
+		byte[] to = result.getTo().getBytes(CHARSET_NAME);
+		byte[] message = result.getMessage().getBytes(CHARSET_NAME);
+
 		ProtocolResult protocol = new ProtocolResult();
 		protocol.setContentType((byte) 0);
 		protocol.setUuid(result.getUuid().getBytes(CHARSET_NAME));
-		protocol.setToLength((short) result.getTo().getBytes(CHARSET_NAME).length);
-		protocol.setDataLength((short) (1 + result.getMessage().getBytes(CHARSET_NAME).length));
-		protocol.setTo(result.getTo().getBytes(CHARSET_NAME));
+		protocol.setToLength((short) to.length);
+		protocol.setDataLength(1 + message.length);
+		protocol.setTo(to);
 		protocol.setSuccess((byte) (result.isSuccess() ? 1 : 0));
-		protocol.setMessage(result.getMessage().getBytes(CHARSET_NAME));
+		protocol.setMessage(message);
 
-		session.write(protocol);
+		Long sessionId = SessionCache.getSessionId(result.getTo());
+		if (sessionId != null) {
+			session.getService().getManagedSessions().get(sessionId).write(protocol);
+		}
 	}
 
+	/**
+	 * @功能: 验证登录, 并发送验证结果, 如果登录成功, 并且支持离线消息, 转发存在的离线消息
+	 * @作者: yangc
+	 * @创建日期: 2014年8月26日 上午10:39:37
+	 * @param session
+	 * @param user
+	 * @throws Exception
+	 */
 	private void loginReceived(IoSession session, UserBean user) throws Exception {
 		List<TSysUser> users = this.userService.getUserListByUsernameAndPassword(user.getUsername(), Md5Utils.getMD5(user.getPassword()));
 
@@ -106,9 +129,35 @@ public class ServerHandler extends IoHandlerAdapter {
 			protocol.setSuccess((byte) 1);
 			protocol.setMessage("登录成功".getBytes(CHARSET_NAME));
 		}
-		protocol.setDataLength((short) (1 + protocol.getMessage().length));
+		protocol.setDataLength(1 + protocol.getMessage().length);
 
 		session.write(protocol);
+
+		if (protocol.getSuccess() == 1 && StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
+			List<TBridgeChat> chatList = this.chatService.getUnreadChatListByTo(user.getUsername());
+			if (chatList != null && !chatList.isEmpty()) {
+				List<Long> ids = new ArrayList<Long>(chatList.size());
+				for (TBridgeChat chat : chatList) {
+					byte[] from = chat.getFrom().getBytes(CHARSET_NAME);
+					byte[] to = chat.getTo().getBytes(CHARSET_NAME);
+					byte[] data = chat.getData().getBytes(CHARSET_NAME);
+
+					ProtocolChat protocolChat = new ProtocolChat();
+					protocolChat.setContentType((byte) 2);
+					protocolChat.setUuid(chat.getUuid().getBytes(CHARSET_NAME));
+					protocolChat.setFromLength((short) from.length);
+					protocolChat.setToLength((short) to.length);
+					protocolChat.setDataLength(data.length);
+					protocolChat.setFrom(from);
+					protocolChat.setTo(to);
+					protocolChat.setData(data);
+
+					session.write(protocolChat);
+					ids.add(chat.getId());
+				}
+				this.chatService.updateChatStatus(ids);
+			}
+		}
 	}
 
 	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
@@ -123,7 +172,7 @@ public class ServerHandler extends IoHandlerAdapter {
 			protocol.setUuid(chat.getUuid().getBytes(CHARSET_NAME));
 			protocol.setFromLength((short) from.length);
 			protocol.setToLength((short) to.length);
-			protocol.setDataLength((short) data.length);
+			protocol.setDataLength(data.length);
 			protocol.setFrom(from);
 			protocol.setTo(to);
 			protocol.setData(data);
@@ -138,10 +187,41 @@ public class ServerHandler extends IoHandlerAdapter {
 		this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), status);
 	}
 
-	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
+	private void fileReceived(IoSession session, FileBean file) throws Exception {
 		Long sessionId = SessionCache.getSessionId(file.getTo());
 		if (sessionId != null) {
+			byte[] from = file.getFrom().getBytes(CHARSET_NAME);
+			byte[] to = file.getTo().getBytes(CHARSET_NAME);
+			byte[] fileName = file.getFileName().getBytes(CHARSET_NAME);
+
 			ProtocolFile protocol = new ProtocolFile();
+			byte contentType = file.getContentType();
+			if (contentType == 3) {
+				protocol.setContentType(contentType);
+				protocol.setUuid(file.getUuid().getBytes(CHARSET_NAME));
+				protocol.setFromLength((short) from.length);
+				protocol.setToLength((short) to.length);
+				protocol.setFrom(from);
+				protocol.setTo(to);
+				protocol.setFileNameLength((short) fileName.length);
+				protocol.setFileName(fileName);
+				protocol.setFileSize(file.getFileSize());
+			} else if (contentType == 4) {
+				protocol.setContentType(contentType);
+				protocol.setUuid(file.getUuid().getBytes(CHARSET_NAME));
+				protocol.setFromLength((short) from.length);
+				protocol.setToLength((short) to.length);
+				protocol.setDataLength(fileName.length + 44 + file.getData().length);
+				protocol.setFrom(from);
+				protocol.setTo(to);
+				protocol.setFileNameLength((short) fileName.length);
+				protocol.setFileName(fileName);
+				protocol.setFileSize(file.getFileSize());
+				protocol.setFileMd5(file.getFileMd5().getBytes(CHARSET_NAME));
+				protocol.setOffset(file.getOffset());
+				protocol.setData(file.getData());
+			}
+			session.getService().getManagedSessions().get(sessionId).write(protocol);
 		}
 	}
 

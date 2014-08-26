@@ -3,11 +3,11 @@ package com.yangc.bridge.comm.protocol;
 public class Protocol {
 
 	public static final byte START_TAG = 0x68; // 1byte
-	private byte contentType; // 1byte 内容类型 0:result, 1:login, 2:chat, 3:file
+	private byte contentType; // 1byte 内容类型 0:result, 1:login, 2:chat, 3:readyFile, 4:transportFile
 	private byte[] uuid; // 36byte
 	private short fromLength; // 2byte
 	private short toLength; // 2byte
-	private short dataLength; // 2byte
+	private int dataLength; // 4byte
 	private byte[] from;
 	private byte[] to;
 	public static final byte END_TAG = 0x68; // 1byte
@@ -46,11 +46,11 @@ public class Protocol {
 		this.toLength = toLength;
 	}
 
-	public short getDataLength() {
+	public int getDataLength() {
 		return dataLength;
 	}
 
-	public void setDataLength(short dataLength) {
+	public void setDataLength(int dataLength) {
 		this.dataLength = dataLength;
 	}
 
