@@ -65,8 +65,8 @@ public class DecoderTransportFile implements MessageDecoder {
 		String fileName = in.getString(fileNameLength, this.charset.newDecoder());
 		long fileSize = in.getLong();
 		String fileMd5 = in.getString(32, this.charset.newDecoder());
-		short offset = in.getShort();
-		byte[] data = new byte[dataLength - fileNameLength - 44];
+		int offset = in.getInt();
+		byte[] data = new byte[dataLength - fileNameLength - 46];
 		in.get(data);
 		in.get(); // crc
 		in.get(); // finalTag

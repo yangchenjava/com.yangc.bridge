@@ -9,7 +9,7 @@ public class FileBean {
 	private String fileName;
 	private Long fileSize;
 	private String fileMd5;
-	private short offset;
+	private int offset;
 	private byte[] data;
 
 	public byte getContentType() {
@@ -68,11 +68,11 @@ public class FileBean {
 		this.fileMd5 = fileMd5;
 	}
 
-	public short getOffset() {
+	public int getOffset() {
 		return offset;
 	}
 
-	public void setOffset(short offset) {
+	public void setOffset(int offset) {
 		this.offset = offset;
 	}
 

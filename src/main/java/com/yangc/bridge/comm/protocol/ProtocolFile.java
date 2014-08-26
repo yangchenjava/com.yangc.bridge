@@ -6,7 +6,7 @@ public class ProtocolFile extends Protocol {
 	private byte[] fileName;
 	private long fileSize; // 8byte
 	private byte[] fileMd5; // 32byte
-	private short offset; // 2byte
+	private int offset; // 4byte
 	private byte[] data;
 
 	public short getFileNameLength() {
@@ -41,11 +41,11 @@ public class ProtocolFile extends Protocol {
 		this.fileMd5 = fileMd5;
 	}
 
-	public short getOffset() {
+	public int getOffset() {
 		return offset;
 	}
 
-	public void setOffset(short offset) {
+	public void setOffset(int offset) {
 		this.offset = offset;
 	}
 

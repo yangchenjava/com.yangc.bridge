@@ -55,7 +55,7 @@ public class ServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-		logger.info("exceptionCaught");
+		logger.error("exceptionCaught - " + cause.getMessage(), cause);
 		session.close(true);
 	}
 
@@ -211,7 +211,7 @@ public class ServerHandler extends IoHandlerAdapter {
 				protocol.setUuid(file.getUuid().getBytes(CHARSET_NAME));
 				protocol.setFromLength((short) from.length);
 				protocol.setToLength((short) to.length);
-				protocol.setDataLength(fileName.length + 44 + file.getData().length);
+				protocol.setDataLength(fileName.length + 46 + file.getData().length);
 				protocol.setFrom(from);
 				protocol.setTo(to);
 				protocol.setFileNameLength((short) fileName.length);

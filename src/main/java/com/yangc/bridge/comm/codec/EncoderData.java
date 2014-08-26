@@ -109,7 +109,7 @@ public class EncoderData implements MessageEncoder<Protocol> {
 			buffer.put(protocol.getFileName());
 			buffer.putLong(protocol.getFileSize());
 			buffer.put(protocol.getFileMd5());
-			buffer.putShort(protocol.getOffset());
+			buffer.putInt(protocol.getOffset());
 			buffer.put(protocol.getData());
 		}
 	}
