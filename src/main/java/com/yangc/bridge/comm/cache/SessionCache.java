@@ -1,13 +1,11 @@
 package com.yangc.bridge.comm.cache;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SessionCache {
 
-	private static final Map<String, Long> map = new HashMap<String, Long>();
+	private static final ConcurrentMap<String, Long> map = new ConcurrentHashMap<String, Long>();
 
 	public static Long getSessionId(String username) {
 		return map.get(username);
@@ -18,15 +16,11 @@ public class SessionCache {
 	}
 
 	public static void removeSessionId(Long id) {
-		String key = null;
 		for (String username : map.keySet()) {
 			if (map.get(username).longValue() == id.longValue()) {
-				key = username;
+				map.remove(username);
 				break;
 			}
-		}
-		if (StringUtils.isNotBlank(key)) {
-			map.remove(key);
 		}
 	}
 

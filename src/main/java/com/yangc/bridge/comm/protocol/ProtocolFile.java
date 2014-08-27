@@ -1,5 +1,12 @@
 package com.yangc.bridge.comm.protocol;
 
+/**
+ * @功能: 68 [contentType(3)] [uuid] [fromLength] [toLength] [from] [to] 68 [fileNameLength] [fileName] [fileSize] [crc] 16
+ * @功能: 68 [contentType(4)] [uuid] [fromLength] [toLength] [dataLength] [from] [to] 68 [fileNameLength] [fileName] [fileSize] [fileMd5] [offset] [data] [crc] 16
+ * @作者: yangc
+ * @创建日期: 2014年8月27日 下午9:50:57
+ * @return
+ */
 public class ProtocolFile extends Protocol {
 
 	private short fileNameLength; // 2byte

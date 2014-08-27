@@ -1,5 +1,11 @@
 package com.yangc.bridge.comm.protocol;
 
+/**
+ * @功能: 68 [contentType(1)] [uuid] 68 [usernameLength] [passwordLength] [username] [password] [crc] 16
+ * @作者: yangc
+ * @创建日期: 2014年8月27日 下午9:50:57
+ * @return
+ */
 public class ProtocolLogin extends Protocol {
 
 	private short usernameLength;
