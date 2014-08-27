@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 
 import org.apache.log4j.Logger;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
-import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -28,7 +27,7 @@ public class Server {
 	@Autowired
 	private ServerHandler serverHandler;
 
-	private IoAcceptor acceptor;
+	private NioSocketAcceptor acceptor;
 
 	private void init() {
 		this.acceptor = new NioSocketAcceptor();
