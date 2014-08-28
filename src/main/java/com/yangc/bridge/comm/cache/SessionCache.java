@@ -1,5 +1,7 @@
 package com.yangc.bridge.comm.cache;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -22,6 +24,10 @@ public class SessionCache {
 				break;
 			}
 		}
+	}
+
+	public static Map<String, Long> getSessionCache() {
+		return new HashMap<String, Long>(map);
 	}
 
 }

@@ -41,7 +41,6 @@ public class ServerHandler extends IoHandlerAdapter {
 	public void sessionClosed(IoSession session) throws Exception {
 		logger.info("sessionClosed");
 		// 移除缓存
-		// String hostAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
 		SessionCache.removeSessionId(session.getId());
 	}
 

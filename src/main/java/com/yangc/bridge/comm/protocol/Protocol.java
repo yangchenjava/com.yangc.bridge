@@ -3,7 +3,7 @@ package com.yangc.bridge.comm.protocol;
 public class Protocol {
 
 	public static final byte START_TAG = 0x68; // 1byte
-	private byte contentType; // 1byte 内容类型 0:result, 1:login, 2:chat, 3:readyFile, 4:transportFile
+	private byte contentType; // 1byte 内容类型 0:result, 1:login, 2:chat, 3:readyFile, 4:transportFile, 99:heart
 	private byte[] uuid; // 36byte
 	private short fromLength; // 2byte
 	private short toLength; // 2byte

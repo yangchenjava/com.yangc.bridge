@@ -2,16 +2,27 @@ package com.yangc.bridge.comm;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.keepalive.KeepAliveFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.yangc.bridge.comm.codec.DataCodecFactory;
+import com.yangc.bridge.bean.ClientStatus;
+import com.yangc.bridge.bean.ServerStatus;
+import com.yangc.bridge.comm.cache.SessionCache;
+import com.yangc.bridge.comm.factory.DataCodecFactory;
+import com.yangc.bridge.comm.factory.KeepAliveFactory;
 import com.yangc.bridge.comm.handler.ServerHandler;
 import com.yangc.utils.Message;
 
@@ -36,6 +47,9 @@ public class Server {
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
+		KeepAliveFilter keepAliveFilter = new KeepAliveFilter(new KeepAliveFactory(), IdleStatus.BOTH_IDLE);
+		keepAliveFilter.setForwardEvent(true);
+		filterChain.addLast("keep-alive", keepAliveFilter);
 		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));
@@ -63,6 +77,34 @@ public class Server {
 			return this.acceptor.isActive();
 		}
 		return false;
+	}
+
+	public ServerStatus getServerStatus() {
+		ServerStatus serverStatus = new ServerStatus();
+		serverStatus.setIpAddress(IP);
+		serverStatus.setPort(PORT);
+		serverStatus.setTimeout(TIMEOUT);
+		serverStatus.setActive(this.isActive());
+		return serverStatus;
+	}
+
+	public List<ClientStatus> getClientStatusList() {
+		Map<String, Long> map = SessionCache.getSessionCache();
+		Map<Long, IoSession> managedSessions = this.acceptor.getManagedSessions();
+
+		List<ClientStatus> clientStatusList = new ArrayList<ClientStatus>(map.size());
+		for (Entry<String, Long> entry : map.entrySet()) {
+			IoSession session = managedSessions.get(entry.getValue());
+			if (session != null) {
+				ClientStatus clientStatus = new ClientStatus();
+				clientStatus.setUsername(entry.getKey());
+				clientStatus.setIpAddress(((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress());
+				clientStatus.setSessionId(entry.getValue());
+				clientStatus.setLastIoTime(DateFormatUtils.format(session.getLastIoTime(), "yyyy-MM-dd HH:mm:ss"));
+				clientStatusList.add(clientStatus);
+			}
+		}
+		return clientStatusList;
 	}
 
 }
