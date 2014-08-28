@@ -18,6 +18,7 @@ import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.protocol.ProtocolChat;
 import com.yangc.bridge.comm.protocol.ProtocolFile;
+import com.yangc.bridge.comm.protocol.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.ProtocolResult;
 import com.yangc.bridge.service.ChatService;
 import com.yangc.system.bean.TSysUser;
@@ -61,7 +62,9 @@ public class ServerHandler extends IoHandlerAdapter {
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		logger.info("messageReceived");
-		if (message instanceof ResultBean) {
+		if (message instanceof ProtocolHeart) {
+			session.write(message);
+		} else if (message instanceof ResultBean) {
 			this.resultReceived(session, (ResultBean) message);
 		} else if (message instanceof UserBean) {
 			this.loginReceived(session, (UserBean) message);

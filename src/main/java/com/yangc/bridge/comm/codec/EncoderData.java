@@ -10,6 +10,7 @@ import org.apache.mina.filter.codec.demux.MessageEncoder;
 import com.yangc.bridge.comm.protocol.Protocol;
 import com.yangc.bridge.comm.protocol.ProtocolChat;
 import com.yangc.bridge.comm.protocol.ProtocolFile;
+import com.yangc.bridge.comm.protocol.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.ProtocolLogin;
 import com.yangc.bridge.comm.protocol.ProtocolResult;
 
@@ -29,6 +30,8 @@ public class EncoderData implements MessageEncoder<Protocol> {
 			this.encodeChat(buffer, (ProtocolChat) message);
 		} else if (message instanceof ProtocolFile) {
 			this.encodeFile(buffer, (ProtocolFile) message);
+		} else if (message instanceof ProtocolHeart) {
+			this.encodeHeart(buffer, (ProtocolHeart) message);
 		}
 
 		byte crc = 0;
@@ -112,6 +115,12 @@ public class EncoderData implements MessageEncoder<Protocol> {
 			buffer.putInt(protocol.getOffset());
 			buffer.put(protocol.getData());
 		}
+	}
+
+	private void encodeHeart(IoBuffer buffer, ProtocolHeart protocol) {
+		buffer.put(Protocol.START_TAG);
+		buffer.put(protocol.getContentType());
+		buffer.put(Protocol.END_TAG);
 	}
 
 }

@@ -13,7 +13,6 @@ import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.keepalive.KeepAliveFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import com.yangc.bridge.bean.ClientStatus;
 import com.yangc.bridge.bean.ServerStatus;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.factory.DataCodecFactory;
-import com.yangc.bridge.comm.factory.KeepAliveFactory;
 import com.yangc.bridge.comm.handler.ServerHandler;
 import com.yangc.utils.Message;
 
@@ -47,9 +45,6 @@ public class Server {
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
-		KeepAliveFilter keepAliveFilter = new KeepAliveFilter(new KeepAliveFactory(), IdleStatus.BOTH_IDLE);
-		keepAliveFilter.setForwardEvent(true);
-		filterChain.addLast("keep-alive", keepAliveFilter);
 		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));
