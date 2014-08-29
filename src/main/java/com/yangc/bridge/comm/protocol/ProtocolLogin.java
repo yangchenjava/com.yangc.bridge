@@ -1,7 +1,7 @@
 package com.yangc.bridge.comm.protocol;
 
 /**
- * @功能: 0x68 [contentType(1)] [uuid] 0x68 [usernameLength] [passwordLength] [username] [password] [crc] 0x16
+ * @功能: 0x68 [contentType(0x01)] [uuid] 0x68 [usernameLength] [passwordLength] [username] [password] [crc] 0x16
  * @作者: yangc
  * @创建日期: 2014年8月27日 下午9:50:57
  * @return

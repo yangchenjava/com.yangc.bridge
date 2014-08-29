@@ -41,14 +41,14 @@ public class BridgeResource {
 	@ResponseBody
 	public ServerStatus getServerStatus() {
 		logger.info("getServerStatus");
-		return this.getServerStatus();
+		return this.bridgeService.getServerStatus();
 	}
 
 	@RequestMapping(value = "getClientStatusList", method = RequestMethod.POST)
 	@ResponseBody
 	public List<ClientStatus> getClientStatusList() {
 		logger.info("getClientStatusList");
-		return this.getClientStatusList();
+		return this.bridgeService.getClientStatusList();
 	}
 
 }

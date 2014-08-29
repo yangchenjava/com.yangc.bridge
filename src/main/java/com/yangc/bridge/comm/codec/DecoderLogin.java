@@ -10,6 +10,7 @@ import org.apache.mina.filter.codec.demux.MessageDecoder;
 import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 
 import com.yangc.bridge.bean.UserBean;
+import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Protocol;
 
 public class DecoderLogin implements MessageDecoder {
@@ -25,24 +26,22 @@ public class DecoderLogin implements MessageDecoder {
 		if (in.remaining() < 43) {
 			return NEED_DATA;
 		}
-		if (in.get() == Protocol.START_TAG) {
-			if (in.get() == 1) {
-				in.skip(36);
-				if (in.get() == Protocol.END_TAG) {
-					short usernameLength = in.getShort();
-					short passwordLength = in.getShort();
-					if (in.limit() >= 43 + usernameLength + passwordLength + 2) {
-						byte crc = 0;
-						byte[] b = Arrays.copyOfRange(in.array(), 0, 43 + usernameLength + passwordLength);
-						for (int i = 0; i < b.length; i++) {
-							crc += b[i];
-						}
-						if (in.skip(usernameLength + passwordLength).get() == crc && in.get() == Protocol.FINAL_TAG) {
-							return OK;
-						}
-					} else {
-						return NEED_DATA;
+		if (in.get() == Protocol.START_TAG && in.get() == ContentType.LOGIN) {
+			in.skip(36);
+			if (in.get() == Protocol.END_TAG) {
+				short usernameLength = in.getShort();
+				short passwordLength = in.getShort();
+				if (in.limit() >= 43 + usernameLength + passwordLength + 2) {
+					byte crc = 0;
+					byte[] b = Arrays.copyOfRange(in.array(), 0, 43 + usernameLength + passwordLength);
+					for (int i = 0; i < b.length; i++) {
+						crc += b[i];
 					}
+					if (in.skip(usernameLength + passwordLength).get() == crc && in.get() == Protocol.FINAL_TAG) {
+						return OK;
+					}
+				} else {
+					return NEED_DATA;
 				}
 			}
 		}

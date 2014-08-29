@@ -22,7 +22,7 @@ public class BridgeServiceImpl implements BridgeService {
 	}
 
 	@Override
-	public ServerStatus getBridgeStatus() {
+	public ServerStatus getServerStatus() {
 		return this.server.getServerStatus();
 	}
 

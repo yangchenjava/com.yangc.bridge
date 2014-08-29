@@ -7,6 +7,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.apache.mina.filter.codec.demux.MessageEncoder;
 
+import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Protocol;
 import com.yangc.bridge.comm.protocol.ProtocolChat;
 import com.yangc.bridge.comm.protocol.ProtocolFile;
@@ -84,7 +85,7 @@ public class EncoderData implements MessageEncoder<Protocol> {
 
 	private void encodeFile(IoBuffer buffer, ProtocolFile protocol) {
 		// 准备发送文件
-		if (protocol.getContentType() == 3) {
+		if (protocol.getContentType() == ContentType.READY_FILE) {
 			buffer.put(Protocol.START_TAG);
 			buffer.put(protocol.getContentType());
 			buffer.put(protocol.getUuid());
@@ -98,7 +99,7 @@ public class EncoderData implements MessageEncoder<Protocol> {
 			buffer.putLong(protocol.getFileSize());
 		}
 		// 传输文件
-		else if (protocol.getContentType() == 4) {
+		else if (protocol.getContentType() == ContentType.TRANSPORT_FILE) {
 			buffer.put(Protocol.START_TAG);
 			buffer.put(protocol.getContentType());
 			buffer.put(protocol.getUuid());

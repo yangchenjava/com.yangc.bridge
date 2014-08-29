@@ -16,6 +16,7 @@ import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
+import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.ProtocolChat;
 import com.yangc.bridge.comm.protocol.ProtocolFile;
 import com.yangc.bridge.comm.protocol.ProtocolHeart;
@@ -84,20 +85,20 @@ public class ServerHandler extends IoHandlerAdapter {
 	 * @throws Exception
 	 */
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
-		byte[] to = result.getTo().getBytes(CHARSET_NAME);
-		byte[] message = result.getMessage().getBytes(CHARSET_NAME);
-
-		ProtocolResult protocol = new ProtocolResult();
-		protocol.setContentType((byte) 0);
-		protocol.setUuid(result.getUuid().getBytes(CHARSET_NAME));
-		protocol.setToLength((short) to.length);
-		protocol.setDataLength(1 + message.length);
-		protocol.setTo(to);
-		protocol.setSuccess((byte) (result.isSuccess() ? 1 : 0));
-		protocol.setMessage(message);
-
 		Long sessionId = SessionCache.getSessionId(result.getTo());
 		if (sessionId != null) {
+			byte[] to = result.getTo().getBytes(CHARSET_NAME);
+			byte[] message = result.getMessage().getBytes(CHARSET_NAME);
+
+			ProtocolResult protocol = new ProtocolResult();
+			protocol.setContentType(ContentType.RESULT);
+			protocol.setUuid(result.getUuid().getBytes(CHARSET_NAME));
+			protocol.setToLength((short) to.length);
+			protocol.setDataLength(1 + message.length);
+			protocol.setTo(to);
+			protocol.setSuccess((byte) (result.isSuccess() ? 1 : 0));
+			protocol.setMessage(message);
+
 			session.getService().getManagedSessions().get(sessionId).write(protocol);
 		}
 	}
@@ -114,7 +115,7 @@ public class ServerHandler extends IoHandlerAdapter {
 		List<TSysUser> users = this.userService.getUserListByUsernameAndPassword(user.getUsername(), Md5Utils.getMD5(user.getPassword()));
 
 		ProtocolResult protocol = new ProtocolResult();
-		protocol.setContentType((byte) 0);
+		protocol.setContentType(ContentType.RESULT);
 		protocol.setUuid(user.getUuid().getBytes(CHARSET_NAME));
 		protocol.setToLength((short) user.getUsername().getBytes(CHARSET_NAME).length);
 		protocol.setTo(user.getUsername().getBytes(CHARSET_NAME));
@@ -145,7 +146,7 @@ public class ServerHandler extends IoHandlerAdapter {
 					byte[] data = chat.getData().getBytes(CHARSET_NAME);
 
 					ProtocolChat protocolChat = new ProtocolChat();
-					protocolChat.setContentType((byte) 2);
+					protocolChat.setContentType(ContentType.CHAT);
 					protocolChat.setUuid(chat.getUuid().getBytes(CHARSET_NAME));
 					protocolChat.setFromLength((short) from.length);
 					protocolChat.setToLength((short) to.length);
@@ -170,7 +171,7 @@ public class ServerHandler extends IoHandlerAdapter {
 			byte[] data = chat.getData().getBytes(CHARSET_NAME);
 
 			ProtocolChat protocol = new ProtocolChat();
-			protocol.setContentType((byte) 2);
+			protocol.setContentType(ContentType.CHAT);
 			protocol.setUuid(chat.getUuid().getBytes(CHARSET_NAME));
 			protocol.setFromLength((short) from.length);
 			protocol.setToLength((short) to.length);
@@ -198,7 +199,7 @@ public class ServerHandler extends IoHandlerAdapter {
 
 			ProtocolFile protocol = new ProtocolFile();
 			byte contentType = file.getContentType();
-			if (contentType == 3) {
+			if (contentType == ContentType.READY_FILE) {
 				protocol.setContentType(contentType);
 				protocol.setUuid(file.getUuid().getBytes(CHARSET_NAME));
 				protocol.setFromLength((short) from.length);
@@ -208,7 +209,7 @@ public class ServerHandler extends IoHandlerAdapter {
 				protocol.setFileNameLength((short) fileName.length);
 				protocol.setFileName(fileName);
 				protocol.setFileSize(file.getFileSize());
-			} else if (contentType == 4) {
+			} else if (contentType == ContentType.TRANSPORT_FILE) {
 				protocol.setContentType(contentType);
 				protocol.setUuid(file.getUuid().getBytes(CHARSET_NAME));
 				protocol.setFromLength((short) from.length);

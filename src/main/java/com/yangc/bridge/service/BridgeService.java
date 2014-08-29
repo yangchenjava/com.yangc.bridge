@@ -9,7 +9,7 @@ public interface BridgeService {
 
 	public void restartServer();
 
-	public ServerStatus getBridgeStatus();
+	public ServerStatus getServerStatus();
 
 	public List<ClientStatus> getClientStatusList();
 
