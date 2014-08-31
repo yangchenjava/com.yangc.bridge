@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.log4j.Logger;
@@ -14,7 +13,6 @@ import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +33,8 @@ public class Server {
 	private static final int PORT = Integer.parseInt(Message.getMessage("bridge.port"));
 	private static final int TIMEOUT = Integer.parseInt(Message.getMessage("bridge.timeout"));
 
+	public static final String CHARSET_NAME = "UTF-8";
+
 	@Autowired
 	private ServerHandler serverHandler;
 
@@ -47,7 +47,7 @@ public class Server {
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
-		filterChain.addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
+		// filterChain.addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
 		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));

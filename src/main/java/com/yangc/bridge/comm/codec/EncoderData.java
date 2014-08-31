@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.apache.mina.filter.codec.demux.MessageEncoder;
 
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Protocol;
@@ -15,12 +15,12 @@ import com.yangc.bridge.comm.protocol.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.ProtocolLogin;
 import com.yangc.bridge.comm.protocol.ProtocolResult;
 
-public class EncoderData implements MessageEncoder<Protocol> {
+public class EncoderData extends ProtocolEncoderAdapter {
 
 	private static final int CAPACITY = 4096;
 
 	@Override
-	public void encode(IoSession session, Protocol message, ProtocolEncoderOutput out) throws Exception {
+	public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
 		IoBuffer buffer = IoBuffer.allocate(CAPACITY).setAutoExpand(true);
 
 		if (message instanceof ProtocolResult) {
@@ -99,7 +99,7 @@ public class EncoderData implements MessageEncoder<Protocol> {
 			buffer.putLong(protocol.getFileSize());
 		}
 		// 传输文件
-		else if (protocol.getContentType() == ContentType.TRANSPORT_FILE) {
+		else if (protocol.getContentType() == ContentType.TRANSMIT_FILE) {
 			buffer.put(Protocol.START_TAG);
 			buffer.put(protocol.getContentType());
 			buffer.put(protocol.getUuid());

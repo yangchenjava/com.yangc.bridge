@@ -2,29 +2,25 @@ package com.yangc.bridge.comm.factory;
 
 import java.nio.charset.Charset;
 
-import org.apache.mina.filter.codec.demux.DemuxingProtocolCodecFactory;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFactory;
+import org.apache.mina.filter.codec.ProtocolDecoder;
+import org.apache.mina.filter.codec.ProtocolEncoder;
 
-import com.yangc.bridge.comm.codec.DecoderChat;
-import com.yangc.bridge.comm.codec.DecoderHeart;
-import com.yangc.bridge.comm.codec.DecoderLogin;
-import com.yangc.bridge.comm.codec.DecoderReadyFile;
-import com.yangc.bridge.comm.codec.DecoderResult;
-import com.yangc.bridge.comm.codec.DecoderTransportFile;
+import com.yangc.bridge.comm.Server;
+import com.yangc.bridge.comm.codec.DecoderData;
 import com.yangc.bridge.comm.codec.EncoderData;
-import com.yangc.bridge.comm.protocol.Protocol;
 
-public class DataCodecFactory extends DemuxingProtocolCodecFactory {
+public class DataCodecFactory implements ProtocolCodecFactory {
 
-	private static final String CHARSET_NAME = "UTF-8";
+	@Override
+	public ProtocolEncoder getEncoder(IoSession session) throws Exception {
+		return new EncoderData();
+	}
 
-	public DataCodecFactory() {
-		this.addMessageEncoder(Protocol.class, new EncoderData());
-		this.addMessageDecoder(new DecoderHeart());
-		this.addMessageDecoder(new DecoderResult(Charset.forName(CHARSET_NAME)));
-		this.addMessageDecoder(new DecoderLogin(Charset.forName(CHARSET_NAME)));
-		this.addMessageDecoder(new DecoderChat(Charset.forName(CHARSET_NAME)));
-		this.addMessageDecoder(new DecoderReadyFile(Charset.forName(CHARSET_NAME)));
-		this.addMessageDecoder(new DecoderTransportFile(Charset.forName(CHARSET_NAME)));
+	@Override
+	public ProtocolDecoder getDecoder(IoSession session) throws Exception {
+		return new DecoderData(Charset.forName(Server.CHARSET_NAME).newDecoder());
 	}
 
 }
