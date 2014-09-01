@@ -48,7 +48,7 @@ Ext.onReady(function(){
 		        {width: 55, text: "重启", handler: restartServer, disabled: !hasPermission("bridge" + permission.SEL), icon: basePath + "js/lib/ext4.2/icons/restart.png"}, "-",
 		        {width: 55, text: "刷新", handler: refreshClientGrid, disabled: !hasPermission("bridge" + permission.SEL), icon: basePath + "js/lib/ext4.2/icons/refresh.gif"}, "-",
 		        {width: 100, disabled: true},
-		        {width: 425, xtype: "label", id: "serverStatus"},
+		        {width: 440, xtype: "label", id: "serverStatus"},
 			    {width: 16, height: 16, xtype: "image", id: "serverActive"}
 		    ]
         })
