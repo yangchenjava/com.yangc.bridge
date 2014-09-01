@@ -44,6 +44,7 @@ public class Server {
 		this.acceptor = new NioSocketAcceptor();
 		// 设置空闲时间
 		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, TIMEOUT);
+		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
