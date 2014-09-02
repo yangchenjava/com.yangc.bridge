@@ -268,6 +268,11 @@ public class ServerHandler extends IoHandlerAdapter {
 		}
 	}
 
+	/**
+	 * @功能: 超时无响应, 标记为未读
+	 * @作者: yangc
+	 * @创建日期: 2014年9月2日 下午6:33:23
+	 */
 	class ChatCheck implements Runnable {
 		@Override
 		public void run() {
