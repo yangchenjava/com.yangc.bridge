@@ -31,4 +31,9 @@ public class BridgeServiceImpl implements BridgeService {
 		return this.server.getClientStatusList();
 	}
 
+	@Override
+	public boolean isOnline(String username) {
+		return this.server.isOnline(username);
+	}
+
 }

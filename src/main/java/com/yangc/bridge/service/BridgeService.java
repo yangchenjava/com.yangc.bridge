@@ -13,4 +13,6 @@ public interface BridgeService {
 
 	public List<ClientStatus> getClientStatusList();
 
+	public boolean isOnline(String username);
+
 }

@@ -106,4 +106,8 @@ public class Server {
 		return clientStatusList;
 	}
 
+	public boolean isOnline(String username) {
+		return SessionCache.getSessionId(username) != null;
+	}
+
 }

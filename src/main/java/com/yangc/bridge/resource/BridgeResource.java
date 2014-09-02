@@ -56,4 +56,11 @@ public class BridgeResource {
 		return this.bridgeService.getClientStatusList();
 	}
 
+	@RequestMapping(value = "isOnline", method = RequestMethod.POST)
+	@ResponseBody
+	public boolean isOnline(String username) {
+		logger.info("isOnline");
+		return this.bridgeService.isOnline(username);
+	}
+
 }

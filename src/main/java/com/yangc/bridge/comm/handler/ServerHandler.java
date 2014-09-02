@@ -1,7 +1,11 @@
 package com.yangc.bridge.comm.handler;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -33,14 +37,20 @@ public class ServerHandler extends IoHandlerAdapter {
 
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
 
+	private static final ConcurrentMap<String, TBridgeChat> CHAT_CACHE = new ConcurrentHashMap<String, TBridgeChat>();
+
 	@Autowired
 	private UserService userService;
 	@Autowired
 	private ChatService chatService;
 
+	public ServerHandler() {
+		new Thread(new ChatCheck()).start();
+	}
+
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		logger.info("sessionClosed");
+		logger.info("sessionClosed - " + ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress());
 		// 移除缓存
 		SessionCache.removeSessionId(session.getId());
 	}
@@ -72,6 +82,8 @@ public class ServerHandler extends IoHandlerAdapter {
 			this.chatReceived(session, (TBridgeChat) message);
 		} else if (message instanceof FileBean) {
 			this.fileReceived(session, (FileBean) message);
+		} else {
+			session.close(true);
 		}
 	}
 
@@ -84,6 +96,9 @@ public class ServerHandler extends IoHandlerAdapter {
 	 * @throws Exception
 	 */
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
+		TBridgeChat chat = CHAT_CACHE.remove(result.getUuid());
+		if (chat != null && chat.getId() == null) this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 1L);
+
 		Long sessionId = SessionCache.getSessionId(result.getTo());
 		if (sessionId != null) {
 			byte[] to = result.getTo().getBytes(Server.CHARSET_NAME);
@@ -135,7 +150,17 @@ public class ServerHandler extends IoHandlerAdapter {
 
 		session.write(protocol);
 
-		if (protocol.getSuccess() == 1 && StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
+		// 登录失败, 标记登录次数, 超过登录阀值就踢出
+		if (protocol.getSuccess() == 0) {
+			Integer loginCount = (Integer) session.getAttribute("loginCount", 1);
+			if (loginCount > 2) {
+				session.close(false);
+			} else {
+				session.setAttribute("loginCount", ++loginCount);
+			}
+		}
+		// 登录成功, 如果存在离线消息, 则发送
+		else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
 			List<TBridgeChat> chatList = this.chatService.getUnreadChatListByTo(user.getUsername());
 			if (chatList != null && !chatList.isEmpty()) {
 				List<Long> ids = new ArrayList<Long>(chatList.size());
@@ -155,6 +180,8 @@ public class ServerHandler extends IoHandlerAdapter {
 					protocolChat.setData(data);
 
 					session.write(protocolChat);
+					chat.setMillisecond(System.currentTimeMillis());
+					CHAT_CACHE.put(chat.getUuid(), chat);
 					ids.add(chat.getId());
 				}
 				this.chatService.updateChatStatus(ids);
@@ -162,8 +189,16 @@ public class ServerHandler extends IoHandlerAdapter {
 		}
 	}
 
+	/**
+	 * @功能: 接收消息并转发
+	 * @作者: yangc
+	 * @创建日期: 2014年9月2日 下午6:32:45
+	 * @param session
+	 * @param chat
+	 * @throws Exception
+	 */
 	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
-		Long sessionId = SessionCache.getSessionId(chat.getTo()), status = 0L;
+		Long sessionId = SessionCache.getSessionId(chat.getTo());
 		if (sessionId != null) {
 			byte[] from = chat.getFrom().getBytes(Server.CHARSET_NAME);
 			byte[] to = chat.getTo().getBytes(Server.CHARSET_NAME);
@@ -180,15 +215,21 @@ public class ServerHandler extends IoHandlerAdapter {
 			protocol.setData(data);
 
 			session.getService().getManagedSessions().get(sessionId).write(protocol);
-			status = 1L;
+			chat.setMillisecond(System.currentTimeMillis());
+			CHAT_CACHE.put(chat.getUuid(), chat);
+		} else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
+			this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 0L);
 		}
-
-		if (sessionId == null && StringUtils.equals(Message.getMessage("bridge.offline_data"), "0")) {
-			return;
-		}
-		this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), status);
 	}
 
+	/**
+	 * @功能: 文件确认, 文件传输转发
+	 * @作者: yangc
+	 * @创建日期: 2014年9月2日 下午6:33:23
+	 * @param session
+	 * @param file
+	 * @throws Exception
+	 */
 	private void fileReceived(IoSession session, FileBean file) throws Exception {
 		Long sessionId = SessionCache.getSessionId(file.getTo());
 		if (sessionId != null) {
@@ -224,6 +265,28 @@ public class ServerHandler extends IoHandlerAdapter {
 				protocol.setData(file.getData());
 			}
 			session.getService().getManagedSessions().get(sessionId).write(protocol);
+		}
+	}
+
+	class ChatCheck implements Runnable {
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					long currentMillisecond = System.currentTimeMillis();
+					for (Entry<String, TBridgeChat> entry : CHAT_CACHE.entrySet()) {
+						TBridgeChat chat = entry.getValue();
+						if (currentMillisecond - chat.getMillisecond() > 8000) {
+							logger.info("unread - uuid=" + chat.getUuid() + ", from=" + chat.getFrom() + ", to=" + chat.getTo());
+							ServerHandler.this.chatService.addOrUpdateChat(chat.getId(), chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 0L);
+							CHAT_CACHE.remove(entry.getKey());
+						}
+					}
+					Thread.sleep(5000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
