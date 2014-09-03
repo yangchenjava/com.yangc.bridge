@@ -3,7 +3,6 @@ package com.yangc.bridge.resource;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,6 @@ import com.yangc.bridge.bean.ClientStatus;
 import com.yangc.bridge.bean.ServerStatus;
 import com.yangc.bridge.service.BridgeService;
 import com.yangc.exception.WebApplicationException;
-import com.yangc.system.bean.Permission;
 
 @Controller
 @RequestMapping("/bridge")
@@ -28,7 +26,6 @@ public class BridgeResource {
 
 	@RequestMapping(value = "restartServer", method = RequestMethod.POST)
 	@ResponseBody
-	@RequiresPermissions("bridge:" + Permission.SEL)
 	public ResultBean restartServer() {
 		logger.info("restartServer");
 		try {
@@ -42,7 +39,6 @@ public class BridgeResource {
 
 	@RequestMapping(value = "getServerStatus", method = RequestMethod.POST)
 	@ResponseBody
-	@RequiresPermissions("bridge:" + Permission.SEL)
 	public ServerStatus getServerStatus() {
 		logger.info("getServerStatus");
 		return this.bridgeService.getServerStatus();
@@ -50,7 +46,6 @@ public class BridgeResource {
 
 	@RequestMapping(value = "getClientStatusList", method = RequestMethod.POST)
 	@ResponseBody
-	@RequiresPermissions("bridge:" + Permission.SEL)
 	public List<ClientStatus> getClientStatusList() {
 		logger.info("getClientStatusList");
 		return this.bridgeService.getClientStatusList();

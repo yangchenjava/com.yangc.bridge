@@ -1,18 +1,24 @@
 package com.yangc.bridge.comm;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.firewall.BlacklistFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +53,14 @@ public class Server {
 		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
+		// 编解码
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
+		// 黑名单
+		BlacklistFilter blacklistFilter = this.getBlacklistFilter();
+		if (blacklistFilter != null) {
+			filterChain.addLast("blacklist", blacklistFilter);
+		}
+		// 线程池
 		// filterChain.addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
 		this.acceptor.setHandler(this.serverHandler);
 		try {
@@ -55,6 +68,25 @@ public class Server {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private BlacklistFilter getBlacklistFilter() {
+		String blacklist = Message.getMessage("bridge.blacklist");
+		if (StringUtils.isNotBlank(blacklist)) {
+			String[] hosts = blacklist.split(",");
+			Set<InetAddress> addresses = new HashSet<InetAddress>(hosts.length);
+			for (String host : hosts) {
+				try {
+					addresses.add(InetAddress.getByName(host));
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				}
+			}
+			BlacklistFilter blacklistFilter = new BlacklistFilter();
+			blacklistFilter.setBlacklist(addresses);
+			return blacklistFilter;
+		}
+		return null;
 	}
 
 	public void start() {
