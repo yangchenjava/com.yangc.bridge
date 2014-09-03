@@ -33,7 +33,7 @@ import com.yangc.utils.Message;
 import com.yangc.utils.encryption.Md5Utils;
 
 @Service
-public class ServerHandler extends IoHandlerAdapter {
+public class ServerHandler extends IoHandlerAdapter implements Runnable {
 
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
 
@@ -45,7 +45,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	private ChatService chatService;
 
 	public ServerHandler() {
-		new Thread(new ChatCheck()).start();
+		new Thread(this).start();
 	}
 
 	@Override
@@ -273,25 +273,25 @@ public class ServerHandler extends IoHandlerAdapter {
 	 * @作者: yangc
 	 * @创建日期: 2014年9月2日 下午6:33:23
 	 */
-	class ChatCheck implements Runnable {
-		@Override
-		public void run() {
+	@Override
+	public void run() {
+		try {
 			while (true) {
-				try {
-					long currentMillisecond = System.currentTimeMillis();
-					for (Entry<String, TBridgeChat> entry : CHAT_CACHE.entrySet()) {
-						TBridgeChat chat = entry.getValue();
-						if (currentMillisecond - chat.getMillisecond() > 8000) {
-							logger.info("unread - uuid=" + chat.getUuid() + ", from=" + chat.getFrom() + ", to=" + chat.getTo());
-							ServerHandler.this.chatService.addOrUpdateChat(chat.getId(), chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 0L);
-							CHAT_CACHE.remove(entry.getKey());
-						}
+				long currentMillisecond = System.currentTimeMillis();
+				for (Entry<String, TBridgeChat> entry : CHAT_CACHE.entrySet()) {
+					TBridgeChat chat = entry.getValue();
+					if (currentMillisecond - chat.getMillisecond() > 8000) {
+						logger.info("unread - uuid=" + chat.getUuid() + ", from=" + chat.getFrom() + ", to=" + chat.getTo());
+						this.chatService.addOrUpdateChat(chat.getId(), chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 0L);
+						CHAT_CACHE.remove(entry.getKey());
 					}
-					Thread.sleep(5000);
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
+				Thread.sleep(5000);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			// 出现异常重启线程
+			new Thread(this).start();
 		}
 	}
 
