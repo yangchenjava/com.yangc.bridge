@@ -1,12 +1,17 @@
 package com.yangc.bridge.comm.handler;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -15,9 +20,9 @@ import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.yangc.bridge.bean.FileBean;
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.cache.SessionCache;
@@ -27,6 +32,7 @@ import com.yangc.bridge.comm.protocol.ProtocolFile;
 import com.yangc.bridge.comm.protocol.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.ProtocolResult;
 import com.yangc.bridge.service.ChatService;
+import com.yangc.bridge.service.FileService;
 import com.yangc.system.bean.TSysUser;
 import com.yangc.system.service.UserService;
 import com.yangc.utils.Message;
@@ -38,11 +44,15 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
 
 	private static final ConcurrentMap<String, TBridgeChat> CHAT_CACHE = new ConcurrentHashMap<String, TBridgeChat>();
+	private static final CopyOnWriteArrayList<String> ONLINE_FILE_CACHE = new CopyOnWriteArrayList<String>();
+	private static final CopyOnWriteArrayList<String> OFFLINE_FILE_CACHE = new CopyOnWriteArrayList<String>();
 
 	@Autowired
 	private UserService userService;
 	@Autowired
 	private ChatService chatService;
+	@Autowired
+	private FileService fileService;
 
 	public ServerHandler() {
 		new Thread(this).start();
@@ -80,8 +90,8 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			this.loginReceived(session, (UserBean) message);
 		} else if (message instanceof TBridgeChat) {
 			this.chatReceived(session, (TBridgeChat) message);
-		} else if (message instanceof FileBean) {
-			this.fileReceived(session, (FileBean) message);
+		} else if (message instanceof TBridgeFile) {
+			this.fileReceived(session, (TBridgeFile) message);
 		} else {
 			session.close(true);
 		}
@@ -198,6 +208,12 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 * @throws Exception
 	 */
 	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
+		// 如果未登录则断开连接
+		if (SessionCache.contains(chat.getFrom())) {
+			session.close(true);
+			return;
+		}
+
 		Long sessionId = SessionCache.getSessionId(chat.getTo());
 		if (sessionId != null) {
 			byte[] from = chat.getFrom().getBytes(Server.CHARSET_NAME);
@@ -230,9 +246,19 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 * @param file
 	 * @throws Exception
 	 */
-	private void fileReceived(IoSession session, FileBean file) throws Exception {
+	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
+		// 如果未登录则断开连接
+		if (SessionCache.contains(file.getFrom())) {
+			session.close(true);
+			return;
+		}
+
 		Long sessionId = SessionCache.getSessionId(file.getTo());
 		if (sessionId != null) {
+			if (OFFLINE_FILE_CACHE.contains(file.getUuid())) {
+				this.writeFileToTemp(file);
+				return;
+			}
 			byte[] from = file.getFrom().getBytes(Server.CHARSET_NAME);
 			byte[] to = file.getTo().getBytes(Server.CHARSET_NAME);
 			byte[] fileName = file.getFileName().getBytes(Server.CHARSET_NAME);
@@ -265,6 +291,33 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 				protocol.setData(file.getData());
 			}
 			session.getService().getManagedSessions().get(sessionId).write(protocol);
+		} else {
+			if (!OFFLINE_FILE_CACHE.contains(file.getUuid())) {
+				OFFLINE_FILE_CACHE.add(file.getFileMd5());
+				File dir = new File(FileUtils.getTempDirectoryPath(), file.getTo());
+				if (!dir.exists() || !dir.isDirectory()) {
+					dir.delete();
+					dir.mkdirs();
+				}
+				File offlineFile = new File(dir, file.getFileName());
+				offlineFile.delete();
+				offlineFile.createNewFile();
+			}
+			this.writeFileToTemp(file);
+		}
+	}
+
+	private void writeFileToTemp(TBridgeFile file) throws IOException {
+		File offlineFile = new File(FileUtils.getTempDirectoryPath() + "/" + file.getTo() + "/" + file.getFileName());
+
+		RandomAccessFile raf = new RandomAccessFile(offlineFile, "rw");
+		raf.seek(raf.length());
+		raf.write(file.getData(), 0, file.getOffset());
+		raf.close();
+
+		if (offlineFile.length() == file.getFileSize() && Md5Utils.getMD5String(offlineFile).equals(file.getFileMd5())) {
+			OFFLINE_FILE_CACHE.remove(file.getFileMd5());
+			this.fileService.addFile(file);
 		}
 	}
 

@@ -5,4 +5,10 @@
 		UPDATE t_bridge_chat SET status = 1 WHERE ID = ?
 	]]>
 	</sql>
+
+	<sql name="bridge.file.delFiles" desc="删除文件信息">
+	<![CDATA[
+		DELETE FROM t_bridge_file WHERE ID = ?
+	]]>
+	</sql>
 </sqlroot>

@@ -8,7 +8,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-import com.yangc.bridge.bean.FileBean;
+import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.UserBean;
@@ -217,7 +217,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 						crc += b[i];
 					}
 					if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
-						FileBean file = new FileBean();
+						TBridgeFile file = new TBridgeFile();
 						file.setContentType(ContentType.READY_FILE);
 						file.setUuid(uuid);
 						file.setFrom(from);
@@ -262,7 +262,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
-					FileBean file = new FileBean();
+					TBridgeFile file = new TBridgeFile();
 					file.setContentType(ContentType.TRANSMIT_FILE);
 					file.setUuid(uuid);
 					file.setFrom(from);

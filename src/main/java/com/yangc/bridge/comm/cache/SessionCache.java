@@ -27,6 +27,10 @@ public class SessionCache {
 		}
 	}
 
+	public static boolean contains(String username) {
+		return SESSION_CACHE.containsKey(username);
+	}
+
 	public static Map<String, Long> getSessionCache() {
 		return new HashMap<String, Long>(SESSION_CACHE);
 	}

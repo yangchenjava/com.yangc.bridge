@@ -1,24 +1,21 @@
 package com.yangc.bridge.bean;
 
-public class FileBean {
+import com.yangc.bean.BaseBean;
 
-	private byte contentType;
+public class TBridgeFile extends BaseBean {
+
+	private static final long serialVersionUID = 4407463520709519024L;
+
 	private String uuid;
 	private String from;
 	private String to;
 	private String fileName;
 	private Long fileSize;
 	private String fileMd5;
+
+	private byte contentType;
 	private int offset;
 	private byte[] data;
-
-	public byte getContentType() {
-		return contentType;
-	}
-
-	public void setContentType(byte contentType) {
-		this.contentType = contentType;
-	}
 
 	public String getUuid() {
 		return uuid;
@@ -66,6 +63,14 @@ public class FileBean {
 
 	public void setFileMd5(String fileMd5) {
 		this.fileMd5 = fileMd5;
+	}
+
+	public byte getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(byte contentType) {
+		this.contentType = contentType;
 	}
 
 	public int getOffset() {

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.yangc.bridge.bean.TBridgeFile" table="T_BRIDGE_FILE">
+		<comment>文件表</comment>
+		<id name="id" type="java.lang.Long">
+			<column name="ID" precision="22" scale="0" />
+			<generator class="sequence">
+				<param name="sequence">HIBERNATE_SEQ</param>
+			</generator>
+		</id>
+		<property name="uuid" type="java.lang.String">
+			<column name="UUID" length="50">
+				<comment>UUID</comment>
+			</column>
+		</property>
+		<property name="from" type="java.lang.String">
+			<column name="FROM_USERNAME" length="200">
+				<comment>发送人</comment>
+			</column>
+		</property>
+		<property name="to" type="java.lang.String">
+			<column name="TO_USERNAME" length="200">
+				<comment>接收人</comment>
+			</column>
+		</property>
+		<property name="fileName" type="java.lang.String">
+			<column name="FILE_NAME" length="200">
+				<comment>文件名</comment>
+			</column>
+		</property>
+		<property name="fileSize" type="java.lang.Long">
+			<column name="FILE_SIZE" precision="22" scale="0">
+				<comment>文件大小</comment>
+			</column>
+		</property>
+		<property name="fileMd5" type="java.lang.String">
+			<column name="FILE_MD5" length="50">
+				<comment>文件md5</comment>
+			</column>
+		</property>
+	</class>
+</hibernate-mapping>
