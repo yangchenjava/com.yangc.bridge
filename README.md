@@ -1,9 +1,11 @@
 com.yangc.bridge
-===============
+================
 
 ### 基于Mina的初级推送服务器实现
+Mina - 强大的网络应用程序框架，封装了java nio，基于事件驱动的异步api。
+
 ### 1.RESULT
-每个request的发生都要返回对应的response。<br />
+每个request的发生都要返回对应的response，又称之为响应报文。<br />
 > 协议：<br />
 0x68 [contentType(0x00)] [uuid] [toLength] [dataLength] [to] 0x68 [success] [message] [crc] 0x16
 
@@ -18,7 +20,7 @@ com.yangc.bridge
 0x68 [contentType(0x02)] [uuid] [fromLength] [toLength] [dataLength] [from] [to] 0x68 [data] [crc] 0x16
 
 ### 4.READY_FILE
-发送文件之前要询问对方是否接收此文件，同时会携带要传输的文件的属性信息。如果接收方返回接收，则开始发送文件；如果接收方返回拒绝，则不发送文件。<br />
+发送文件之前要询问对方是否接收此文件，同时会携带要发送文件的属性信息。如果接收方返回接收，则开始发送文件；如果接收方返回拒绝，则不发送文件。<br />
 > 协议：<br />
 0x68 [contentType(0x03)] [uuid] [fromLength] [toLength] [from] [to] 0x68 [fileNameLength] [fileName] [fileSize] [crc] 0x16
 
