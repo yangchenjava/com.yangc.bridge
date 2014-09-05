@@ -1,7 +1,6 @@
 package com.yangc.bridge.comm.handler;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -24,13 +23,10 @@ import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
-import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.ProtocolChat;
-import com.yangc.bridge.comm.protocol.ProtocolFile;
 import com.yangc.bridge.comm.protocol.ProtocolHeart;
-import com.yangc.bridge.comm.protocol.ProtocolResult;
+import com.yangc.bridge.comm.protocol.TransmitStatus;
 import com.yangc.bridge.service.ChatService;
 import com.yangc.bridge.service.FileService;
 import com.yangc.system.bean.TSysUser;
@@ -44,8 +40,8 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
 
 	private static final ConcurrentMap<String, TBridgeChat> CHAT_CACHE = new ConcurrentHashMap<String, TBridgeChat>();
-	private static final CopyOnWriteArrayList<String> ONLINE_FILE_CACHE = new CopyOnWriteArrayList<String>();
-	private static final CopyOnWriteArrayList<String> OFFLINE_FILE_CACHE = new CopyOnWriteArrayList<String>();
+	private static final CopyOnWriteArrayList<String> FILE_CACHE = new CopyOnWriteArrayList<String>();
+	private static final ConcurrentMap<String, ConcurrentMap<String, TBridgeFile>> OFFLINE_FILE_CACHE = new ConcurrentHashMap<String, ConcurrentMap<String, TBridgeFile>>();
 
 	@Autowired
 	private UserService userService;
@@ -106,29 +102,26 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 * @throws Exception
 	 */
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
+		// 如果未登录则断开连接
+		if (SessionCache.contains(result.getFrom())) {
+			session.close(true);
+			return;
+		}
+
+		// 清空已送达的文本
 		TBridgeChat chat = CHAT_CACHE.remove(result.getUuid());
 		if (chat != null && chat.getId() == null) this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 1L);
 
+		// 转发离线文件
+
 		Long sessionId = SessionCache.getSessionId(result.getTo());
 		if (sessionId != null) {
-			byte[] to = result.getTo().getBytes(Server.CHARSET_NAME);
-			byte[] message = result.getMessage().getBytes(Server.CHARSET_NAME);
-
-			ProtocolResult protocol = new ProtocolResult();
-			protocol.setContentType(ContentType.RESULT);
-			protocol.setUuid(result.getUuid().getBytes(Server.CHARSET_NAME));
-			protocol.setToLength((short) to.length);
-			protocol.setDataLength(1 + message.length);
-			protocol.setTo(to);
-			protocol.setSuccess((byte) (result.isSuccess() ? 1 : 0));
-			protocol.setMessage(message);
-
-			session.getService().getManagedSessions().get(sessionId).write(protocol);
+			MessageHandler.sendResult(session.getService().getManagedSessions().get(sessionId), result);
 		}
 	}
 
 	/**
-	 * @功能: 验证登录, 并发送验证结果, 如果登录成功, 并且支持离线消息, 转发存在的离线消息
+	 * @功能: 验证登录, 并发送验证结果, 如果登录成功, 并且支持离线文本, 转发存在的离线文本,
 	 * @作者: yangc
 	 * @创建日期: 2014年8月26日 上午10:39:37
 	 * @param session
@@ -138,30 +131,27 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	private void loginReceived(IoSession session, UserBean user) throws Exception {
 		List<TSysUser> users = this.userService.getUserListByUsernameAndPassword(user.getUsername(), Md5Utils.getMD5(user.getPassword()));
 
-		ProtocolResult protocol = new ProtocolResult();
-		protocol.setContentType(ContentType.RESULT);
-		protocol.setUuid(user.getUuid().getBytes(Server.CHARSET_NAME));
-		protocol.setToLength((short) user.getUsername().getBytes(Server.CHARSET_NAME).length);
-		protocol.setTo(user.getUsername().getBytes(Server.CHARSET_NAME));
+		ResultBean result = new ResultBean();
+		result.setUuid(user.getUuid());
+		result.setFrom(user.getUsername());
+		result.setTo(user.getUsername());
 		if (users == null || users.isEmpty()) {
-			protocol.setSuccess((byte) 0);
-			protocol.setMessage("用户名或密码错误".getBytes(Server.CHARSET_NAME));
+			result.setSuccess(false);
+			result.setMessage("用户名或密码错误");
 		} else if (users.size() > 1) {
-			protocol.setSuccess((byte) 0);
-			protocol.setMessage("用户重复".getBytes(Server.CHARSET_NAME));
+			result.setSuccess(false);
+			result.setMessage("用户重复");
 		} else {
 			// 添加缓存
 			SessionCache.putSessionId(user.getUsername(), session.getId());
 
-			protocol.setSuccess((byte) 1);
-			protocol.setMessage("登录成功".getBytes(Server.CHARSET_NAME));
+			result.setSuccess(true);
+			result.setMessage("登录成功");
 		}
-		protocol.setDataLength(1 + protocol.getMessage().length);
-
-		session.write(protocol);
+		MessageHandler.sendResult(session, result);
 
 		// 登录失败, 标记登录次数, 超过登录阀值就踢出
-		if (protocol.getSuccess() == 0) {
+		if (!result.isSuccess()) {
 			Integer loginCount = (Integer) session.getAttribute("loginCount", 1);
 			if (loginCount > 2) {
 				session.close(false);
@@ -169,38 +159,32 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 				session.setAttribute("loginCount", ++loginCount);
 			}
 		}
-		// 登录成功, 如果存在离线消息, 则发送
+		// 登录成功, 如果存在离线文本, 则发送
 		else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
 			List<TBridgeChat> chatList = this.chatService.getUnreadChatListByTo(user.getUsername());
 			if (chatList != null && !chatList.isEmpty()) {
 				List<Long> ids = new ArrayList<Long>(chatList.size());
 				for (TBridgeChat chat : chatList) {
-					byte[] from = chat.getFrom().getBytes(Server.CHARSET_NAME);
-					byte[] to = chat.getTo().getBytes(Server.CHARSET_NAME);
-					byte[] data = chat.getData().getBytes(Server.CHARSET_NAME);
-
-					ProtocolChat protocolChat = new ProtocolChat();
-					protocolChat.setContentType(ContentType.CHAT);
-					protocolChat.setUuid(chat.getUuid().getBytes(Server.CHARSET_NAME));
-					protocolChat.setFromLength((short) from.length);
-					protocolChat.setToLength((short) to.length);
-					protocolChat.setDataLength(data.length);
-					protocolChat.setFrom(from);
-					protocolChat.setTo(to);
-					protocolChat.setData(data);
-
-					session.write(protocolChat);
+					MessageHandler.sendChat(session, chat);
 					chat.setMillisecond(System.currentTimeMillis());
 					CHAT_CACHE.put(chat.getUuid(), chat);
 					ids.add(chat.getId());
 				}
 				this.chatService.updateChatStatus(ids);
 			}
+
+			ConcurrentMap<String, TBridgeFile> offlineFileMap = new ConcurrentHashMap<String, TBridgeFile>();
+			List<TBridgeFile> fileList = this.fileService.getUnreceiveFileListByTo(user.getUsername());
+			for (TBridgeFile file : fileList) {
+				MessageHandler.sendReadyFile(session, file);
+				offlineFileMap.put(file.getUuid(), file);
+			}
+			OFFLINE_FILE_CACHE.put(user.getUsername(), offlineFileMap);
 		}
 	}
 
 	/**
-	 * @功能: 接收消息并转发
+	 * @功能: 接收文本并转发
 	 * @作者: yangc
 	 * @创建日期: 2014年9月2日 下午6:32:45
 	 * @param session
@@ -216,21 +200,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 
 		Long sessionId = SessionCache.getSessionId(chat.getTo());
 		if (sessionId != null) {
-			byte[] from = chat.getFrom().getBytes(Server.CHARSET_NAME);
-			byte[] to = chat.getTo().getBytes(Server.CHARSET_NAME);
-			byte[] data = chat.getData().getBytes(Server.CHARSET_NAME);
-
-			ProtocolChat protocol = new ProtocolChat();
-			protocol.setContentType(ContentType.CHAT);
-			protocol.setUuid(chat.getUuid().getBytes(Server.CHARSET_NAME));
-			protocol.setFromLength((short) from.length);
-			protocol.setToLength((short) to.length);
-			protocol.setDataLength(data.length);
-			protocol.setFrom(from);
-			protocol.setTo(to);
-			protocol.setData(data);
-
-			session.getService().getManagedSessions().get(sessionId).write(protocol);
+			MessageHandler.sendChat(session.getService().getManagedSessions().get(sessionId), chat);
 			chat.setMillisecond(System.currentTimeMillis());
 			CHAT_CACHE.put(chat.getUuid(), chat);
 		} else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
@@ -253,71 +223,44 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			return;
 		}
 
-		Long sessionId = SessionCache.getSessionId(file.getTo());
-		if (sessionId != null) {
-			if (OFFLINE_FILE_CACHE.contains(file.getUuid())) {
-				this.writeFileToTemp(file);
-				return;
+		byte contentType = file.getContentType();
+		// 发送在线文件
+		if (contentType == ContentType.READY_FILE || file.getTransmitStatus() == TransmitStatus.ONLINE) {
+			Long sessionId = SessionCache.getSessionId(file.getTo());
+			if (sessionId != null) {
+				if (contentType == ContentType.READY_FILE) {
+					MessageHandler.sendReadyFile(session.getService().getManagedSessions().get(sessionId), file);
+				} else if (contentType == ContentType.TRANSMIT_FILE) {
+					MessageHandler.sendTransmitFile(session.getService().getManagedSessions().get(sessionId), file);
+				}
 			}
-			byte[] from = file.getFrom().getBytes(Server.CHARSET_NAME);
-			byte[] to = file.getTo().getBytes(Server.CHARSET_NAME);
-			byte[] fileName = file.getFileName().getBytes(Server.CHARSET_NAME);
-
-			ProtocolFile protocol = new ProtocolFile();
-			byte contentType = file.getContentType();
-			if (contentType == ContentType.READY_FILE) {
-				protocol.setContentType(contentType);
-				protocol.setUuid(file.getUuid().getBytes(Server.CHARSET_NAME));
-				protocol.setFromLength((short) from.length);
-				protocol.setToLength((short) to.length);
-				protocol.setFrom(from);
-				protocol.setTo(to);
-				protocol.setFileNameLength((short) fileName.length);
-				protocol.setFileName(fileName);
-				protocol.setFileSize(file.getFileSize());
-			} else if (contentType == ContentType.TRANSMIT_FILE) {
-				protocol.setContentType(contentType);
-				protocol.setUuid(file.getUuid().getBytes(Server.CHARSET_NAME));
-				protocol.setFromLength((short) from.length);
-				protocol.setToLength((short) to.length);
-				protocol.setDataLength(fileName.length + 46 + file.getData().length);
-				protocol.setFrom(from);
-				protocol.setTo(to);
-				protocol.setFileNameLength((short) fileName.length);
-				protocol.setFileName(fileName);
-				protocol.setFileSize(file.getFileSize());
-				protocol.setFileMd5(file.getFileMd5().getBytes(Server.CHARSET_NAME));
-				protocol.setOffset(file.getOffset());
-				protocol.setData(file.getData());
-			}
-			session.getService().getManagedSessions().get(sessionId).write(protocol);
-		} else {
-			if (!OFFLINE_FILE_CACHE.contains(file.getUuid())) {
-				OFFLINE_FILE_CACHE.add(file.getFileMd5());
+		}
+		// 发送离线文件
+		else {
+			File offlineFile = null;
+			if (!FILE_CACHE.contains(file.getUuid())) {
+				FILE_CACHE.add(file.getFileMd5());
 				File dir = new File(FileUtils.getTempDirectoryPath(), file.getTo());
 				if (!dir.exists() || !dir.isDirectory()) {
 					dir.delete();
 					dir.mkdirs();
 				}
-				File offlineFile = new File(dir, file.getFileName());
+				offlineFile = new File(dir, file.getFileName());
 				offlineFile.delete();
 				offlineFile.createNewFile();
+			} else {
+				offlineFile = new File(FileUtils.getTempDirectoryPath() + "/" + file.getTo() + "/" + file.getFileName());
 			}
-			this.writeFileToTemp(file);
-		}
-	}
 
-	private void writeFileToTemp(TBridgeFile file) throws IOException {
-		File offlineFile = new File(FileUtils.getTempDirectoryPath() + "/" + file.getTo() + "/" + file.getFileName());
+			RandomAccessFile raf = new RandomAccessFile(offlineFile, "rw");
+			raf.seek(raf.length());
+			raf.write(file.getData(), 0, file.getOffset());
+			raf.close();
 
-		RandomAccessFile raf = new RandomAccessFile(offlineFile, "rw");
-		raf.seek(raf.length());
-		raf.write(file.getData(), 0, file.getOffset());
-		raf.close();
-
-		if (offlineFile.length() == file.getFileSize() && Md5Utils.getMD5String(offlineFile).equals(file.getFileMd5())) {
-			OFFLINE_FILE_CACHE.remove(file.getFileMd5());
-			this.fileService.addFile(file);
+			if (offlineFile.length() == file.getFileSize() && Md5Utils.getMD5String(offlineFile).equals(file.getFileMd5())) {
+				FILE_CACHE.remove(file.getFileMd5());
+				this.fileService.addFile(file);
+			}
 		}
 	}
 

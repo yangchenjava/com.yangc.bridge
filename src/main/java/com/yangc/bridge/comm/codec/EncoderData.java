@@ -51,8 +51,10 @@ public class EncoderData extends ProtocolEncoderAdapter {
 		buffer.put(Protocol.START_TAG);
 		buffer.put(protocol.getContentType());
 		buffer.put(protocol.getUuid());
+		buffer.putShort(protocol.getFromLength());
 		buffer.putShort(protocol.getToLength());
 		buffer.putInt(protocol.getDataLength());
+		buffer.put(protocol.getFrom());
 		buffer.put(protocol.getTo());
 		buffer.put(Protocol.END_TAG);
 		buffer.put(protocol.getSuccess());
@@ -109,6 +111,7 @@ public class EncoderData extends ProtocolEncoderAdapter {
 			buffer.put(protocol.getFrom());
 			buffer.put(protocol.getTo());
 			buffer.put(Protocol.END_TAG);
+			buffer.put(protocol.getTransmitStatus());
 			buffer.putShort(protocol.getFileNameLength());
 			buffer.put(protocol.getFileName());
 			buffer.putLong(protocol.getFileSize());

@@ -8,9 +8,9 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Protocol;
@@ -98,26 +98,29 @@ public class DecoderData extends CumulativeProtocolDecoder {
 	}
 
 	private boolean decodeResult(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 42) {
+		if (in.remaining() < 44) {
 			return false;
 		}
 		String uuid = in.getString(36, this.charsetDecoder);
+		short fromLength = in.getShort();
 		short toLength = in.getShort();
 		int dataLength = in.getInt();
-		if (in.remaining() >= toLength + 1 + dataLength + 2) {
+		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
+			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
 			if (in.get() == Protocol.END_TAG) {
 				byte success = in.get();
 				String message = in.getString(dataLength - 1, this.charsetDecoder);
 
 				byte crc = 0;
-				byte[] b = Arrays.copyOfRange(in.array(), position, position + 44 + toLength + 1 + dataLength);
+				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
 					ResultBean result = new ResultBean();
 					result.setUuid(uuid);
+					result.setFrom(from);
 					result.setTo(to);
 					result.setSuccess(success == 0 ? false : true);
 					result.setMessage(message);
@@ -248,12 +251,13 @@ public class DecoderData extends CumulativeProtocolDecoder {
 			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
 			if (in.get() == Protocol.END_TAG) {
+				byte transmitStatus = in.get();
 				short fileNameLength = in.getShort();
 				String fileName = in.getString(fileNameLength, this.charsetDecoder);
 				long fileSize = in.getLong();
 				String fileMd5 = in.getString(32, this.charsetDecoder);
 				int offset = in.getInt();
-				byte[] data = new byte[dataLength - fileNameLength - 46];
+				byte[] data = new byte[dataLength - fileNameLength - 47];
 
 				in.get(data);
 				byte crc = 0;
@@ -267,6 +271,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 					file.setUuid(uuid);
 					file.setFrom(from);
 					file.setTo(to);
+					file.setTransmitStatus(transmitStatus);
 					file.setFileName(fileName);
 					file.setFileSize(fileSize);
 					file.setFileMd5(fileMd5);

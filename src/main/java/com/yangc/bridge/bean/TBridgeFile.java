@@ -14,6 +14,7 @@ public class TBridgeFile extends BaseBean {
 	private String fileMd5;
 
 	private byte contentType;
+	private byte transmitStatus;
 	private int offset;
 	private byte[] data;
 
@@ -71,6 +72,14 @@ public class TBridgeFile extends BaseBean {
 
 	public void setContentType(byte contentType) {
 		this.contentType = contentType;
+	}
+
+	public byte getTransmitStatus() {
+		return transmitStatus;
+	}
+
+	public void setTransmitStatus(byte transmitStatus) {
+		this.transmitStatus = transmitStatus;
 	}
 
 	public int getOffset() {
