@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sqlroot>
-	<sql name="bridge.chat.updateChatStatus" desc="修改消息状态">
+	<sql name="" desc="">
 	<![CDATA[
-		UPDATE T_BRIDGE_CHAT SET STATUS = 1 WHERE ID = ?
-	]]>
-	</sql>
-
-	<sql name="bridge.file.delFiles" desc="删除文件信息">
-	<![CDATA[
-		DELETE FROM T_BRIDGE_FILE WHERE ID = ?
 	]]>
 	</sql>
 </sqlroot>

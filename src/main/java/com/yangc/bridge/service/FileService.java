@@ -8,7 +8,7 @@ public interface FileService {
 
 	public void addFile(TBridgeFile file);
 
-	public void delFiles(List<Long> ids);
+	public void delFile(Long id);
 
 	public List<TBridgeFile> getUnreceiveFileListByTo(String to);
 

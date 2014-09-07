@@ -2,13 +2,15 @@ package com.yangc.bridge.comm.handler;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,8 +42,8 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
 
 	private static final ConcurrentMap<String, TBridgeChat> CHAT_CACHE = new ConcurrentHashMap<String, TBridgeChat>();
-	private static final CopyOnWriteArrayList<String> FILE_CACHE = new CopyOnWriteArrayList<String>();
-	private static final ConcurrentMap<String, ConcurrentMap<String, TBridgeFile>> OFFLINE_FILE_CACHE = new ConcurrentHashMap<String, ConcurrentMap<String, TBridgeFile>>();
+	private static final List<String> FILE_CACHE = new ArrayList<String>();
+	private static final Map<String, Map<String, TBridgeFile>> OFFLINE_FILE_CACHE = new HashMap<String, Map<String, TBridgeFile>>();
 
 	@Autowired
 	private UserService userService;
@@ -56,9 +58,17 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		logger.info("sessionClosed - " + ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress());
+		if (session.getRemoteAddress() != null) {
+			InetAddress address = ((InetSocketAddress) session.getRemoteAddress()).getAddress();
+			if (address != null) {
+				logger.info("sessionClosed - " + address.getHostAddress());
+			}
+		}
 		// 移除缓存
-		SessionCache.removeSessionId(session.getId());
+		String username = SessionCache.removeSessionId(session.getId());
+		if (StringUtils.isNotBlank(username)) {
+			OFFLINE_FILE_CACHE.remove(username);
+		}
 	}
 
 	@Override
@@ -103,16 +113,31 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 */
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
 		// 如果未登录则断开连接
-		if (SessionCache.contains(result.getFrom())) {
+		if (!SessionCache.contains(result.getFrom())) {
 			session.close(true);
 			return;
 		}
 
 		// 清空已送达的文本
 		TBridgeChat chat = CHAT_CACHE.remove(result.getUuid());
-		if (chat != null && chat.getId() == null) this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 1L);
+		if (chat != null) {
+			chat.setStatus(1L);
+			this.chatService.addOrUpdateChat(chat);
+		}
 
 		// 转发离线文件
+		Map<String, TBridgeFile> offlineFileMap = OFFLINE_FILE_CACHE.get(result.getFrom());
+		if (offlineFileMap != null && !offlineFileMap.isEmpty()) {
+			TBridgeFile file = offlineFileMap.remove(result.getUuid());
+			if (file != null) {
+				MessageHandler.sendFile(session, file, result.isSuccess());
+				this.fileService.delFile(file.getId());
+				if (offlineFileMap.isEmpty()) {
+					OFFLINE_FILE_CACHE.remove(result.getFrom());
+				}
+				return;
+			}
+		}
 
 		Long sessionId = SessionCache.getSessionId(result.getTo());
 		if (sessionId != null) {
@@ -121,7 +146,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	}
 
 	/**
-	 * @功能: 验证登录, 并发送验证结果, 如果登录成功, 并且支持离线文本, 转发存在的离线文本,
+	 * @功能: 验证登录, 并发送验证结果, 如果登录成功, 并且支持离线文本, 转发存在的离线文本, 转发存在的离线文件
 	 * @作者: yangc
 	 * @创建日期: 2014年8月26日 上午10:39:37
 	 * @param session
@@ -163,23 +188,24 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 		else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
 			List<TBridgeChat> chatList = this.chatService.getUnreadChatListByTo(user.getUsername());
 			if (chatList != null && !chatList.isEmpty()) {
-				List<Long> ids = new ArrayList<Long>(chatList.size());
 				for (TBridgeChat chat : chatList) {
-					MessageHandler.sendChat(session, chat);
 					chat.setMillisecond(System.currentTimeMillis());
 					CHAT_CACHE.put(chat.getUuid(), chat);
-					ids.add(chat.getId());
+					MessageHandler.sendChat(session, chat);
 				}
-				this.chatService.updateChatStatus(ids);
 			}
 
-			ConcurrentMap<String, TBridgeFile> offlineFileMap = new ConcurrentHashMap<String, TBridgeFile>();
 			List<TBridgeFile> fileList = this.fileService.getUnreceiveFileListByTo(user.getUsername());
-			for (TBridgeFile file : fileList) {
-				MessageHandler.sendReadyFile(session, file);
-				offlineFileMap.put(file.getUuid(), file);
+			if (fileList != null && !fileList.isEmpty()) {
+				Map<String, TBridgeFile> offlineFileMap = new HashMap<String, TBridgeFile>();
+				for (TBridgeFile file : fileList) {
+					offlineFileMap.put(file.getUuid(), file);
+				}
+				OFFLINE_FILE_CACHE.put(user.getUsername(), offlineFileMap);
+				for (TBridgeFile file : fileList) {
+					MessageHandler.sendReadyFile(session, file);
+				}
 			}
-			OFFLINE_FILE_CACHE.put(user.getUsername(), offlineFileMap);
 		}
 	}
 
@@ -193,18 +219,19 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 */
 	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
 		// 如果未登录则断开连接
-		if (SessionCache.contains(chat.getFrom())) {
+		if (!SessionCache.contains(chat.getFrom())) {
 			session.close(true);
 			return;
 		}
 
 		Long sessionId = SessionCache.getSessionId(chat.getTo());
 		if (sessionId != null) {
-			MessageHandler.sendChat(session.getService().getManagedSessions().get(sessionId), chat);
 			chat.setMillisecond(System.currentTimeMillis());
 			CHAT_CACHE.put(chat.getUuid(), chat);
+			MessageHandler.sendChat(session.getService().getManagedSessions().get(sessionId), chat);
 		} else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
-			this.chatService.addOrUpdateChat(null, chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 0L);
+			chat.setStatus(0L);
+			this.chatService.addOrUpdateChat(chat);
 		}
 	}
 
@@ -218,7 +245,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 */
 	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
 		// 如果未登录则断开连接
-		if (SessionCache.contains(file.getFrom())) {
+		if (!SessionCache.contains(file.getFrom())) {
 			session.close(true);
 			return;
 		}
@@ -239,27 +266,34 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 		else {
 			File offlineFile = null;
 			if (!FILE_CACHE.contains(file.getUuid())) {
-				FILE_CACHE.add(file.getFileMd5());
-				File dir = new File(FileUtils.getTempDirectoryPath(), file.getTo());
+				FILE_CACHE.add(file.getUuid());
+				File dir = new File(FileUtils.getTempDirectoryPath() + "/com.yangc.bridge/" + file.getTo());
 				if (!dir.exists() || !dir.isDirectory()) {
 					dir.delete();
 					dir.mkdirs();
 				}
-				offlineFile = new File(dir, file.getFileName());
+				offlineFile = new File(dir, file.getUuid());
 				offlineFile.delete();
 				offlineFile.createNewFile();
 			} else {
-				offlineFile = new File(FileUtils.getTempDirectoryPath() + "/" + file.getTo() + "/" + file.getFileName());
+				offlineFile = new File(FileUtils.getTempDirectoryPath() + "/com.yangc.bridge/" + file.getTo() + "/" + file.getUuid());
 			}
-
 			RandomAccessFile raf = new RandomAccessFile(offlineFile, "rw");
 			raf.seek(raf.length());
 			raf.write(file.getData(), 0, file.getOffset());
 			raf.close();
 
 			if (offlineFile.length() == file.getFileSize() && Md5Utils.getMD5String(offlineFile).equals(file.getFileMd5())) {
-				FILE_CACHE.remove(file.getFileMd5());
+				FILE_CACHE.remove(file.getUuid());
 				this.fileService.addFile(file);
+
+				ResultBean result = new ResultBean();
+				result.setUuid(file.getUuid());
+				result.setFrom(file.getFrom());
+				result.setTo(file.getFrom());
+				result.setSuccess(true);
+				result.setMessage("ok");
+				MessageHandler.sendResult(session, result);
 			}
 		}
 	}
@@ -278,7 +312,8 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 					TBridgeChat chat = entry.getValue();
 					if (currentMillisecond - chat.getMillisecond() > 8000) {
 						logger.info("unread - uuid=" + chat.getUuid() + ", from=" + chat.getFrom() + ", to=" + chat.getTo());
-						this.chatService.addOrUpdateChat(chat.getId(), chat.getUuid(), chat.getFrom(), chat.getTo(), chat.getData(), 0L);
+						chat.setStatus(0L);
+						this.chatService.addOrUpdateChat(chat);
 						CHAT_CACHE.remove(entry.getKey());
 					}
 				}

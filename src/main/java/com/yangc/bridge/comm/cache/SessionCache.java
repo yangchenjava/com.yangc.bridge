@@ -18,13 +18,14 @@ public class SessionCache {
 		SESSION_CACHE.put(username, sessionId);
 	}
 
-	public static void removeSessionId(Long sessionId) {
+	public static String removeSessionId(Long sessionId) {
 		for (Entry<String, Long> entry : SESSION_CACHE.entrySet()) {
 			if (entry.getValue().longValue() == sessionId.longValue()) {
 				SESSION_CACHE.remove(entry.getKey());
-				break;
+				return entry.getKey();
 			}
 		}
+		return null;
 	}
 
 	public static boolean contains(String username) {

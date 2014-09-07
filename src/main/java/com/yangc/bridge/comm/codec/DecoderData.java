@@ -258,8 +258,8 @@ public class DecoderData extends CumulativeProtocolDecoder {
 				String fileMd5 = in.getString(32, this.charsetDecoder);
 				int offset = in.getInt();
 				byte[] data = new byte[dataLength - fileNameLength - 47];
-
 				in.get(data);
+
 				byte crc = 0;
 				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
 				for (int i = 0; i < b.length; i++) {

@@ -6,9 +6,7 @@ import com.yangc.bridge.bean.TBridgeChat;
 
 public interface ChatService {
 
-	public void addOrUpdateChat(Long id, String uuid, String from, String to, String data, Long status);
-
-	public void updateChatStatus(List<Long> ids);
+	public void addOrUpdateChat(TBridgeChat chat);
 
 	public List<TBridgeChat> getUnreadChatListByTo(String to);
 
