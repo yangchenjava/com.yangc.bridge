@@ -48,8 +48,13 @@ public class Server {
 
 	private void init() {
 		this.acceptor = new NioSocketAcceptor();
+		// 设置的是主服务监听的端口可以重用
+		this.acceptor.setReuseAddress(true);
+		// 客户端最大连接数
+		// this.acceptor.setBacklog(1000);
 		// 设置空闲时间
 		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, TIMEOUT);
+		// 设置每一个非主监听连接的端口可以重用
 		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
