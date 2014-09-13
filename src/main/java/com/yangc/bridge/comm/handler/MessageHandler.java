@@ -15,10 +15,10 @@ import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.ProtocolChat;
-import com.yangc.bridge.comm.protocol.ProtocolFile;
-import com.yangc.bridge.comm.protocol.ProtocolResult;
 import com.yangc.bridge.comm.protocol.TransmitStatus;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolChat;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolResult;
 
 public class MessageHandler implements Runnable {
 
@@ -27,18 +27,18 @@ public class MessageHandler implements Runnable {
 	public static void sendResult(IoSession session, ResultBean result) throws Exception {
 		byte[] from = result.getFrom().getBytes(Server.CHARSET_NAME);
 		byte[] to = result.getTo().getBytes(Server.CHARSET_NAME);
-		byte[] message = result.getMessage().getBytes(Server.CHARSET_NAME);
+		byte[] data = result.getData().getBytes(Server.CHARSET_NAME);
 
 		ProtocolResult protocol = new ProtocolResult();
 		protocol.setContentType(ContentType.RESULT);
 		protocol.setUuid(result.getUuid().getBytes(Server.CHARSET_NAME));
 		protocol.setFromLength((short) from.length);
 		protocol.setToLength((short) to.length);
-		protocol.setDataLength(1 + message.length);
+		protocol.setDataLength(1 + data.length);
 		protocol.setFrom(from);
 		protocol.setTo(to);
 		protocol.setSuccess((byte) (result.isSuccess() ? 1 : 0));
-		protocol.setMessage(message);
+		protocol.setData(data);
 
 		session.write(protocol);
 	}

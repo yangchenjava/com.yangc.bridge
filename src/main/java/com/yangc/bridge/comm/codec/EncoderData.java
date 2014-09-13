@@ -8,12 +8,12 @@ import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.Protocol;
-import com.yangc.bridge.comm.protocol.ProtocolChat;
-import com.yangc.bridge.comm.protocol.ProtocolFile;
-import com.yangc.bridge.comm.protocol.ProtocolHeart;
-import com.yangc.bridge.comm.protocol.ProtocolLogin;
-import com.yangc.bridge.comm.protocol.ProtocolResult;
+import com.yangc.bridge.comm.protocol.prototype.Protocol;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolChat;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolLogin;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolResult;
 
 public class EncoderData extends ProtocolEncoderAdapter {
 
@@ -58,7 +58,7 @@ public class EncoderData extends ProtocolEncoderAdapter {
 		buffer.put(protocol.getTo());
 		buffer.put(Protocol.END_TAG);
 		buffer.put(protocol.getSuccess());
-		buffer.put(protocol.getMessage());
+		buffer.put(protocol.getData());
 	}
 
 	private void encodeLogin(IoBuffer buffer, ProtocolLogin protocol) {

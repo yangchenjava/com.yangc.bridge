@@ -13,8 +13,8 @@ import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.Protocol;
-import com.yangc.bridge.comm.protocol.ProtocolHeart;
+import com.yangc.bridge.comm.protocol.prototype.Protocol;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 
 public class DecoderData extends CumulativeProtocolDecoder {
 
@@ -110,7 +110,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 			String to = in.getString(toLength, this.charsetDecoder);
 			if (in.get() == Protocol.END_TAG) {
 				byte success = in.get();
-				String message = in.getString(dataLength - 1, this.charsetDecoder);
+				String data = in.getString(dataLength - 1, this.charsetDecoder);
 
 				byte crc = 0;
 				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
@@ -123,7 +123,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 					result.setFrom(from);
 					result.setTo(to);
 					result.setSuccess(success == 0 ? false : true);
-					result.setMessage(message);
+					result.setData(data);
 					out.write(result);
 				}
 			}

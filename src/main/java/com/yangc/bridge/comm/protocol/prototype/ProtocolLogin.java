@@ -1,4 +1,4 @@
-package com.yangc.bridge.comm.protocol;
+package com.yangc.bridge.comm.protocol.prototype;
 
 /**
  * @功能: 0x68 [contentType(0x01)] [uuid] 0x68 [usernameLength] [passwordLength] [username] [password] [crc] 0x16

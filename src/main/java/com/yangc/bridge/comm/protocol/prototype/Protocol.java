@@ -1,4 +1,4 @@
-package com.yangc.bridge.comm.protocol;
+package com.yangc.bridge.comm.protocol.prototype;
 
 public class Protocol {
 

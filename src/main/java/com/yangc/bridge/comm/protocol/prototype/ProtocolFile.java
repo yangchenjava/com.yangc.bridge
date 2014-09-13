@@ -1,4 +1,4 @@
-package com.yangc.bridge.comm.protocol;
+package com.yangc.bridge.comm.protocol.prototype;
 
 /**
  * @功能: 0x68 [contentType(0x03)] [uuid] [fromLength] [toLength] [from] [to] 0x68 [fileNameLength] [fileName] [fileSize] [crc] 0x16
