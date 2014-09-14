@@ -38,6 +38,7 @@ public class Server {
 	private static final String IP = Message.getMessage("bridge.ipAddress");
 	private static final int PORT = Integer.parseInt(Message.getMessage("bridge.port"));
 	private static final int TIMEOUT = Integer.parseInt(Message.getMessage("bridge.timeout"));
+	public static final String CODEC = Message.getMessage("bridge.codec");
 
 	public static final String CHARSET_NAME = "UTF-8";
 

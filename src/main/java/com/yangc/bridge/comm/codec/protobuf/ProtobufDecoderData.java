@@ -1,4 +1,4 @@
-package com.yangc.bridge.comm.codec;
+package com.yangc.bridge.comm.codec.protobuf;
 
 import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
@@ -13,14 +13,14 @@ import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.prototype.Protocol;
+import com.yangc.bridge.comm.protocol.Tag;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 
-public class DecoderData extends CumulativeProtocolDecoder {
+public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 
 	private CharsetDecoder charsetDecoder;
 
-	public DecoderData(CharsetDecoder charsetDecoder) {
+	public ProtobufDecoderData(CharsetDecoder charsetDecoder) {
 		this.charsetDecoder = charsetDecoder;
 	}
 
@@ -33,7 +33,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 				return false;
 			}
 			int position = in.position();
-			if (in.get() == Protocol.START_TAG) {
+			if (in.get() == Tag.START) {
 				byte contentType = in.get();
 				if (contentType == ContentType.HEART) {
 					if (!this.decodeHeart(position, in, out)) {
@@ -78,14 +78,14 @@ public class DecoderData extends CumulativeProtocolDecoder {
 		if (in.remaining() < 1) {
 			return false;
 		}
-		if (in.get() == Protocol.END_TAG) {
+		if (in.get() == Tag.END) {
 			if (in.remaining() >= 2) {
 				byte crc = 0;
 				byte[] b = Arrays.copyOfRange(in.array(), position, position + 3);
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
-				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
+				if (in.get() == crc && in.get() == Tag.FINAL) {
 					ProtocolHeart protocol = new ProtocolHeart();
 					protocol.setContentType(ContentType.HEART);
 					out.write(protocol);
@@ -108,7 +108,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
 			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Protocol.END_TAG) {
+			if (in.get() == Tag.END) {
 				byte success = in.get();
 				String data = in.getString(dataLength - 1, this.charsetDecoder);
 
@@ -117,7 +117,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
-				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
+				if (in.get() == crc && in.get() == Tag.FINAL) {
 					ResultBean result = new ResultBean();
 					result.setUuid(uuid);
 					result.setFrom(from);
@@ -138,7 +138,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 			return false;
 		}
 		String uuid = in.getString(36, this.charsetDecoder);
-		if (in.get() == Protocol.END_TAG) {
+		if (in.get() == Tag.END) {
 			short usernameLength = in.getShort();
 			short passwordLength = in.getShort();
 			if (in.remaining() >= usernameLength + passwordLength + 2) {
@@ -150,7 +150,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
-				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
+				if (in.get() == crc && in.get() == Tag.FINAL) {
 					UserBean user = new UserBean();
 					user.setUuid(uuid);
 					user.setUsername(username);
@@ -175,7 +175,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
 			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Protocol.END_TAG) {
+			if (in.get() == Tag.END) {
 				String data = in.getString(dataLength, this.charsetDecoder);
 
 				byte crc = 0;
@@ -183,7 +183,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
-				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
+				if (in.get() == crc && in.get() == Tag.FINAL) {
 					TBridgeChat chat = new TBridgeChat();
 					chat.setUuid(uuid);
 					chat.setFrom(from);
@@ -208,7 +208,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 		if (in.remaining() >= fromLength + toLength + 3) {
 			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Protocol.END_TAG) {
+			if (in.get() == Tag.END) {
 				short fileNameLength = in.getShort();
 				if (in.remaining() >= fileNameLength + 10) {
 					String fileName = in.getString(fileNameLength, this.charsetDecoder);
@@ -219,7 +219,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 					for (int i = 0; i < b.length; i++) {
 						crc += b[i];
 					}
-					if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
+					if (in.get() == crc && in.get() == Tag.FINAL) {
 						TBridgeFile file = new TBridgeFile();
 						file.setContentType(ContentType.READY_FILE);
 						file.setUuid(uuid);
@@ -250,7 +250,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
 			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Protocol.END_TAG) {
+			if (in.get() == Tag.END) {
 				byte transmitStatus = in.get();
 				short fileNameLength = in.getShort();
 				String fileName = in.getString(fileNameLength, this.charsetDecoder);
@@ -265,7 +265,7 @@ public class DecoderData extends CumulativeProtocolDecoder {
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
-				if (in.get() == crc && in.get() == Protocol.FINAL_TAG) {
+				if (in.get() == crc && in.get() == Tag.FINAL) {
 					TBridgeFile file = new TBridgeFile();
 					file.setContentType(ContentType.TRANSMIT_FILE);
 					file.setUuid(uuid);

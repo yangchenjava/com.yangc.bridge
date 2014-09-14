@@ -1,4 +1,4 @@
-package com.yangc.bridge.comm.codec;
+package com.yangc.bridge.comm.codec.prototype;
 
 import java.util.Arrays;
 
@@ -8,14 +8,14 @@ import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.prototype.Protocol;
+import com.yangc.bridge.comm.protocol.Tag;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolChat;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolLogin;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolResult;
 
-public class EncoderData extends ProtocolEncoderAdapter {
+public class PrototypeEncoderData extends ProtocolEncoderAdapter {
 
 	private static final int CAPACITY = 4096;
 
@@ -41,14 +41,14 @@ public class EncoderData extends ProtocolEncoderAdapter {
 			crc += b[i];
 		}
 		buffer.put(crc);
-		buffer.put(Protocol.FINAL_TAG);
+		buffer.put(Tag.FINAL);
 
 		buffer.flip();
 		out.write(buffer);
 	}
 
 	private void encodeResult(IoBuffer buffer, ProtocolResult protocol) {
-		buffer.put(Protocol.START_TAG);
+		buffer.put(Tag.START);
 		buffer.put(protocol.getContentType());
 		buffer.put(protocol.getUuid());
 		buffer.putShort(protocol.getFromLength());
@@ -56,16 +56,16 @@ public class EncoderData extends ProtocolEncoderAdapter {
 		buffer.putInt(protocol.getDataLength());
 		buffer.put(protocol.getFrom());
 		buffer.put(protocol.getTo());
-		buffer.put(Protocol.END_TAG);
+		buffer.put(Tag.END);
 		buffer.put(protocol.getSuccess());
 		buffer.put(protocol.getData());
 	}
 
 	private void encodeLogin(IoBuffer buffer, ProtocolLogin protocol) {
-		buffer.put(Protocol.START_TAG);
+		buffer.put(Tag.START);
 		buffer.put(protocol.getContentType());
 		buffer.put(protocol.getUuid());
-		buffer.put(Protocol.END_TAG);
+		buffer.put(Tag.END);
 		buffer.putShort(protocol.getUsernameLength());
 		buffer.putShort(protocol.getPasswordLength());
 		buffer.put(protocol.getUsername());
@@ -73,7 +73,7 @@ public class EncoderData extends ProtocolEncoderAdapter {
 	}
 
 	private void encodeChat(IoBuffer buffer, ProtocolChat protocol) {
-		buffer.put(Protocol.START_TAG);
+		buffer.put(Tag.START);
 		buffer.put(protocol.getContentType());
 		buffer.put(protocol.getUuid());
 		buffer.putShort(protocol.getFromLength());
@@ -81,28 +81,28 @@ public class EncoderData extends ProtocolEncoderAdapter {
 		buffer.putInt(protocol.getDataLength());
 		buffer.put(protocol.getFrom());
 		buffer.put(protocol.getTo());
-		buffer.put(Protocol.END_TAG);
+		buffer.put(Tag.END);
 		buffer.put(protocol.getData());
 	}
 
 	private void encodeFile(IoBuffer buffer, ProtocolFile protocol) {
 		// 准备发送文件
 		if (protocol.getContentType() == ContentType.READY_FILE) {
-			buffer.put(Protocol.START_TAG);
+			buffer.put(Tag.START);
 			buffer.put(protocol.getContentType());
 			buffer.put(protocol.getUuid());
 			buffer.putShort(protocol.getFromLength());
 			buffer.putShort(protocol.getToLength());
 			buffer.put(protocol.getFrom());
 			buffer.put(protocol.getTo());
-			buffer.put(Protocol.END_TAG);
+			buffer.put(Tag.END);
 			buffer.putShort(protocol.getFileNameLength());
 			buffer.put(protocol.getFileName());
 			buffer.putLong(protocol.getFileSize());
 		}
 		// 传输文件
 		else if (protocol.getContentType() == ContentType.TRANSMIT_FILE) {
-			buffer.put(Protocol.START_TAG);
+			buffer.put(Tag.START);
 			buffer.put(protocol.getContentType());
 			buffer.put(protocol.getUuid());
 			buffer.putShort(protocol.getFromLength());
@@ -110,7 +110,7 @@ public class EncoderData extends ProtocolEncoderAdapter {
 			buffer.putInt(protocol.getDataLength());
 			buffer.put(protocol.getFrom());
 			buffer.put(protocol.getTo());
-			buffer.put(Protocol.END_TAG);
+			buffer.put(Tag.END);
 			buffer.put(protocol.getTransmitStatus());
 			buffer.putShort(protocol.getFileNameLength());
 			buffer.put(protocol.getFileName());
@@ -122,9 +122,9 @@ public class EncoderData extends ProtocolEncoderAdapter {
 	}
 
 	private void encodeHeart(IoBuffer buffer, ProtocolHeart protocol) {
-		buffer.put(Protocol.START_TAG);
+		buffer.put(Tag.START);
 		buffer.put(protocol.getContentType());
-		buffer.put(Protocol.END_TAG);
+		buffer.put(Tag.END);
 	}
 
 }
