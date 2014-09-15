@@ -43,40 +43,40 @@ public class ProtobufEncoderData extends ProtocolEncoderAdapter {
 		out.write(buffer);
 	}
 
-	private void encodeResult(IoBuffer buffer, ProtobufMessage.Result result) {
+	private void encodeResult(IoBuffer buffer, ProtobufMessage.Result message) {
 		buffer.put(Tag.START);
 		buffer.put(ContentType.RESULT);
-		buffer.putInt(result.getSerializedSize());
-		buffer.put(result.toByteArray());
+		buffer.putInt(message.getSerializedSize());
+		buffer.put(message.toByteArray());
 	}
 
-	private void encodeLogin(IoBuffer buffer, ProtobufMessage.Login login) {
+	private void encodeLogin(IoBuffer buffer, ProtobufMessage.Login message) {
 		buffer.put(Tag.START);
 		buffer.put(ContentType.LOGIN);
-		buffer.putInt(login.getSerializedSize());
-		buffer.put(login.toByteArray());
+		buffer.putInt(message.getSerializedSize());
+		buffer.put(message.toByteArray());
 	}
 
-	private void encodeChat(IoBuffer buffer, ProtobufMessage.Chat chat) {
+	private void encodeChat(IoBuffer buffer, ProtobufMessage.Chat message) {
 		buffer.put(Tag.START);
 		buffer.put(ContentType.CHAT);
-		buffer.putInt(chat.getSerializedSize());
-		buffer.put(chat.toByteArray());
+		buffer.putInt(message.getSerializedSize());
+		buffer.put(message.toByteArray());
 	}
 
-	private void encodeFile(IoBuffer buffer, ProtobufMessage.File file) {
+	private void encodeFile(IoBuffer buffer, ProtobufMessage.File message) {
 		buffer.put(Tag.START);
 
 		// 准备发送文件
-		if (!file.hasData()) buffer.put(ContentType.READY_FILE);
+		if (!message.hasData()) buffer.put(ContentType.READY_FILE);
 		// 传输文件
 		else buffer.put(ContentType.TRANSMIT_FILE);
 
-		buffer.putInt(file.getSerializedSize());
-		buffer.put(file.toByteArray());
+		buffer.putInt(message.getSerializedSize());
+		buffer.put(message.toByteArray());
 	}
 
-	private void encodeHeart(IoBuffer buffer, ProtobufMessage.Heart heart) {
+	private void encodeHeart(IoBuffer buffer, ProtobufMessage.Heart message) {
 		buffer.put(Tag.START);
 		buffer.put(ContentType.HEART);
 		buffer.put(Tag.END);

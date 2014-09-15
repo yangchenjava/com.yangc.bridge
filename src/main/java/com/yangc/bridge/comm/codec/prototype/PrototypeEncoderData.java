@@ -123,7 +123,7 @@ public class PrototypeEncoderData extends ProtocolEncoderAdapter {
 
 	private void encodeHeart(IoBuffer buffer, ProtocolHeart protocol) {
 		buffer.put(Tag.START);
-		buffer.put(protocol.getContentType());
+		buffer.put(ContentType.HEART);
 		buffer.put(Tag.END);
 	}
 

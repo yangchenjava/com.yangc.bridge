@@ -1,7 +1,6 @@
 package com.yangc.bridge.comm.factory;
 
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
@@ -24,8 +23,7 @@ public class DataCodecFactory implements ProtocolCodecFactory {
 
 	@Override
 	public ProtocolDecoder getDecoder(IoSession session) throws Exception {
-		CharsetDecoder charsetDecoder = Charset.forName(Server.CHARSET_NAME).newDecoder();
-		return StringUtils.equals(Server.CODEC, "prototype") ? new PrototypeDecoderData(charsetDecoder) : new ProtobufDecoderData(charsetDecoder);
+		return StringUtils.equals(Server.CODEC, "prototype") ? new PrototypeDecoderData(Charset.forName(Server.CHARSET_NAME).newDecoder()) : new ProtobufDecoderData();
 	}
 
 }

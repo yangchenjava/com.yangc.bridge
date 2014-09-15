@@ -18,11 +18,16 @@ import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.TransmitStatus;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolChat;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
+import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolResult;
 
 public class MessageHandler implements Runnable {
 
 	private static final Logger logger = Logger.getLogger(MessageHandler.class);
+
+	public static void sendHeart(IoSession session) {
+		session.write(new ProtocolHeart());
+	}
 
 	public static void sendResult(IoSession session, ResultBean result) throws Exception {
 		byte[] from = result.getFrom().getBytes(Server.CHARSET_NAME);

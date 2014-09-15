@@ -1,6 +1,5 @@
 package com.yangc.bridge.comm.codec.protobuf;
 
-import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -14,15 +13,9 @@ import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Tag;
-import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
+import com.yangc.bridge.comm.protocol.protobuf.ProtobufMessage;
 
 public class ProtobufDecoderData extends CumulativeProtocolDecoder {
-
-	private CharsetDecoder charsetDecoder;
-
-	public ProtobufDecoderData(CharsetDecoder charsetDecoder) {
-		this.charsetDecoder = charsetDecoder;
-	}
 
 	@Override
 	protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
@@ -86,9 +79,7 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Tag.FINAL) {
-					ProtocolHeart protocol = new ProtocolHeart();
-					protocol.setContentType(ContentType.HEART);
-					out.write(protocol);
+					out.write(ContentType.HEART);
 				}
 			} else {
 				return false;
@@ -98,34 +89,28 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 	}
 
 	private boolean decodeResult(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 44) {
+		if (in.remaining() < 4) {
 			return false;
 		}
-		String uuid = in.getString(36, this.charsetDecoder);
-		short fromLength = in.getShort();
-		short toLength = in.getShort();
-		int dataLength = in.getInt();
-		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
-			String from = in.getString(fromLength, this.charsetDecoder);
-			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Tag.END) {
-				byte success = in.get();
-				String data = in.getString(dataLength - 1, this.charsetDecoder);
+		int serializedSize = in.getInt();
+		if (in.remaining() >= serializedSize + 2) {
+			byte[] data = new byte[serializedSize];
+			in.get(data);
+			ProtobufMessage.Result message = ProtobufMessage.Result.parseFrom(data);
 
-				byte crc = 0;
-				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
-				for (int i = 0; i < b.length; i++) {
-					crc += b[i];
-				}
-				if (in.get() == crc && in.get() == Tag.FINAL) {
-					ResultBean result = new ResultBean();
-					result.setUuid(uuid);
-					result.setFrom(from);
-					result.setTo(to);
-					result.setSuccess(success == 0 ? false : true);
-					result.setData(data);
-					out.write(result);
-				}
+			byte crc = 0;
+			byte[] b = Arrays.copyOfRange(in.array(), position, position + 6 + serializedSize);
+			for (int i = 0; i < b.length; i++) {
+				crc += b[i];
+			}
+			if (in.get() == crc && in.get() == Tag.FINAL) {
+				ResultBean result = new ResultBean();
+				result.setUuid(message.getUuid());
+				result.setFrom(message.getFrom());
+				result.setTo(message.getTo());
+				result.setSuccess(message.getSuccess());
+				result.setData(message.getData());
+				out.write(result);
 			}
 		} else {
 			return false;
@@ -134,63 +119,55 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 	}
 
 	private boolean decodeLogin(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 41) {
+		if (in.remaining() < 4) {
 			return false;
 		}
-		String uuid = in.getString(36, this.charsetDecoder);
-		if (in.get() == Tag.END) {
-			short usernameLength = in.getShort();
-			short passwordLength = in.getShort();
-			if (in.remaining() >= usernameLength + passwordLength + 2) {
-				String username = in.getString(usernameLength, this.charsetDecoder);
-				String password = in.getString(passwordLength, this.charsetDecoder);
+		int serializedSize = in.getInt();
+		if (in.remaining() >= serializedSize + 2) {
+			byte[] data = new byte[serializedSize];
+			in.get(data);
+			ProtobufMessage.Login message = ProtobufMessage.Login.parseFrom(data);
 
-				byte crc = 0;
-				byte[] b = Arrays.copyOfRange(in.array(), position, position + 43 + usernameLength + passwordLength);
-				for (int i = 0; i < b.length; i++) {
-					crc += b[i];
-				}
-				if (in.get() == crc && in.get() == Tag.FINAL) {
-					UserBean user = new UserBean();
-					user.setUuid(uuid);
-					user.setUsername(username);
-					user.setPassword(password);
-					out.write(user);
-				}
-			} else {
-				return false;
+			byte crc = 0;
+			byte[] b = Arrays.copyOfRange(in.array(), position, position + 6 + serializedSize);
+			for (int i = 0; i < b.length; i++) {
+				crc += b[i];
 			}
+			if (in.get() == crc && in.get() == Tag.FINAL) {
+				UserBean user = new UserBean();
+				user.setUuid(message.getUuid());
+				user.setUsername(message.getUsername());
+				user.setPassword(message.getPassword());
+				out.write(user);
+			}
+		} else {
+			return false;
 		}
 		return true;
 	}
 
 	private boolean decodeChat(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 44) {
+		if (in.remaining() < 4) {
 			return false;
 		}
-		String uuid = in.getString(36, this.charsetDecoder);
-		short fromLength = in.getShort();
-		short toLength = in.getShort();
-		int dataLength = in.getInt();
-		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
-			String from = in.getString(fromLength, this.charsetDecoder);
-			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Tag.END) {
-				String data = in.getString(dataLength, this.charsetDecoder);
+		int serializedSize = in.getInt();
+		if (in.remaining() >= serializedSize + 2) {
+			byte[] data = new byte[serializedSize];
+			in.get(data);
+			ProtobufMessage.Chat message = ProtobufMessage.Chat.parseFrom(data);
 
-				byte crc = 0;
-				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
-				for (int i = 0; i < b.length; i++) {
-					crc += b[i];
-				}
-				if (in.get() == crc && in.get() == Tag.FINAL) {
-					TBridgeChat chat = new TBridgeChat();
-					chat.setUuid(uuid);
-					chat.setFrom(from);
-					chat.setTo(to);
-					chat.setData(data);
-					out.write(chat);
-				}
+			byte crc = 0;
+			byte[] b = Arrays.copyOfRange(in.array(), position, position + 6 + serializedSize);
+			for (int i = 0; i < b.length; i++) {
+				crc += b[i];
+			}
+			if (in.get() == crc && in.get() == Tag.FINAL) {
+				TBridgeChat chat = new TBridgeChat();
+				chat.setUuid(message.getUuid());
+				chat.setFrom(message.getFrom());
+				chat.setTo(message.getTo());
+				chat.setData(message.getData());
+				out.write(chat);
 			}
 		} else {
 			return false;
@@ -199,39 +176,29 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 	}
 
 	private boolean decodeReadyFile(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 40) {
+		if (in.remaining() < 4) {
 			return false;
 		}
-		String uuid = in.getString(36, this.charsetDecoder);
-		short fromLength = in.getShort();
-		short toLength = in.getShort();
-		if (in.remaining() >= fromLength + toLength + 3) {
-			String from = in.getString(fromLength, this.charsetDecoder);
-			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Tag.END) {
-				short fileNameLength = in.getShort();
-				if (in.remaining() >= fileNameLength + 10) {
-					String fileName = in.getString(fileNameLength, this.charsetDecoder);
-					long fileSize = in.getLong();
+		int serializedSize = in.getInt();
+		if (in.remaining() >= serializedSize + 2) {
+			byte[] data = new byte[serializedSize];
+			in.get(data);
+			ProtobufMessage.File message = ProtobufMessage.File.parseFrom(data);
 
-					byte crc = 0;
-					byte[] b = Arrays.copyOfRange(in.array(), position, position + 42 + fromLength + toLength + 3 + fileNameLength + 8);
-					for (int i = 0; i < b.length; i++) {
-						crc += b[i];
-					}
-					if (in.get() == crc && in.get() == Tag.FINAL) {
-						TBridgeFile file = new TBridgeFile();
-						file.setContentType(ContentType.READY_FILE);
-						file.setUuid(uuid);
-						file.setFrom(from);
-						file.setTo(to);
-						file.setFileName(fileName);
-						file.setFileSize(fileSize);
-						out.write(file);
-					}
-				} else {
-					return false;
-				}
+			byte crc = 0;
+			byte[] b = Arrays.copyOfRange(in.array(), position, position + 6 + serializedSize);
+			for (int i = 0; i < b.length; i++) {
+				crc += b[i];
+			}
+			if (in.get() == crc && in.get() == Tag.FINAL) {
+				TBridgeFile file = new TBridgeFile();
+				file.setContentType(ContentType.READY_FILE);
+				file.setUuid(message.getUuid());
+				file.setFrom(message.getFrom());
+				file.setTo(message.getTo());
+				file.setFileName(message.getFileName());
+				file.setFileSize(message.getFileSize());
+				out.write(file);
 			}
 		} else {
 			return false;
@@ -240,45 +207,33 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 	}
 
 	private boolean decodeTransmitFile(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 44) {
+		if (in.remaining() < 4) {
 			return false;
 		}
-		String uuid = in.getString(36, this.charsetDecoder);
-		short fromLength = in.getShort();
-		short toLength = in.getShort();
-		int dataLength = in.getInt();
-		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
-			String from = in.getString(fromLength, this.charsetDecoder);
-			String to = in.getString(toLength, this.charsetDecoder);
-			if (in.get() == Tag.END) {
-				byte transmitStatus = in.get();
-				short fileNameLength = in.getShort();
-				String fileName = in.getString(fileNameLength, this.charsetDecoder);
-				long fileSize = in.getLong();
-				String fileMd5 = in.getString(32, this.charsetDecoder);
-				int offset = in.getInt();
-				byte[] data = new byte[dataLength - fileNameLength - 47];
-				in.get(data);
+		int serializedSize = in.getInt();
+		if (in.remaining() >= serializedSize + 2) {
+			byte[] data = new byte[serializedSize];
+			in.get(data);
+			ProtobufMessage.File message = ProtobufMessage.File.parseFrom(data);
 
-				byte crc = 0;
-				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
-				for (int i = 0; i < b.length; i++) {
-					crc += b[i];
-				}
-				if (in.get() == crc && in.get() == Tag.FINAL) {
-					TBridgeFile file = new TBridgeFile();
-					file.setContentType(ContentType.TRANSMIT_FILE);
-					file.setUuid(uuid);
-					file.setFrom(from);
-					file.setTo(to);
-					file.setTransmitStatus(transmitStatus);
-					file.setFileName(fileName);
-					file.setFileSize(fileSize);
-					file.setFileMd5(fileMd5);
-					file.setOffset(offset);
-					file.setData(data);
-					out.write(file);
-				}
+			byte crc = 0;
+			byte[] b = Arrays.copyOfRange(in.array(), position, position + 6 + serializedSize);
+			for (int i = 0; i < b.length; i++) {
+				crc += b[i];
+			}
+			if (in.get() == crc && in.get() == Tag.FINAL) {
+				TBridgeFile file = new TBridgeFile();
+				file.setContentType(ContentType.TRANSMIT_FILE);
+				file.setUuid(message.getUuid());
+				file.setFrom(message.getFrom());
+				file.setTo(message.getTo());
+				file.setTransmitStatus((byte) message.getTransmitStatus());
+				file.setFileName(message.getFileName());
+				file.setFileSize(message.getFileSize());
+				file.setFileMd5(message.getFileMd5());
+				file.setOffset(message.getOffset());
+				file.setData(message.getData().toByteArray());
+				out.write(file);
 			}
 		} else {
 			return false;

@@ -14,7 +14,6 @@ import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Tag;
-import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 
 public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 
@@ -86,9 +85,7 @@ public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Tag.FINAL) {
-					ProtocolHeart protocol = new ProtocolHeart();
-					protocol.setContentType(ContentType.HEART);
-					out.write(protocol);
+					out.write(ContentType.HEART);
 				}
 			} else {
 				return false;
