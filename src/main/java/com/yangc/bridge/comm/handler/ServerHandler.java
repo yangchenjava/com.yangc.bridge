@@ -56,6 +56,26 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	}
 
 	@Override
+	public void sessionCreated(IoSession session) throws Exception {
+		if (session.getRemoteAddress() != null) {
+			InetAddress address = ((InetSocketAddress) session.getRemoteAddress()).getAddress();
+			if (address != null) {
+				logger.info("sessionCreated - " + address.getHostAddress());
+			}
+		}
+	}
+
+	@Override
+	public void sessionOpened(IoSession session) throws Exception {
+		if (session.getRemoteAddress() != null) {
+			InetAddress address = ((InetSocketAddress) session.getRemoteAddress()).getAddress();
+			if (address != null) {
+				logger.info("sessionOpened - " + address.getHostAddress());
+			}
+		}
+	}
+
+	@Override
 	public void sessionClosed(IoSession session) throws Exception {
 		if (session.getRemoteAddress() != null) {
 			InetAddress address = ((InetSocketAddress) session.getRemoteAddress()).getAddress();
