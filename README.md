@@ -7,7 +7,7 @@ Mina - 强大的网络应用程序框架，封装了java nio，基于事件驱�
 ### 1.RESULT
 每个request的发生都要返回对应的response，又称之为响应报文。<br />
 > 协议：<br />
-0x68 [contentType(0x00)] [uuid] [fromLength] [toLength] [dataLength] [from] [to] 0x68 [success] [message] [crc] 0x16
+0x68 [contentType(0x00)] [uuid] [fromLength] [toLength] [dataLength] [from] [to] 0x68 [success] [data] [crc] 0x16
 
 ### 2.LOGIN
 在首次消息发送前，必须先登录，如果多次验证失败，将强制关闭连接；如果绕开登录直接发送消息，也将强制关闭连接。登录成功后，会收到之前未读的离线文本，或者未收到的离线文件。<br />

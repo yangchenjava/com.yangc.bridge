@@ -27,7 +27,6 @@ import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.TransmitStatus;
 import com.yangc.bridge.service.ChatService;
 import com.yangc.bridge.service.FileService;
@@ -88,8 +87,8 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		logger.info("messageReceived");
-		if (message instanceof ProtocolHeart) {
-			session.write(message);
+		if (message instanceof Byte) {
+			MessageHandler.sendHeart(session);
 		} else if (message instanceof ResultBean) {
 			this.resultReceived(session, (ResultBean) message);
 		} else if (message instanceof UserBean) {
@@ -162,16 +161,16 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 		result.setTo(user.getUsername());
 		if (users == null || users.isEmpty()) {
 			result.setSuccess(false);
-			result.setMessage("用户名或密码错误");
+			result.setData("用户名或密码错误");
 		} else if (users.size() > 1) {
 			result.setSuccess(false);
-			result.setMessage("用户重复");
+			result.setData("用户重复");
 		} else {
 			// 添加缓存
 			SessionCache.putSessionId(user.getUsername(), session.getId());
 
 			result.setSuccess(true);
-			result.setMessage("登录成功");
+			result.setData("登录成功");
 		}
 		MessageHandler.sendResult(session, result);
 
@@ -292,7 +291,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 				result.setFrom(file.getFrom());
 				result.setTo(file.getFrom());
 				result.setSuccess(true);
-				result.setMessage("ok");
+				result.setData("ok");
 				MessageHandler.sendResult(session, result);
 			}
 		}

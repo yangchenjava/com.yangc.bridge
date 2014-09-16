@@ -6,7 +6,7 @@ public class ResultBean {
 	private String from;
 	private String to;
 	private boolean success;
-	private String message;
+	private String data;
 
 	public String getUuid() {
 		return uuid;
@@ -40,12 +40,12 @@ public class ResultBean {
 		this.success = success;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getData() {
+		return data;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setData(String data) {
+		this.data = data;
 	}
 
 }
