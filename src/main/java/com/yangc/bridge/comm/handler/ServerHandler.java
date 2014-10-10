@@ -45,6 +45,8 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	private static final Map<String, Map<String, TBridgeFile>> OFFLINE_FILE_CACHE = new HashMap<String, Map<String, TBridgeFile>>();
 
 	@Autowired
+	private SessionCache sessionCache;
+	@Autowired
 	private UserService userService;
 	@Autowired
 	private ChatService chatService;
@@ -84,7 +86,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			}
 		}
 		// 移除缓存
-		String username = SessionCache.removeSessionId(session.getId());
+		String username = this.sessionCache.removeSessionId(session.getId());
 		if (StringUtils.isNotBlank(username)) {
 			OFFLINE_FILE_CACHE.remove(username);
 		}
@@ -132,7 +134,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 */
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
 		// 如果未登录则断开连接
-		if (!SessionCache.contains(result.getFrom())) {
+		if (!this.sessionCache.contains(result.getFrom())) {
 			session.close(true);
 			return;
 		}
@@ -158,7 +160,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			}
 		}
 
-		Long sessionId = SessionCache.getSessionId(result.getTo());
+		Long sessionId = this.sessionCache.getSessionId(result.getTo());
 		if (sessionId != null) {
 			MessageHandler.sendResult(session.getService().getManagedSessions().get(sessionId), result);
 		}
@@ -187,7 +189,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			result.setData("用户重复");
 		} else {
 			// 添加缓存
-			SessionCache.putSessionId(user.getUsername(), session.getId());
+			this.sessionCache.putSessionId(user.getUsername(), session.getId());
 
 			result.setSuccess(true);
 			result.setData("登录成功");
@@ -238,12 +240,12 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 */
 	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
 		// 如果未登录则断开连接
-		if (!SessionCache.contains(chat.getFrom())) {
+		if (!this.sessionCache.contains(chat.getFrom())) {
 			session.close(true);
 			return;
 		}
 
-		Long sessionId = SessionCache.getSessionId(chat.getTo());
+		Long sessionId = this.sessionCache.getSessionId(chat.getTo());
 		if (sessionId != null) {
 			chat.setMillisecond(System.currentTimeMillis());
 			CHAT_CACHE.put(chat.getUuid(), chat);
@@ -264,7 +266,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	 */
 	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
 		// 如果未登录则断开连接
-		if (!SessionCache.contains(file.getFrom())) {
+		if (!this.sessionCache.contains(file.getFrom())) {
 			session.close(true);
 			return;
 		}
@@ -272,7 +274,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 		byte contentType = file.getContentType();
 		// 发送在线文件
 		if (contentType == ContentType.READY_FILE || file.getTransmitStatus() == TransmitStatus.ONLINE) {
-			Long sessionId = SessionCache.getSessionId(file.getTo());
+			Long sessionId = this.sessionCache.getSessionId(file.getTo());
 			if (sessionId != null) {
 				if (contentType == ContentType.READY_FILE) {
 					MessageHandler.sendReadyFile(session.getService().getManagedSessions().get(sessionId), file);
