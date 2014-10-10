@@ -44,6 +44,8 @@ public class Server {
 
 	@Autowired
 	private ServerHandler serverHandler;
+	@Autowired
+	private SessionCache sessionCache;
 
 	private NioSocketAcceptor acceptor;
 
@@ -126,7 +128,7 @@ public class Server {
 	}
 
 	public List<ClientStatus> getClientStatusList() {
-		Map<String, Long> map = SessionCache.getSessionCache();
+		Map<String, Long> map = this.sessionCache.getSessionCache();
 		Map<Long, IoSession> managedSessions = this.acceptor.getManagedSessions();
 
 		List<ClientStatus> clientStatusList = new ArrayList<ClientStatus>(map.size());
@@ -145,7 +147,7 @@ public class Server {
 	}
 
 	public boolean isOnline(String username) {
-		return SessionCache.getSessionId(username) != null;
+		return this.sessionCache.getSessionId(username) != null;
 	}
 
 }
