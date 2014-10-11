@@ -6,7 +6,7 @@
 						http://www.springframework.org/schema/context
 						http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
-    <!-- 扫描注解 -->
+	<!-- 扫描注解 -->
 	<context:component-scan base-package="com.yangc.bridge">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
