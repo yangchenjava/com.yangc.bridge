@@ -108,6 +108,7 @@ public class Server {
 			this.acceptor.dispose();
 			this.acceptor = null;
 		}
+		this.sessionCache.clear();
 		this.init();
 	}
 

@@ -44,6 +44,10 @@ public class SessionCache {
 		return null;
 	}
 
+	public void clear() {
+		this.cache.clear();
+	}
+
 	public boolean contains(String username) {
 		return this.cache.containsKey(username);
 	}
