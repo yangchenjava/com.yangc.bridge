@@ -51,23 +51,23 @@ public class Server {
 
 	private void init() {
 		this.acceptor = new NioSocketAcceptor();
-		// 设置的是主服务监听的端口可以重用
+		// 设置主服务监听的端口可以重用
 		this.acceptor.setReuseAddress(true);
 		// 客户端最大连接数
 		// this.acceptor.setBacklog(1000);
 		// 设置空闲时间
 		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, TIMEOUT);
-		// 设置每一个非主监听连接的端口可以重用
+		// 设置每一个非主服务监听的端口可以重用
 		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
-		// 编解码
-		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
 		// 黑名单
 		BlacklistFilter blacklistFilter = this.getBlacklistFilter();
 		if (blacklistFilter != null) {
 			filterChain.addLast("blacklist", blacklistFilter);
 		}
+		// 编解码
+		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
 		// 线程池
 		// filterChain.addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
 		this.acceptor.setHandler(this.serverHandler);
