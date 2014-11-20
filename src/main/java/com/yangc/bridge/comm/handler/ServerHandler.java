@@ -110,7 +110,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		logger.info("messageReceived");
 		if (message instanceof Byte) {
-			MessageHandler.sendHeart(session);
+			SendHandler.sendHeart(session);
 		} else if (message instanceof ResultBean) {
 			this.resultReceived(session, (ResultBean) message);
 		} else if (message instanceof UserBean) {
@@ -151,7 +151,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 		if (offlineFileMap != null && !offlineFileMap.isEmpty()) {
 			TBridgeFile file = offlineFileMap.remove(result.getUuid());
 			if (file != null) {
-				MessageHandler.sendFile(session, file, result.isSuccess());
+				SendHandler.sendFile(session, file, result.isSuccess());
 				this.fileService.delFile(file.getId());
 				if (offlineFileMap.isEmpty()) {
 					OFFLINE_FILE_CACHE.remove(result.getFrom());
@@ -162,7 +162,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 
 		Long sessionId = this.sessionCache.getSessionId(result.getTo());
 		if (sessionId != null) {
-			MessageHandler.sendResult(session.getService().getManagedSessions().get(sessionId), result);
+			SendHandler.sendResult(session.getService().getManagedSessions().get(sessionId), result);
 		}
 	}
 
@@ -188,13 +188,17 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			result.setSuccess(false);
 			result.setData("用户重复");
 		} else {
+			Long sessionId = this.sessionCache.getSessionId(user.getUsername());
+			if (sessionId != null) {
+				session.getService().getManagedSessions().get(sessionId).close(true);
+			}
 			// 添加缓存
 			this.sessionCache.putSessionId(user.getUsername(), session.getId());
 
 			result.setSuccess(true);
 			result.setData("登录成功");
 		}
-		MessageHandler.sendResult(session, result);
+		SendHandler.sendResult(session, result);
 
 		// 登录失败, 标记登录次数, 超过登录阀值就踢出
 		if (!result.isSuccess()) {
@@ -212,7 +216,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 				for (TBridgeChat chat : chatList) {
 					chat.setMillisecond(System.currentTimeMillis());
 					CHAT_CACHE.put(chat.getUuid(), chat);
-					MessageHandler.sendChat(session, chat);
+					SendHandler.sendChat(session, chat);
 				}
 			}
 
@@ -224,7 +228,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 				}
 				OFFLINE_FILE_CACHE.put(user.getUsername(), offlineFileMap);
 				for (TBridgeFile file : fileList) {
-					MessageHandler.sendReadyFile(session, file);
+					SendHandler.sendReadyFile(session, file);
 				}
 			}
 		}
@@ -249,7 +253,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 		if (sessionId != null) {
 			chat.setMillisecond(System.currentTimeMillis());
 			CHAT_CACHE.put(chat.getUuid(), chat);
-			MessageHandler.sendChat(session.getService().getManagedSessions().get(sessionId), chat);
+			SendHandler.sendChat(session.getService().getManagedSessions().get(sessionId), chat);
 		} else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
 			chat.setStatus(0L);
 			this.chatService.addOrUpdateChat(chat);
@@ -277,9 +281,9 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 			Long sessionId = this.sessionCache.getSessionId(file.getTo());
 			if (sessionId != null) {
 				if (contentType == ContentType.READY_FILE) {
-					MessageHandler.sendReadyFile(session.getService().getManagedSessions().get(sessionId), file);
+					SendHandler.sendReadyFile(session.getService().getManagedSessions().get(sessionId), file);
 				} else if (contentType == ContentType.TRANSMIT_FILE) {
-					MessageHandler.sendTransmitFile(session.getService().getManagedSessions().get(sessionId), file);
+					SendHandler.sendTransmitFile(session.getService().getManagedSessions().get(sessionId), file);
 				}
 			}
 		}
@@ -314,7 +318,7 @@ public class ServerHandler extends IoHandlerAdapter implements Runnable {
 				result.setTo(file.getFrom());
 				result.setSuccess(true);
 				result.setData("ok");
-				MessageHandler.sendResult(session, result);
+				SendHandler.sendResult(session, result);
 			}
 		}
 	}

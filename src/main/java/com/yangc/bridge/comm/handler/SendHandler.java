@@ -24,9 +24,12 @@ import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolResult;
 
-public class MessageHandler implements Runnable {
+public class SendHandler implements Runnable {
 
-	private static final Logger logger = Logger.getLogger(MessageHandler.class);
+	private static final Logger logger = Logger.getLogger(SendHandler.class);
+
+	private SendHandler() {
+	}
 
 	public static void sendHeart(IoSession session) {
 		if (StringUtils.equals(Server.CODEC, "prototype")) {
@@ -164,14 +167,14 @@ public class MessageHandler implements Runnable {
 	}
 
 	public static void sendFile(IoSession session, TBridgeFile file, boolean success) {
-		new Thread(new MessageHandler(session, file, success)).start();
+		new Thread(new SendHandler(session, file, success)).start();
 	}
 
 	private IoSession session;
 	private TBridgeFile file;
 	private boolean success;
 
-	private MessageHandler(IoSession session, TBridgeFile file, boolean success) {
+	private SendHandler(IoSession session, TBridgeFile file, boolean success) {
 		this.session = session;
 		this.file = file;
 		this.success = success;
