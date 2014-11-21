@@ -227,7 +227,6 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 				file.setUuid(message.getUuid());
 				file.setFrom(message.getFrom());
 				file.setTo(message.getTo());
-				file.setTransmitStatus((byte) message.getTransmitStatus());
 				file.setFileName(message.getFileName());
 				file.setFileSize(message.getFileSize());
 				file.setFileMd5(message.getFileMd5());

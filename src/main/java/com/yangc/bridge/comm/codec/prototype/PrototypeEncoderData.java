@@ -111,7 +111,6 @@ public class PrototypeEncoderData extends ProtocolEncoderAdapter {
 			buffer.put(protocol.getFrom());
 			buffer.put(protocol.getTo());
 			buffer.put(Tag.END);
-			buffer.put(protocol.getTransmitStatus());
 			buffer.putShort(protocol.getFileNameLength());
 			buffer.put(protocol.getFileName());
 			buffer.putLong(protocol.getFileSize());

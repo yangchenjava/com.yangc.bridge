@@ -248,13 +248,12 @@ public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 			String from = in.getString(fromLength, this.charsetDecoder);
 			String to = in.getString(toLength, this.charsetDecoder);
 			if (in.get() == Tag.END) {
-				byte transmitStatus = in.get();
 				short fileNameLength = in.getShort();
 				String fileName = in.getString(fileNameLength, this.charsetDecoder);
 				long fileSize = in.getLong();
 				String fileMd5 = in.getString(32, this.charsetDecoder);
 				int offset = in.getInt();
-				byte[] data = new byte[dataLength - fileNameLength - 47];
+				byte[] data = new byte[dataLength - fileNameLength - 46];
 				in.get(data);
 
 				byte crc = 0;
@@ -268,7 +267,6 @@ public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 					file.setUuid(uuid);
 					file.setFrom(from);
 					file.setTo(to);
-					file.setTransmitStatus(transmitStatus);
 					file.setFileName(fileName);
 					file.setFileSize(fileSize);
 					file.setFileMd5(fileMd5);

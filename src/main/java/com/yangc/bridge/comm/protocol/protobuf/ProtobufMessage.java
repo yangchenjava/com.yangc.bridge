@@ -2859,79 +2859,68 @@ public final class ProtobufMessage {
 		 */
 		com.google.protobuf.ByteString getToBytes();
 
-		// optional int32 transmitStatus = 4;
+		// required string fileName = 4;
 		/**
-		 * <code>optional int32 transmitStatus = 4;</code>
-		 */
-		boolean hasTransmitStatus();
-
-		/**
-		 * <code>optional int32 transmitStatus = 4;</code>
-		 */
-		int getTransmitStatus();
-
-		// required string fileName = 5;
-		/**
-		 * <code>required string fileName = 5;</code>
+		 * <code>required string fileName = 4;</code>
 		 */
 		boolean hasFileName();
 
 		/**
-		 * <code>required string fileName = 5;</code>
+		 * <code>required string fileName = 4;</code>
 		 */
 		java.lang.String getFileName();
 
 		/**
-		 * <code>required string fileName = 5;</code>
+		 * <code>required string fileName = 4;</code>
 		 */
 		com.google.protobuf.ByteString getFileNameBytes();
 
-		// required int64 fileSize = 6;
+		// required int64 fileSize = 5;
 		/**
-		 * <code>required int64 fileSize = 6;</code>
+		 * <code>required int64 fileSize = 5;</code>
 		 */
 		boolean hasFileSize();
 
 		/**
-		 * <code>required int64 fileSize = 6;</code>
+		 * <code>required int64 fileSize = 5;</code>
 		 */
 		long getFileSize();
 
-		// optional string fileMd5 = 7;
+		// optional string fileMd5 = 6;
 		/**
-		 * <code>optional string fileMd5 = 7;</code>
+		 * <code>optional string fileMd5 = 6;</code>
 		 */
 		boolean hasFileMd5();
 
 		/**
-		 * <code>optional string fileMd5 = 7;</code>
+		 * <code>optional string fileMd5 = 6;</code>
 		 */
 		java.lang.String getFileMd5();
 
 		/**
-		 * <code>optional string fileMd5 = 7;</code>
+		 * <code>optional string fileMd5 = 6;</code>
 		 */
 		com.google.protobuf.ByteString getFileMd5Bytes();
 
-		// optional int32 offset = 8;
+		// optional int32 offset = 7;
 		/**
-		 * <code>optional int32 offset = 8;</code>
+		 * <code>optional int32 offset = 7;</code>
 		 */
 		boolean hasOffset();
 
 		/**
-		 * <code>optional int32 offset = 8;</code>
+		 * <code>optional int32 offset = 7;</code>
 		 */
 		int getOffset();
 
-		// optional bytes data = 9;
+		// optional bytes data = 8;
 		/**
-		 * <code>optional bytes data = 9;</code>
+		 * <code>optional bytes data = 8;</code>
 		 */
 		boolean hasData();
 
 		/**
-		 * <code>optional bytes data = 9;</code>
+		 * <code>optional bytes data = 8;</code>
 		 */
 		com.google.protobuf.ByteString getData();
 	}
@@ -3000,33 +2989,28 @@ public final class ProtobufMessage {
 						to_ = input.readBytes();
 						break;
 					}
-					case 32: {
+					case 34: {
 						bitField0_ |= 0x00000008;
-						transmitStatus_ = input.readInt32();
-						break;
-					}
-					case 42: {
-						bitField0_ |= 0x00000010;
 						fileName_ = input.readBytes();
 						break;
 					}
-					case 48: {
-						bitField0_ |= 0x00000020;
+					case 40: {
+						bitField0_ |= 0x00000010;
 						fileSize_ = input.readInt64();
 						break;
 					}
-					case 58: {
-						bitField0_ |= 0x00000040;
+					case 50: {
+						bitField0_ |= 0x00000020;
 						fileMd5_ = input.readBytes();
 						break;
 					}
-					case 64: {
-						bitField0_ |= 0x00000080;
+					case 56: {
+						bitField0_ |= 0x00000040;
 						offset_ = input.readInt32();
 						break;
 					}
-					case 74: {
-						bitField0_ |= 0x00000100;
+					case 66: {
+						bitField0_ |= 0x00000080;
 						data_ = input.readBytes();
 						break;
 					}
@@ -3190,37 +3174,19 @@ public final class ProtobufMessage {
 			}
 		}
 
-		// optional int32 transmitStatus = 4;
-		public static final int TRANSMITSTATUS_FIELD_NUMBER = 4;
-		private int transmitStatus_;
+		// required string fileName = 4;
+		public static final int FILENAME_FIELD_NUMBER = 4;
+		private java.lang.Object fileName_;
 
 		/**
-		 * <code>optional int32 transmitStatus = 4;</code>
+		 * <code>required string fileName = 4;</code>
 		 */
-		public boolean hasTransmitStatus() {
+		public boolean hasFileName() {
 			return ((bitField0_ & 0x00000008) == 0x00000008);
 		}
 
 		/**
-		 * <code>optional int32 transmitStatus = 4;</code>
-		 */
-		public int getTransmitStatus() {
-			return transmitStatus_;
-		}
-
-		// required string fileName = 5;
-		public static final int FILENAME_FIELD_NUMBER = 5;
-		private java.lang.Object fileName_;
-
-		/**
-		 * <code>required string fileName = 5;</code>
-		 */
-		public boolean hasFileName() {
-			return ((bitField0_ & 0x00000010) == 0x00000010);
-		}
-
-		/**
-		 * <code>required string fileName = 5;</code>
+		 * <code>required string fileName = 4;</code>
 		 */
 		public java.lang.String getFileName() {
 			java.lang.Object ref = fileName_;
@@ -3237,7 +3203,7 @@ public final class ProtobufMessage {
 		}
 
 		/**
-		 * <code>required string fileName = 5;</code>
+		 * <code>required string fileName = 4;</code>
 		 */
 		public com.google.protobuf.ByteString getFileNameBytes() {
 			java.lang.Object ref = fileName_;
@@ -3250,37 +3216,37 @@ public final class ProtobufMessage {
 			}
 		}
 
-		// required int64 fileSize = 6;
-		public static final int FILESIZE_FIELD_NUMBER = 6;
+		// required int64 fileSize = 5;
+		public static final int FILESIZE_FIELD_NUMBER = 5;
 		private long fileSize_;
 
 		/**
-		 * <code>required int64 fileSize = 6;</code>
+		 * <code>required int64 fileSize = 5;</code>
 		 */
 		public boolean hasFileSize() {
-			return ((bitField0_ & 0x00000020) == 0x00000020);
+			return ((bitField0_ & 0x00000010) == 0x00000010);
 		}
 
 		/**
-		 * <code>required int64 fileSize = 6;</code>
+		 * <code>required int64 fileSize = 5;</code>
 		 */
 		public long getFileSize() {
 			return fileSize_;
 		}
 
-		// optional string fileMd5 = 7;
-		public static final int FILEMD5_FIELD_NUMBER = 7;
+		// optional string fileMd5 = 6;
+		public static final int FILEMD5_FIELD_NUMBER = 6;
 		private java.lang.Object fileMd5_;
 
 		/**
-		 * <code>optional string fileMd5 = 7;</code>
+		 * <code>optional string fileMd5 = 6;</code>
 		 */
 		public boolean hasFileMd5() {
-			return ((bitField0_ & 0x00000040) == 0x00000040);
+			return ((bitField0_ & 0x00000020) == 0x00000020);
 		}
 
 		/**
-		 * <code>optional string fileMd5 = 7;</code>
+		 * <code>optional string fileMd5 = 6;</code>
 		 */
 		public java.lang.String getFileMd5() {
 			java.lang.Object ref = fileMd5_;
@@ -3297,7 +3263,7 @@ public final class ProtobufMessage {
 		}
 
 		/**
-		 * <code>optional string fileMd5 = 7;</code>
+		 * <code>optional string fileMd5 = 6;</code>
 		 */
 		public com.google.protobuf.ByteString getFileMd5Bytes() {
 			java.lang.Object ref = fileMd5_;
@@ -3310,37 +3276,37 @@ public final class ProtobufMessage {
 			}
 		}
 
-		// optional int32 offset = 8;
-		public static final int OFFSET_FIELD_NUMBER = 8;
+		// optional int32 offset = 7;
+		public static final int OFFSET_FIELD_NUMBER = 7;
 		private int offset_;
 
 		/**
-		 * <code>optional int32 offset = 8;</code>
+		 * <code>optional int32 offset = 7;</code>
 		 */
 		public boolean hasOffset() {
-			return ((bitField0_ & 0x00000080) == 0x00000080);
+			return ((bitField0_ & 0x00000040) == 0x00000040);
 		}
 
 		/**
-		 * <code>optional int32 offset = 8;</code>
+		 * <code>optional int32 offset = 7;</code>
 		 */
 		public int getOffset() {
 			return offset_;
 		}
 
-		// optional bytes data = 9;
-		public static final int DATA_FIELD_NUMBER = 9;
+		// optional bytes data = 8;
+		public static final int DATA_FIELD_NUMBER = 8;
 		private com.google.protobuf.ByteString data_;
 
 		/**
-		 * <code>optional bytes data = 9;</code>
+		 * <code>optional bytes data = 8;</code>
 		 */
 		public boolean hasData() {
-			return ((bitField0_ & 0x00000100) == 0x00000100);
+			return ((bitField0_ & 0x00000080) == 0x00000080);
 		}
 
 		/**
-		 * <code>optional bytes data = 9;</code>
+		 * <code>optional bytes data = 8;</code>
 		 */
 		public com.google.protobuf.ByteString getData() {
 			return data_;
@@ -3350,7 +3316,6 @@ public final class ProtobufMessage {
 			uuid_ = "";
 			from_ = "";
 			to_ = "";
-			transmitStatus_ = 0;
 			fileName_ = "";
 			fileSize_ = 0L;
 			fileMd5_ = "";
@@ -3400,22 +3365,19 @@ public final class ProtobufMessage {
 				output.writeBytes(3, getToBytes());
 			}
 			if (((bitField0_ & 0x00000008) == 0x00000008)) {
-				output.writeInt32(4, transmitStatus_);
+				output.writeBytes(4, getFileNameBytes());
 			}
 			if (((bitField0_ & 0x00000010) == 0x00000010)) {
-				output.writeBytes(5, getFileNameBytes());
+				output.writeInt64(5, fileSize_);
 			}
 			if (((bitField0_ & 0x00000020) == 0x00000020)) {
-				output.writeInt64(6, fileSize_);
+				output.writeBytes(6, getFileMd5Bytes());
 			}
 			if (((bitField0_ & 0x00000040) == 0x00000040)) {
-				output.writeBytes(7, getFileMd5Bytes());
+				output.writeInt32(7, offset_);
 			}
 			if (((bitField0_ & 0x00000080) == 0x00000080)) {
-				output.writeInt32(8, offset_);
-			}
-			if (((bitField0_ & 0x00000100) == 0x00000100)) {
-				output.writeBytes(9, data_);
+				output.writeBytes(8, data_);
 			}
 			getUnknownFields().writeTo(output);
 		}
@@ -3437,22 +3399,19 @@ public final class ProtobufMessage {
 				size += com.google.protobuf.CodedOutputStream.computeBytesSize(3, getToBytes());
 			}
 			if (((bitField0_ & 0x00000008) == 0x00000008)) {
-				size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, transmitStatus_);
+				size += com.google.protobuf.CodedOutputStream.computeBytesSize(4, getFileNameBytes());
 			}
 			if (((bitField0_ & 0x00000010) == 0x00000010)) {
-				size += com.google.protobuf.CodedOutputStream.computeBytesSize(5, getFileNameBytes());
+				size += com.google.protobuf.CodedOutputStream.computeInt64Size(5, fileSize_);
 			}
 			if (((bitField0_ & 0x00000020) == 0x00000020)) {
-				size += com.google.protobuf.CodedOutputStream.computeInt64Size(6, fileSize_);
+				size += com.google.protobuf.CodedOutputStream.computeBytesSize(6, getFileMd5Bytes());
 			}
 			if (((bitField0_ & 0x00000040) == 0x00000040)) {
-				size += com.google.protobuf.CodedOutputStream.computeBytesSize(7, getFileMd5Bytes());
+				size += com.google.protobuf.CodedOutputStream.computeInt32Size(7, offset_);
 			}
 			if (((bitField0_ & 0x00000080) == 0x00000080)) {
-				size += com.google.protobuf.CodedOutputStream.computeInt32Size(8, offset_);
-			}
-			if (((bitField0_ & 0x00000100) == 0x00000100)) {
-				size += com.google.protobuf.CodedOutputStream.computeBytesSize(9, data_);
+				size += com.google.protobuf.CodedOutputStream.computeBytesSize(8, data_);
 			}
 			size += getUnknownFields().getSerializedSize();
 			memoizedSerializedSize = size;
@@ -3573,18 +3532,16 @@ public final class ProtobufMessage {
 				bitField0_ = (bitField0_ & ~0x00000002);
 				to_ = "";
 				bitField0_ = (bitField0_ & ~0x00000004);
-				transmitStatus_ = 0;
-				bitField0_ = (bitField0_ & ~0x00000008);
 				fileName_ = "";
-				bitField0_ = (bitField0_ & ~0x00000010);
+				bitField0_ = (bitField0_ & ~0x00000008);
 				fileSize_ = 0L;
-				bitField0_ = (bitField0_ & ~0x00000020);
+				bitField0_ = (bitField0_ & ~0x00000010);
 				fileMd5_ = "";
-				bitField0_ = (bitField0_ & ~0x00000040);
+				bitField0_ = (bitField0_ & ~0x00000020);
 				offset_ = 0;
-				bitField0_ = (bitField0_ & ~0x00000080);
+				bitField0_ = (bitField0_ & ~0x00000040);
 				data_ = com.google.protobuf.ByteString.EMPTY;
-				bitField0_ = (bitField0_ & ~0x00000100);
+				bitField0_ = (bitField0_ & ~0x00000080);
 				return this;
 			}
 
@@ -3627,25 +3584,21 @@ public final class ProtobufMessage {
 				if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
 					to_bitField0_ |= 0x00000008;
 				}
-				result.transmitStatus_ = transmitStatus_;
+				result.fileName_ = fileName_;
 				if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
 					to_bitField0_ |= 0x00000010;
 				}
-				result.fileName_ = fileName_;
+				result.fileSize_ = fileSize_;
 				if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
 					to_bitField0_ |= 0x00000020;
 				}
-				result.fileSize_ = fileSize_;
+				result.fileMd5_ = fileMd5_;
 				if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
 					to_bitField0_ |= 0x00000040;
 				}
-				result.fileMd5_ = fileMd5_;
+				result.offset_ = offset_;
 				if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
 					to_bitField0_ |= 0x00000080;
-				}
-				result.offset_ = offset_;
-				if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
-					to_bitField0_ |= 0x00000100;
 				}
 				result.data_ = data_;
 				result.bitField0_ = to_bitField0_;
@@ -3679,11 +3632,8 @@ public final class ProtobufMessage {
 					to_ = other.to_;
 					onChanged();
 				}
-				if (other.hasTransmitStatus()) {
-					setTransmitStatus(other.getTransmitStatus());
-				}
 				if (other.hasFileName()) {
-					bitField0_ |= 0x00000010;
+					bitField0_ |= 0x00000008;
 					fileName_ = other.fileName_;
 					onChanged();
 				}
@@ -3691,7 +3641,7 @@ public final class ProtobufMessage {
 					setFileSize(other.getFileSize());
 				}
 				if (other.hasFileMd5()) {
-					bitField0_ |= 0x00000040;
+					bitField0_ |= 0x00000020;
 					fileMd5_ = other.fileMd5_;
 					onChanged();
 				}
@@ -3968,55 +3918,18 @@ public final class ProtobufMessage {
 				return this;
 			}
 
-			// optional int32 transmitStatus = 4;
-			private int transmitStatus_;
+			// required string fileName = 4;
+			private java.lang.Object fileName_ = "";
 
 			/**
-			 * <code>optional int32 transmitStatus = 4;</code>
+			 * <code>required string fileName = 4;</code>
 			 */
-			public boolean hasTransmitStatus() {
+			public boolean hasFileName() {
 				return ((bitField0_ & 0x00000008) == 0x00000008);
 			}
 
 			/**
-			 * <code>optional int32 transmitStatus = 4;</code>
-			 */
-			public int getTransmitStatus() {
-				return transmitStatus_;
-			}
-
-			/**
-			 * <code>optional int32 transmitStatus = 4;</code>
-			 */
-			public Builder setTransmitStatus(int value) {
-				bitField0_ |= 0x00000008;
-				transmitStatus_ = value;
-				onChanged();
-				return this;
-			}
-
-			/**
-			 * <code>optional int32 transmitStatus = 4;</code>
-			 */
-			public Builder clearTransmitStatus() {
-				bitField0_ = (bitField0_ & ~0x00000008);
-				transmitStatus_ = 0;
-				onChanged();
-				return this;
-			}
-
-			// required string fileName = 5;
-			private java.lang.Object fileName_ = "";
-
-			/**
-			 * <code>required string fileName = 5;</code>
-			 */
-			public boolean hasFileName() {
-				return ((bitField0_ & 0x00000010) == 0x00000010);
-			}
-
-			/**
-			 * <code>required string fileName = 5;</code>
+			 * <code>required string fileName = 4;</code>
 			 */
 			public java.lang.String getFileName() {
 				java.lang.Object ref = fileName_;
@@ -4030,7 +3943,7 @@ public final class ProtobufMessage {
 			}
 
 			/**
-			 * <code>required string fileName = 5;</code>
+			 * <code>required string fileName = 4;</code>
 			 */
 			public com.google.protobuf.ByteString getFileNameBytes() {
 				java.lang.Object ref = fileName_;
@@ -4044,90 +3957,90 @@ public final class ProtobufMessage {
 			}
 
 			/**
-			 * <code>required string fileName = 5;</code>
+			 * <code>required string fileName = 4;</code>
 			 */
 			public Builder setFileName(java.lang.String value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000010;
+				bitField0_ |= 0x00000008;
 				fileName_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>required string fileName = 5;</code>
+			 * <code>required string fileName = 4;</code>
 			 */
 			public Builder clearFileName() {
-				bitField0_ = (bitField0_ & ~0x00000010);
+				bitField0_ = (bitField0_ & ~0x00000008);
 				fileName_ = getDefaultInstance().getFileName();
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>required string fileName = 5;</code>
+			 * <code>required string fileName = 4;</code>
 			 */
 			public Builder setFileNameBytes(com.google.protobuf.ByteString value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000010;
+				bitField0_ |= 0x00000008;
 				fileName_ = value;
 				onChanged();
 				return this;
 			}
 
-			// required int64 fileSize = 6;
+			// required int64 fileSize = 5;
 			private long fileSize_;
 
 			/**
-			 * <code>required int64 fileSize = 6;</code>
+			 * <code>required int64 fileSize = 5;</code>
 			 */
 			public boolean hasFileSize() {
-				return ((bitField0_ & 0x00000020) == 0x00000020);
+				return ((bitField0_ & 0x00000010) == 0x00000010);
 			}
 
 			/**
-			 * <code>required int64 fileSize = 6;</code>
+			 * <code>required int64 fileSize = 5;</code>
 			 */
 			public long getFileSize() {
 				return fileSize_;
 			}
 
 			/**
-			 * <code>required int64 fileSize = 6;</code>
+			 * <code>required int64 fileSize = 5;</code>
 			 */
 			public Builder setFileSize(long value) {
-				bitField0_ |= 0x00000020;
+				bitField0_ |= 0x00000010;
 				fileSize_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>required int64 fileSize = 6;</code>
+			 * <code>required int64 fileSize = 5;</code>
 			 */
 			public Builder clearFileSize() {
-				bitField0_ = (bitField0_ & ~0x00000020);
+				bitField0_ = (bitField0_ & ~0x00000010);
 				fileSize_ = 0L;
 				onChanged();
 				return this;
 			}
 
-			// optional string fileMd5 = 7;
+			// optional string fileMd5 = 6;
 			private java.lang.Object fileMd5_ = "";
 
 			/**
-			 * <code>optional string fileMd5 = 7;</code>
+			 * <code>optional string fileMd5 = 6;</code>
 			 */
 			public boolean hasFileMd5() {
-				return ((bitField0_ & 0x00000040) == 0x00000040);
+				return ((bitField0_ & 0x00000020) == 0x00000020);
 			}
 
 			/**
-			 * <code>optional string fileMd5 = 7;</code>
+			 * <code>optional string fileMd5 = 6;</code>
 			 */
 			public java.lang.String getFileMd5() {
 				java.lang.Object ref = fileMd5_;
@@ -4141,7 +4054,7 @@ public final class ProtobufMessage {
 			}
 
 			/**
-			 * <code>optional string fileMd5 = 7;</code>
+			 * <code>optional string fileMd5 = 6;</code>
 			 */
 			public com.google.protobuf.ByteString getFileMd5Bytes() {
 				java.lang.Object ref = fileMd5_;
@@ -4155,113 +4068,113 @@ public final class ProtobufMessage {
 			}
 
 			/**
-			 * <code>optional string fileMd5 = 7;</code>
+			 * <code>optional string fileMd5 = 6;</code>
 			 */
 			public Builder setFileMd5(java.lang.String value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000040;
+				bitField0_ |= 0x00000020;
 				fileMd5_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>optional string fileMd5 = 7;</code>
+			 * <code>optional string fileMd5 = 6;</code>
 			 */
 			public Builder clearFileMd5() {
-				bitField0_ = (bitField0_ & ~0x00000040);
+				bitField0_ = (bitField0_ & ~0x00000020);
 				fileMd5_ = getDefaultInstance().getFileMd5();
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>optional string fileMd5 = 7;</code>
+			 * <code>optional string fileMd5 = 6;</code>
 			 */
 			public Builder setFileMd5Bytes(com.google.protobuf.ByteString value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000040;
+				bitField0_ |= 0x00000020;
 				fileMd5_ = value;
 				onChanged();
 				return this;
 			}
 
-			// optional int32 offset = 8;
+			// optional int32 offset = 7;
 			private int offset_;
 
 			/**
-			 * <code>optional int32 offset = 8;</code>
+			 * <code>optional int32 offset = 7;</code>
 			 */
 			public boolean hasOffset() {
-				return ((bitField0_ & 0x00000080) == 0x00000080);
+				return ((bitField0_ & 0x00000040) == 0x00000040);
 			}
 
 			/**
-			 * <code>optional int32 offset = 8;</code>
+			 * <code>optional int32 offset = 7;</code>
 			 */
 			public int getOffset() {
 				return offset_;
 			}
 
 			/**
-			 * <code>optional int32 offset = 8;</code>
+			 * <code>optional int32 offset = 7;</code>
 			 */
 			public Builder setOffset(int value) {
-				bitField0_ |= 0x00000080;
+				bitField0_ |= 0x00000040;
 				offset_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>optional int32 offset = 8;</code>
+			 * <code>optional int32 offset = 7;</code>
 			 */
 			public Builder clearOffset() {
-				bitField0_ = (bitField0_ & ~0x00000080);
+				bitField0_ = (bitField0_ & ~0x00000040);
 				offset_ = 0;
 				onChanged();
 				return this;
 			}
 
-			// optional bytes data = 9;
+			// optional bytes data = 8;
 			private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
 
 			/**
-			 * <code>optional bytes data = 9;</code>
+			 * <code>optional bytes data = 8;</code>
 			 */
 			public boolean hasData() {
-				return ((bitField0_ & 0x00000100) == 0x00000100);
+				return ((bitField0_ & 0x00000080) == 0x00000080);
 			}
 
 			/**
-			 * <code>optional bytes data = 9;</code>
+			 * <code>optional bytes data = 8;</code>
 			 */
 			public com.google.protobuf.ByteString getData() {
 				return data_;
 			}
 
 			/**
-			 * <code>optional bytes data = 9;</code>
+			 * <code>optional bytes data = 8;</code>
 			 */
 			public Builder setData(com.google.protobuf.ByteString value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000100;
+				bitField0_ |= 0x00000080;
 				data_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>optional bytes data = 9;</code>
+			 * <code>optional bytes data = 8;</code>
 			 */
 			public Builder clearData() {
-				bitField0_ = (bitField0_ & ~0x00000100);
+				bitField0_ = (bitField0_ & ~0x00000080);
 				data_ = getDefaultInstance().getData();
 				onChanged();
 				return this;
@@ -4596,10 +4509,11 @@ public final class ProtobufMessage {
 						+ "cess\030\004 \002(\010\022\014\n\004data\030\005 \002(\t\"9\n\005Login\022\014\n\004uui"
 						+ "d\030\001 \002(\t\022\020\n\010username\030\002 \002(\t\022\020\n\010password\030\003 "
 						+ "\002(\t\"<\n\004Chat\022\014\n\004uuid\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022"
-						+ "\n\n\002to\030\003 \002(\t\022\014\n\004data\030\004 \002(\t\"\231\001\n\004File\022\014\n\004uu"
-						+ "id\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022\n\n\002to\030\003 \002(\t\022\026\n\016tr"
-						+ "ansmitStatus\030\004 \001(\005\022\020\n\010fileName\030\005 \002(\t\022\020\n\010" + "fileSize\030\006 \002(\003\022\017\n\007fileMd5\030\007 \001(\t\022\016\n\006offse"
-						+ "t\030\010 \001(\005\022\014\n\004data\030\t \001(\014\"\007\n\005HeartB:\n\'com.ya", "ngc.bridge.comm.protocol.protobufB\017Proto" + "bufMessage" };
+						+ "\n\n\002to\030\003 \002(\t\022\014\n\004data\030\004 \002(\t\"\201\001\n\004File\022\014\n\004uu"
+						+ "id\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022\n\n\002to\030\003 \002(\t\022\020\n\010fi"
+						+ "leName\030\004 \002(\t\022\020\n\010fileSize\030\005 \002(\003\022\017\n\007fileMd"
+						+ "5\030\006 \001(\t\022\016\n\006offset\030\007 \001(\005\022\014\n\004data\030\010 \001(\014\"\007\n" + "\005HeartB:\n\'com.yangc.bridge.comm.protocol",
+				".protobufB\017ProtobufMessage" };
 		com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner = new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
 			public com.google.protobuf.ExtensionRegistry assignDescriptors(com.google.protobuf.Descriptors.FileDescriptor root) {
 				descriptor = root;
@@ -4614,7 +4528,7 @@ public final class ProtobufMessage {
 						"Data", });
 				internal_static_File_descriptor = getDescriptor().getMessageTypes().get(3);
 				internal_static_File_fieldAccessorTable = new com.google.protobuf.GeneratedMessage.FieldAccessorTable(internal_static_File_descriptor, new java.lang.String[] { "Uuid", "From", "To",
-						"TransmitStatus", "FileName", "FileSize", "FileMd5", "Offset", "Data", });
+						"FileName", "FileSize", "FileMd5", "Offset", "Data", });
 				internal_static_Heart_descriptor = getDescriptor().getMessageTypes().get(4);
 				internal_static_Heart_fieldAccessorTable = new com.google.protobuf.GeneratedMessage.FieldAccessorTable(internal_static_Heart_descriptor, new java.lang.String[] {});
 				return null;

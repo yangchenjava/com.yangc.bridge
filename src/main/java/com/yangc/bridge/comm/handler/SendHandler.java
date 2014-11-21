@@ -17,7 +17,6 @@ import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.comm.protocol.TransmitStatus;
 import com.yangc.bridge.comm.protocol.protobuf.ProtobufMessage;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolChat;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
@@ -138,10 +137,9 @@ public class SendHandler implements Runnable {
 			protocol.setUuid(file.getUuid().getBytes(Server.CHARSET_NAME));
 			protocol.setFromLength((short) from.length);
 			protocol.setToLength((short) to.length);
-			protocol.setDataLength(fileName.length + 47 + file.getData().length);
+			protocol.setDataLength(fileName.length + 46 + file.getData().length);
 			protocol.setFrom(from);
 			protocol.setTo(to);
-			protocol.setTransmitStatus(file.getTransmitStatus());
 			protocol.setFileNameLength((short) fileName.length);
 			protocol.setFileName(fileName);
 			protocol.setFileSize(file.getFileSize());
@@ -155,7 +153,6 @@ public class SendHandler implements Runnable {
 			builder.setUuid(file.getUuid());
 			builder.setFrom(file.getFrom());
 			builder.setTo(file.getTo());
-			builder.setTransmitStatus(file.getTransmitStatus());
 			builder.setFileName(file.getFileName());
 			builder.setFileSize(file.getFileSize());
 			builder.setFileMd5(file.getFileMd5());
@@ -198,10 +195,9 @@ public class SendHandler implements Runnable {
 					protocol.setUuid(this.file.getUuid().getBytes(Server.CHARSET_NAME));
 					protocol.setFromLength((short) from.length);
 					protocol.setToLength((short) to.length);
-					protocol.setDataLength(fileName.length + 47 + data.length);
+					protocol.setDataLength(fileName.length + 46 + data.length);
 					protocol.setFrom(from);
 					protocol.setTo(to);
-					protocol.setTransmitStatus(TransmitStatus.OFFLINE);
 					protocol.setFileNameLength((short) fileName.length);
 					protocol.setFileName(fileName);
 					protocol.setFileSize(this.file.getFileSize());
@@ -221,7 +217,6 @@ public class SendHandler implements Runnable {
 					builder.setUuid(this.file.getUuid());
 					builder.setFrom(this.file.getFrom());
 					builder.setTo(this.file.getTo());
-					builder.setTransmitStatus(TransmitStatus.OFFLINE);
 					builder.setFileName(this.file.getFileName());
 					builder.setFileSize(this.file.getFileSize());
 					builder.setFileMd5(this.file.getFileMd5());
