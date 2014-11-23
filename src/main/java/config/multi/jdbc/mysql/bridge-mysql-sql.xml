@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sqlroot>
-	<sql name="" desc="">
+	<sql name="bridge.chat.updateChatStatusByUuid" desc="更新消息为已读">
 	<![CDATA[
+		UPDATE T_BRIDGE_CHAT SET STATUS = 1 WHERE UUID = :uuid
+	]]>
+	</sql>
+
+	<sql name="bridge.chat.getUnreadChatListByTo" desc="更新消息为已读">
+	<![CDATA[
+		SELECT * FROM (
+			SELECT C.ID, C.UUID, C.FROM_USERNAME, C.TO_USERNAME, C.CHAT_TYPE, T.DATA, 0 AS FILE_NAME, 0 AS FILE_SIZE, 0 AS FILE_MD5
+			FROM T_BRIDGE_CHAT C JOIN T_BRIDGE_TEXT T ON T.ID = C.ID
+			WHERE C.STATUS = 0 AND C.TO_USERNAME = :to
+			UNION
+			SELECT C.ID, C.UUID, C.FROM_USERNAME, C.TO_USERNAME, C.CHAT_TYPE, 0 AS DATA, F.FILE_NAME, F.FILE_SIZE, F.FILE_MD5
+			FROM T_BRIDGE_CHAT C JOIN T_BRIDGE_FILE F ON F.ID = C.ID
+			WHERE C.STATUS = 0 AND C.TO_USERNAME = :to
+		) T ORDER BY ID
 	]]>
 	</sql>
 </sqlroot>

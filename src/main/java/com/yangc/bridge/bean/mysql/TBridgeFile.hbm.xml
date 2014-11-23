@@ -9,21 +9,6 @@
 			<column name="ID" precision="22" scale="0" />
 			<generator class="identity" />
 		</id>
-		<property name="uuid" type="java.lang.String">
-			<column name="UUID" length="50">
-				<comment>UUID</comment>
-			</column>
-		</property>
-		<property name="from" type="java.lang.String">
-			<column name="FROM_USERNAME" length="200">
-				<comment>发送者</comment>
-			</column>
-		</property>
-		<property name="to" type="java.lang.String">
-			<column name="TO_USERNAME" length="200">
-				<comment>接收者</comment>
-			</column>
-		</property>
 		<property name="fileName" type="java.lang.String">
 			<column name="FILE_NAME" length="200">
 				<comment>文件名</comment>

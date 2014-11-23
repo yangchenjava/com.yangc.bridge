@@ -9,8 +9,8 @@ import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 import com.yangc.bridge.bean.ResultBean;
-import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
+import com.yangc.bridge.bean.TBridgeText;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Tag;
@@ -95,30 +95,24 @@ public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 	}
 
 	private boolean decodeResult(int position, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-		if (in.remaining() < 44) {
+		if (in.remaining() < 40) {
 			return false;
 		}
 		String uuid = in.getString(36, this.charsetDecoder);
-		short fromLength = in.getShort();
-		short toLength = in.getShort();
 		int dataLength = in.getInt();
-		if (in.remaining() >= fromLength + toLength + 1 + dataLength + 2) {
-			String from = in.getString(fromLength, this.charsetDecoder);
-			String to = in.getString(toLength, this.charsetDecoder);
+		if (in.remaining() >= 1 + dataLength + 2) {
 			if (in.get() == Tag.END) {
 				byte success = in.get();
 				String data = in.getString(dataLength - 1, this.charsetDecoder);
 
 				byte crc = 0;
-				byte[] b = Arrays.copyOfRange(in.array(), position, position + 46 + fromLength + toLength + 1 + dataLength);
+				byte[] b = Arrays.copyOfRange(in.array(), position, position + 43 + dataLength);
 				for (int i = 0; i < b.length; i++) {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Tag.FINAL) {
 					ResultBean result = new ResultBean();
 					result.setUuid(uuid);
-					result.setFrom(from);
-					result.setTo(to);
 					result.setSuccess(success == 0 ? false : true);
 					result.setData(data);
 					out.write(result);
@@ -181,12 +175,12 @@ public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Tag.FINAL) {
-					TBridgeChat chat = new TBridgeChat();
-					chat.setUuid(uuid);
-					chat.setFrom(from);
-					chat.setTo(to);
-					chat.setData(data);
-					out.write(chat);
+					TBridgeText text = new TBridgeText();
+					text.setUuid(uuid);
+					text.setFrom(from);
+					text.setTo(to);
+					text.setData(data);
+					out.write(text);
 				}
 			}
 		} else {

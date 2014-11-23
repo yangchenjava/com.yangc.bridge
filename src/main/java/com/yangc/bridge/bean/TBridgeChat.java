@@ -9,9 +9,8 @@ public class TBridgeChat extends BaseBean {
 	private String uuid;
 	private String from;
 	private String to;
-	private String data;
+	private Long chatType;
 	private Long status;
-	private long millisecond;
 
 	public String getUuid() {
 		return uuid;
@@ -37,12 +36,12 @@ public class TBridgeChat extends BaseBean {
 		this.to = to;
 	}
 
-	public String getData() {
-		return data;
+	public Long getChatType() {
+		return chatType;
 	}
 
-	public void setData(String data) {
-		this.data = data;
+	public void setChatType(Long chatType) {
+		this.chatType = chatType;
 	}
 
 	public Long getStatus() {
@@ -51,14 +50,6 @@ public class TBridgeChat extends BaseBean {
 
 	public void setStatus(Long status) {
 		this.status = status;
-	}
-
-	public long getMillisecond() {
-		return millisecond;
-	}
-
-	public void setMillisecond(long millisecond) {
-		this.millisecond = millisecond;
 	}
 
 }

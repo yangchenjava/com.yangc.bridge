@@ -1,14 +1,9 @@
 package com.yangc.bridge.bean;
 
-import com.yangc.bean.BaseBean;
-
-public class TBridgeFile extends BaseBean {
+public class TBridgeFile extends TBridgeChat {
 
 	private static final long serialVersionUID = 4407463520709519024L;
 
-	private String uuid;
-	private String from;
-	private String to;
 	private String fileName;
 	private Long fileSize;
 	private String fileMd5;
@@ -17,28 +12,8 @@ public class TBridgeFile extends BaseBean {
 	private int offset;
 	private byte[] data;
 
-	public String getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
-
-	public String getFrom() {
-		return from;
-	}
-
-	public void setFrom(String from) {
-		this.from = from;
-	}
-
-	public String getTo() {
-		return to;
-	}
-
-	public void setTo(String to) {
-		this.to = to;
+	public TBridgeFile() {
+		this.setChatType(1L);
 	}
 
 	public String getFileName() {

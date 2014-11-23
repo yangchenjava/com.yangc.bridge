@@ -3,10 +3,8 @@ option java_outer_classname = "ProtobufMessage";
 
 message Result {
 	required string uuid = 1;
-	required string from = 2;
-	required string to = 3;
-	required bool success = 4;
-	required string data = 5;
+	required bool success = 2;
+	required string data = 3;
 }
 
 message Login {

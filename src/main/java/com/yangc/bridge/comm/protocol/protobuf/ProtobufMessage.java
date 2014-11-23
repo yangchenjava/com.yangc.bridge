@@ -30,62 +30,30 @@ public final class ProtobufMessage {
 		 */
 		com.google.protobuf.ByteString getUuidBytes();
 
-		// required string from = 2;
+		// required bool success = 2;
 		/**
-		 * <code>required string from = 2;</code>
-		 */
-		boolean hasFrom();
-
-		/**
-		 * <code>required string from = 2;</code>
-		 */
-		java.lang.String getFrom();
-
-		/**
-		 * <code>required string from = 2;</code>
-		 */
-		com.google.protobuf.ByteString getFromBytes();
-
-		// required string to = 3;
-		/**
-		 * <code>required string to = 3;</code>
-		 */
-		boolean hasTo();
-
-		/**
-		 * <code>required string to = 3;</code>
-		 */
-		java.lang.String getTo();
-
-		/**
-		 * <code>required string to = 3;</code>
-		 */
-		com.google.protobuf.ByteString getToBytes();
-
-		// required bool success = 4;
-		/**
-		 * <code>required bool success = 4;</code>
+		 * <code>required bool success = 2;</code>
 		 */
 		boolean hasSuccess();
 
 		/**
-		 * <code>required bool success = 4;</code>
+		 * <code>required bool success = 2;</code>
 		 */
 		boolean getSuccess();
 
-		// required string data = 5;
+		// required string data = 3;
 		/**
-		 * <code>required string data = 5;</code>
+		 * <code>required string data = 3;</code>
 		 */
 		boolean hasData();
 
 		/**
-		 * <code>required string data = 5;</code>
+		 * <code>required string data = 3;</code>
 		 */
 		java.lang.String getData();
 
 		/**
-		 * <code>required string data = 5;</code>
+		 * <code>required string data = 3;</code>
 		 */
 		com.google.protobuf.ByteString getDataBytes();
 	}
@@ -144,23 +112,13 @@ public final class ProtobufMessage {
 						uuid_ = input.readBytes();
 						break;
 					}
-					case 18: {
+					case 16: {
 						bitField0_ |= 0x00000002;
-						from_ = input.readBytes();
+						success_ = input.readBool();
 						break;
 					}
 					case 26: {
 						bitField0_ |= 0x00000004;
-						to_ = input.readBytes();
-						break;
-					}
-					case 32: {
-						bitField0_ |= 0x00000008;
-						success_ = input.readBool();
-						break;
-					}
-					case 42: {
-						bitField0_ |= 0x00000010;
 						data_ = input.readBytes();
 						break;
 					}
@@ -240,121 +198,37 @@ public final class ProtobufMessage {
 			}
 		}
 
-		// required string from = 2;
-		public static final int FROM_FIELD_NUMBER = 2;
-		private java.lang.Object from_;
+		// required bool success = 2;
+		public static final int SUCCESS_FIELD_NUMBER = 2;
+		private boolean success_;
 
 		/**
-		 * <code>required string from = 2;</code>
+		 * <code>required bool success = 2;</code>
 		 */
-		public boolean hasFrom() {
+		public boolean hasSuccess() {
 			return ((bitField0_ & 0x00000002) == 0x00000002);
 		}
 
 		/**
-		 * <code>required string from = 2;</code>
-		 */
-		public java.lang.String getFrom() {
-			java.lang.Object ref = from_;
-			if (ref instanceof java.lang.String) {
-				return (java.lang.String) ref;
-			} else {
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
-				if (bs.isValidUtf8()) {
-					from_ = s;
-				}
-				return s;
-			}
-		}
-
-		/**
-		 * <code>required string from = 2;</code>
-		 */
-		public com.google.protobuf.ByteString getFromBytes() {
-			java.lang.Object ref = from_;
-			if (ref instanceof java.lang.String) {
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
-				from_ = b;
-				return b;
-			} else {
-				return (com.google.protobuf.ByteString) ref;
-			}
-		}
-
-		// required string to = 3;
-		public static final int TO_FIELD_NUMBER = 3;
-		private java.lang.Object to_;
-
-		/**
-		 * <code>required string to = 3;</code>
-		 */
-		public boolean hasTo() {
-			return ((bitField0_ & 0x00000004) == 0x00000004);
-		}
-
-		/**
-		 * <code>required string to = 3;</code>
-		 */
-		public java.lang.String getTo() {
-			java.lang.Object ref = to_;
-			if (ref instanceof java.lang.String) {
-				return (java.lang.String) ref;
-			} else {
-				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
-				java.lang.String s = bs.toStringUtf8();
-				if (bs.isValidUtf8()) {
-					to_ = s;
-				}
-				return s;
-			}
-		}
-
-		/**
-		 * <code>required string to = 3;</code>
-		 */
-		public com.google.protobuf.ByteString getToBytes() {
-			java.lang.Object ref = to_;
-			if (ref instanceof java.lang.String) {
-				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
-				to_ = b;
-				return b;
-			} else {
-				return (com.google.protobuf.ByteString) ref;
-			}
-		}
-
-		// required bool success = 4;
-		public static final int SUCCESS_FIELD_NUMBER = 4;
-		private boolean success_;
-
-		/**
-		 * <code>required bool success = 4;</code>
-		 */
-		public boolean hasSuccess() {
-			return ((bitField0_ & 0x00000008) == 0x00000008);
-		}
-
-		/**
-		 * <code>required bool success = 4;</code>
+		 * <code>required bool success = 2;</code>
 		 */
 		public boolean getSuccess() {
 			return success_;
 		}
 
-		// required string data = 5;
-		public static final int DATA_FIELD_NUMBER = 5;
+		// required string data = 3;
+		public static final int DATA_FIELD_NUMBER = 3;
 		private java.lang.Object data_;
 
 		/**
-		 * <code>required string data = 5;</code>
+		 * <code>required string data = 3;</code>
 		 */
 		public boolean hasData() {
-			return ((bitField0_ & 0x00000010) == 0x00000010);
+			return ((bitField0_ & 0x00000004) == 0x00000004);
 		}
 
 		/**
-		 * <code>required string data = 5;</code>
+		 * <code>required string data = 3;</code>
 		 */
 		public java.lang.String getData() {
 			java.lang.Object ref = data_;
@@ -371,7 +245,7 @@ public final class ProtobufMessage {
 		}
 
 		/**
-		 * <code>required string data = 5;</code>
+		 * <code>required string data = 3;</code>
 		 */
 		public com.google.protobuf.ByteString getDataBytes() {
 			java.lang.Object ref = data_;
@@ -386,8 +260,6 @@ public final class ProtobufMessage {
 
 		private void initFields() {
 			uuid_ = "";
-			from_ = "";
-			to_ = "";
 			success_ = false;
 			data_ = "";
 		}
@@ -399,14 +271,6 @@ public final class ProtobufMessage {
 			if (isInitialized != -1) return isInitialized == 1;
 
 			if (!hasUuid()) {
-				memoizedIsInitialized = 0;
-				return false;
-			}
-			if (!hasFrom()) {
-				memoizedIsInitialized = 0;
-				return false;
-			}
-			if (!hasTo()) {
 				memoizedIsInitialized = 0;
 				return false;
 			}
@@ -428,16 +292,10 @@ public final class ProtobufMessage {
 				output.writeBytes(1, getUuidBytes());
 			}
 			if (((bitField0_ & 0x00000002) == 0x00000002)) {
-				output.writeBytes(2, getFromBytes());
+				output.writeBool(2, success_);
 			}
 			if (((bitField0_ & 0x00000004) == 0x00000004)) {
-				output.writeBytes(3, getToBytes());
-			}
-			if (((bitField0_ & 0x00000008) == 0x00000008)) {
-				output.writeBool(4, success_);
-			}
-			if (((bitField0_ & 0x00000010) == 0x00000010)) {
-				output.writeBytes(5, getDataBytes());
+				output.writeBytes(3, getDataBytes());
 			}
 			getUnknownFields().writeTo(output);
 		}
@@ -453,16 +311,10 @@ public final class ProtobufMessage {
 				size += com.google.protobuf.CodedOutputStream.computeBytesSize(1, getUuidBytes());
 			}
 			if (((bitField0_ & 0x00000002) == 0x00000002)) {
-				size += com.google.protobuf.CodedOutputStream.computeBytesSize(2, getFromBytes());
+				size += com.google.protobuf.CodedOutputStream.computeBoolSize(2, success_);
 			}
 			if (((bitField0_ & 0x00000004) == 0x00000004)) {
-				size += com.google.protobuf.CodedOutputStream.computeBytesSize(3, getToBytes());
-			}
-			if (((bitField0_ & 0x00000008) == 0x00000008)) {
-				size += com.google.protobuf.CodedOutputStream.computeBoolSize(4, success_);
-			}
-			if (((bitField0_ & 0x00000010) == 0x00000010)) {
-				size += com.google.protobuf.CodedOutputStream.computeBytesSize(5, getDataBytes());
+				size += com.google.protobuf.CodedOutputStream.computeBytesSize(3, getDataBytes());
 			}
 			size += getUnknownFields().getSerializedSize();
 			memoizedSerializedSize = size;
@@ -579,14 +431,10 @@ public final class ProtobufMessage {
 				super.clear();
 				uuid_ = "";
 				bitField0_ = (bitField0_ & ~0x00000001);
-				from_ = "";
-				bitField0_ = (bitField0_ & ~0x00000002);
-				to_ = "";
-				bitField0_ = (bitField0_ & ~0x00000004);
 				success_ = false;
-				bitField0_ = (bitField0_ & ~0x00000008);
+				bitField0_ = (bitField0_ & ~0x00000002);
 				data_ = "";
-				bitField0_ = (bitField0_ & ~0x00000010);
+				bitField0_ = (bitField0_ & ~0x00000004);
 				return this;
 			}
 
@@ -621,17 +469,9 @@ public final class ProtobufMessage {
 				if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
 					to_bitField0_ |= 0x00000002;
 				}
-				result.from_ = from_;
+				result.success_ = success_;
 				if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
 					to_bitField0_ |= 0x00000004;
-				}
-				result.to_ = to_;
-				if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-					to_bitField0_ |= 0x00000008;
-				}
-				result.success_ = success_;
-				if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-					to_bitField0_ |= 0x00000010;
 				}
 				result.data_ = data_;
 				result.bitField0_ = to_bitField0_;
@@ -655,21 +495,11 @@ public final class ProtobufMessage {
 					uuid_ = other.uuid_;
 					onChanged();
 				}
-				if (other.hasFrom()) {
-					bitField0_ |= 0x00000002;
-					from_ = other.from_;
-					onChanged();
-				}
-				if (other.hasTo()) {
-					bitField0_ |= 0x00000004;
-					to_ = other.to_;
-					onChanged();
-				}
 				if (other.hasSuccess()) {
 					setSuccess(other.getSuccess());
 				}
 				if (other.hasData()) {
-					bitField0_ |= 0x00000010;
+					bitField0_ |= 0x00000004;
 					data_ = other.data_;
 					onChanged();
 				}
@@ -679,14 +509,6 @@ public final class ProtobufMessage {
 
 			public final boolean isInitialized() {
 				if (!hasUuid()) {
-
-					return false;
-				}
-				if (!hasFrom()) {
-
-					return false;
-				}
-				if (!hasTo()) {
 
 					return false;
 				}
@@ -792,203 +614,55 @@ public final class ProtobufMessage {
 				return this;
 			}
 
-			// required string from = 2;
-			private java.lang.Object from_ = "";
+			// required bool success = 2;
+			private boolean success_;
 
 			/**
-			 * <code>required string from = 2;</code>
+			 * <code>required bool success = 2;</code>
 			 */
-			public boolean hasFrom() {
+			public boolean hasSuccess() {
 				return ((bitField0_ & 0x00000002) == 0x00000002);
 			}
 
 			/**
-			 * <code>required string from = 2;</code>
-			 */
-			public java.lang.String getFrom() {
-				java.lang.Object ref = from_;
-				if (!(ref instanceof java.lang.String)) {
-					java.lang.String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-					from_ = s;
-					return s;
-				} else {
-					return (java.lang.String) ref;
-				}
-			}
-
-			/**
-			 * <code>required string from = 2;</code>
-			 */
-			public com.google.protobuf.ByteString getFromBytes() {
-				java.lang.Object ref = from_;
-				if (ref instanceof String) {
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
-					from_ = b;
-					return b;
-				} else {
-					return (com.google.protobuf.ByteString) ref;
-				}
-			}
-
-			/**
-			 * <code>required string from = 2;</code>
-			 */
-			public Builder setFrom(java.lang.String value) {
-				if (value == null) {
-					throw new NullPointerException();
-				}
-				bitField0_ |= 0x00000002;
-				from_ = value;
-				onChanged();
-				return this;
-			}
-
-			/**
-			 * <code>required string from = 2;</code>
-			 */
-			public Builder clearFrom() {
-				bitField0_ = (bitField0_ & ~0x00000002);
-				from_ = getDefaultInstance().getFrom();
-				onChanged();
-				return this;
-			}
-
-			/**
-			 * <code>required string from = 2;</code>
-			 */
-			public Builder setFromBytes(com.google.protobuf.ByteString value) {
-				if (value == null) {
-					throw new NullPointerException();
-				}
-				bitField0_ |= 0x00000002;
-				from_ = value;
-				onChanged();
-				return this;
-			}
-
-			// required string to = 3;
-			private java.lang.Object to_ = "";
-
-			/**
-			 * <code>required string to = 3;</code>
-			 */
-			public boolean hasTo() {
-				return ((bitField0_ & 0x00000004) == 0x00000004);
-			}
-
-			/**
-			 * <code>required string to = 3;</code>
-			 */
-			public java.lang.String getTo() {
-				java.lang.Object ref = to_;
-				if (!(ref instanceof java.lang.String)) {
-					java.lang.String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-					to_ = s;
-					return s;
-				} else {
-					return (java.lang.String) ref;
-				}
-			}
-
-			/**
-			 * <code>required string to = 3;</code>
-			 */
-			public com.google.protobuf.ByteString getToBytes() {
-				java.lang.Object ref = to_;
-				if (ref instanceof String) {
-					com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
-					to_ = b;
-					return b;
-				} else {
-					return (com.google.protobuf.ByteString) ref;
-				}
-			}
-
-			/**
-			 * <code>required string to = 3;</code>
-			 */
-			public Builder setTo(java.lang.String value) {
-				if (value == null) {
-					throw new NullPointerException();
-				}
-				bitField0_ |= 0x00000004;
-				to_ = value;
-				onChanged();
-				return this;
-			}
-
-			/**
-			 * <code>required string to = 3;</code>
-			 */
-			public Builder clearTo() {
-				bitField0_ = (bitField0_ & ~0x00000004);
-				to_ = getDefaultInstance().getTo();
-				onChanged();
-				return this;
-			}
-
-			/**
-			 * <code>required string to = 3;</code>
-			 */
-			public Builder setToBytes(com.google.protobuf.ByteString value) {
-				if (value == null) {
-					throw new NullPointerException();
-				}
-				bitField0_ |= 0x00000004;
-				to_ = value;
-				onChanged();
-				return this;
-			}
-
-			// required bool success = 4;
-			private boolean success_;
-
-			/**
-			 * <code>required bool success = 4;</code>
-			 */
-			public boolean hasSuccess() {
-				return ((bitField0_ & 0x00000008) == 0x00000008);
-			}
-
-			/**
-			 * <code>required bool success = 4;</code>
+			 * <code>required bool success = 2;</code>
 			 */
 			public boolean getSuccess() {
 				return success_;
 			}
 
 			/**
-			 * <code>required bool success = 4;</code>
+			 * <code>required bool success = 2;</code>
 			 */
 			public Builder setSuccess(boolean value) {
-				bitField0_ |= 0x00000008;
+				bitField0_ |= 0x00000002;
 				success_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>required bool success = 4;</code>
+			 * <code>required bool success = 2;</code>
 			 */
 			public Builder clearSuccess() {
-				bitField0_ = (bitField0_ & ~0x00000008);
+				bitField0_ = (bitField0_ & ~0x00000002);
 				success_ = false;
 				onChanged();
 				return this;
 			}
 
-			// required string data = 5;
+			// required string data = 3;
 			private java.lang.Object data_ = "";
 
 			/**
-			 * <code>required string data = 5;</code>
+			 * <code>required string data = 3;</code>
 			 */
 			public boolean hasData() {
-				return ((bitField0_ & 0x00000010) == 0x00000010);
+				return ((bitField0_ & 0x00000004) == 0x00000004);
 			}
 
 			/**
-			 * <code>required string data = 5;</code>
+			 * <code>required string data = 3;</code>
 			 */
 			public java.lang.String getData() {
 				java.lang.Object ref = data_;
@@ -1002,7 +676,7 @@ public final class ProtobufMessage {
 			}
 
 			/**
-			 * <code>required string data = 5;</code>
+			 * <code>required string data = 3;</code>
 			 */
 			public com.google.protobuf.ByteString getDataBytes() {
 				java.lang.Object ref = data_;
@@ -1016,36 +690,36 @@ public final class ProtobufMessage {
 			}
 
 			/**
-			 * <code>required string data = 5;</code>
+			 * <code>required string data = 3;</code>
 			 */
 			public Builder setData(java.lang.String value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000010;
+				bitField0_ |= 0x00000004;
 				data_ = value;
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>required string data = 5;</code>
+			 * <code>required string data = 3;</code>
 			 */
 			public Builder clearData() {
-				bitField0_ = (bitField0_ & ~0x00000010);
+				bitField0_ = (bitField0_ & ~0x00000004);
 				data_ = getDefaultInstance().getData();
 				onChanged();
 				return this;
 			}
 
 			/**
-			 * <code>required string data = 5;</code>
+			 * <code>required string data = 3;</code>
 			 */
 			public Builder setDataBytes(com.google.protobuf.ByteString value) {
 				if (value == null) {
 					throw new NullPointerException();
 				}
-				bitField0_ |= 0x00000010;
+				bitField0_ |= 0x00000004;
 				data_ = value;
 				onChanged();
 				return this;
@@ -4504,22 +4178,20 @@ public final class ProtobufMessage {
 
 	private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
 	static {
-		java.lang.String[] descriptorData = {
-				"\n\025ProtobufMessage.proto\"O\n\006Result\022\014\n\004uui" + "d\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022\n\n\002to\030\003 \002(\t\022\017\n\007suc"
-						+ "cess\030\004 \002(\010\022\014\n\004data\030\005 \002(\t\"9\n\005Login\022\014\n\004uui"
-						+ "d\030\001 \002(\t\022\020\n\010username\030\002 \002(\t\022\020\n\010password\030\003 "
-						+ "\002(\t\"<\n\004Chat\022\014\n\004uuid\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022"
-						+ "\n\n\002to\030\003 \002(\t\022\014\n\004data\030\004 \002(\t\"\201\001\n\004File\022\014\n\004uu"
-						+ "id\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022\n\n\002to\030\003 \002(\t\022\020\n\010fi"
-						+ "leName\030\004 \002(\t\022\020\n\010fileSize\030\005 \002(\003\022\017\n\007fileMd"
-						+ "5\030\006 \001(\t\022\016\n\006offset\030\007 \001(\005\022\014\n\004data\030\010 \001(\014\"\007\n" + "\005HeartB:\n\'com.yangc.bridge.comm.protocol",
-				".protobufB\017ProtobufMessage" };
+		java.lang.String[] descriptorData = { "\n\025ProtobufMessage.proto\"5\n\006Result\022\014\n\004uui"
+				+ "d\030\001 \002(\t\022\017\n\007success\030\002 \002(\010\022\014\n\004data\030\003 \002(\t\"9"
+				+ "\n\005Login\022\014\n\004uuid\030\001 \002(\t\022\020\n\010username\030\002 \002(\t\022" + "\020\n\010password\030\003 \002(\t\"<\n\004Chat\022\014\n\004uuid\030\001 \002(\t\022"
+				+ "\014\n\004from\030\002 \002(\t\022\n\n\002to\030\003 \002(\t\022\014\n\004data\030\004 \002(\t\""
+				+ "\201\001\n\004File\022\014\n\004uuid\030\001 \002(\t\022\014\n\004from\030\002 \002(\t\022\n\n\002"
+				+ "to\030\003 \002(\t\022\020\n\010fileName\030\004 \002(\t\022\020\n\010fileSize\030\005"
+				+ " \002(\003\022\017\n\007fileMd5\030\006 \001(\t\022\016\n\006offset\030\007 \001(\005\022\014\n" + "\004data\030\010 \001(\014\"\007\n\005HeartB:\n\'com.yangc.bridge"
+				+ ".comm.protocol.protobufB\017ProtobufMessage" };
 		com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner = new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
 			public com.google.protobuf.ExtensionRegistry assignDescriptors(com.google.protobuf.Descriptors.FileDescriptor root) {
 				descriptor = root;
 				internal_static_Result_descriptor = getDescriptor().getMessageTypes().get(0);
-				internal_static_Result_fieldAccessorTable = new com.google.protobuf.GeneratedMessage.FieldAccessorTable(internal_static_Result_descriptor, new java.lang.String[] { "Uuid", "From",
-						"To", "Success", "Data", });
+				internal_static_Result_fieldAccessorTable = new com.google.protobuf.GeneratedMessage.FieldAccessorTable(internal_static_Result_descriptor, new java.lang.String[] { "Uuid", "Success",
+						"Data", });
 				internal_static_Login_descriptor = getDescriptor().getMessageTypes().get(1);
 				internal_static_Login_fieldAccessorTable = new com.google.protobuf.GeneratedMessage.FieldAccessorTable(internal_static_Login_descriptor, new java.lang.String[] { "Uuid", "Username",
 						"Password", });

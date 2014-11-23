@@ -26,14 +26,19 @@
 				<comment>接收人</comment>
 			</column>
 		</property>
-		<property name="data" type="java.lang.String">
-			<column name="DATA" length="1000">
-				<comment>消息内容</comment>
+		<property name="chatType" type="java.lang.Long">
+			<column name="CHAT_TYPE" precision="1" scale="0">
+				<comment>消息类型:0文本;1文件</comment>
 			</column>
 		</property>
 		<property name="status" type="java.lang.Long">
 			<column name="STATUS" precision="1" scale="0">
 				<comment>消息状态:0未读;1已读</comment>
+			</column>
+		</property>
+		<property name="createTime" type="java.util.Date">
+			<column name="CREATE_TIME" length="7">
+				<comment>创建时间</comment>
 			</column>
 		</property>
 	</class>

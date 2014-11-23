@@ -8,8 +8,8 @@ import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 import com.yangc.bridge.bean.ResultBean;
-import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
+import com.yangc.bridge.bean.TBridgeText;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Tag;
@@ -106,8 +106,6 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 			if (in.get() == crc && in.get() == Tag.FINAL) {
 				ResultBean result = new ResultBean();
 				result.setUuid(message.getUuid());
-				result.setFrom(message.getFrom());
-				result.setTo(message.getTo());
 				result.setSuccess(message.getSuccess());
 				result.setData(message.getData());
 				out.write(result);
@@ -162,12 +160,12 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 				crc += b[i];
 			}
 			if (in.get() == crc && in.get() == Tag.FINAL) {
-				TBridgeChat chat = new TBridgeChat();
-				chat.setUuid(message.getUuid());
-				chat.setFrom(message.getFrom());
-				chat.setTo(message.getTo());
-				chat.setData(message.getData());
-				out.write(chat);
+				TBridgeText text = new TBridgeText();
+				text.setUuid(message.getUuid());
+				text.setFrom(message.getFrom());
+				text.setTo(message.getTo());
+				text.setData(message.getData());
+				out.write(text);
 			}
 		} else {
 			return false;
