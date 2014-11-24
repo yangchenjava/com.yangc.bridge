@@ -10,7 +10,7 @@ public class TBridgeChat extends BaseBean {
 	private String from;
 	private String to;
 	private Long chatType;
-	private Long status;
+	private Long status = 0L;
 
 	public String getUuid() {
 		return uuid;

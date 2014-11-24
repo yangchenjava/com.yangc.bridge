@@ -11,6 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.io.FileUtils;
 import org.apache.mina.core.service.IoService;
 import org.apache.mina.core.session.IoSession;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,36 +76,32 @@ public class TextAndFileProcessor {
 			}
 		}
 
+		private void saveChat(TBridgeChat chat) {
+			TBridgeChat c = new TBridgeChat();
+			BeanUtils.copyProperties(chat, c);
+			chatService.addChat(c);
+			chat.setId(c.getId());
+		}
+
 		@Override
 		public void run() {
-			try {
-				Long toSessionId = sessionCache.getSessionId(this.toUsername);
-				LinkedBlockingQueue<TBridgeChat> queue = CHAT_QUEUE.get(this.toUsername);
-				while (true) {
+			Long toSessionId = sessionCache.getSessionId(this.toUsername);
+			LinkedBlockingQueue<TBridgeChat> queue = CHAT_QUEUE.get(this.toUsername);
+			while (true) {
+				try {
 					while (!queue.isEmpty()) {
 						TBridgeChat chat = queue.poll();
 						if (chat instanceof TBridgeText) {
+							this.sendResult(chat);
+							this.saveChat(chat);
+
 							TBridgeText text = (TBridgeText) chat;
+							chatService.addText(text);
 							if (toSessionId != null) {
 								SendHandler.sendChat(this.service.getManagedSessions().get(toSessionId), text);
 							}
-
-							this.sendResult(chat);
-							chatService.addChat(chat);
-							chatService.addText(text);
 						} else {
 							TBridgeFile file = (TBridgeFile) chat;
-							if (toSessionId != null) {
-								switch (file.getContentType()) {
-								case ContentType.READY_FILE:
-									SendHandler.sendReadyFile(this.service.getManagedSessions().get(toSessionId), file);
-									break;
-								case ContentType.TRANSMIT_FILE:
-									SendHandler.sendTransmitFile(this.service.getManagedSessions().get(toSessionId), file);
-									break;
-								}
-							}
-
 							if (file.getContentType() == ContentType.TRANSMIT_FILE) {
 								File dir = new File(FileUtils.getTempDirectory(), "com.yangc.bridge/" + this.toUsername);
 								if (!dir.exists() || !dir.isDirectory()) {
@@ -122,21 +119,32 @@ public class TextAndFileProcessor {
 
 								if (targetFile.length() == file.getFileSize() && Md5Utils.getMD5String(targetFile).equals(file.getFileMd5())) {
 									this.sendResult(chat);
-									chatService.addChat(chat);
+									this.saveChat(chat);
 									chatService.addFile(file);
+								}
+							}
+
+							if (toSessionId != null) {
+								switch (file.getContentType()) {
+								case ContentType.READY_FILE:
+									SendHandler.sendReadyFile(this.service.getManagedSessions().get(toSessionId), file);
+									break;
+								case ContentType.TRANSMIT_FILE:
+									SendHandler.sendTransmitFile(this.service.getManagedSessions().get(toSessionId), file);
+									break;
 								}
 							}
 						}
 					}
-					synchronized (CHAT_QUEUE) {
-						if (queue.isEmpty()) {
-							CHAT_QUEUE.remove(this.toUsername);
-							break;
-						}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				synchronized (CHAT_QUEUE) {
+					if (queue.isEmpty()) {
+						CHAT_QUEUE.remove(this.toUsername);
+						break;
 					}
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 	}

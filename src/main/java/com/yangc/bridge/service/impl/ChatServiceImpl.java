@@ -66,6 +66,7 @@ public class ChatServiceImpl implements ChatService {
 				text.setFrom(MapUtils.getString(map, "FROM_USERNAME"));
 				text.setTo(MapUtils.getString(map, "TO_USERNAME"));
 				text.setData(MapUtils.getString(map, "DATA"));
+				chats.add(text);
 			} else if (chatType == 1) {
 				TBridgeFile file = new TBridgeFile();
 				file.setId(MapUtils.getLong(map, "ID"));

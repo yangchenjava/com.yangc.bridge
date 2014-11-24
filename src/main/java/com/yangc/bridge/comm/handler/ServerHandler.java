@@ -8,6 +8,7 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeFile;
@@ -18,6 +19,7 @@ import com.yangc.bridge.comm.handler.processor.LoginProcessor;
 import com.yangc.bridge.comm.handler.processor.ResultProcessor;
 import com.yangc.bridge.comm.handler.processor.TextAndFileProcessor;
 
+@Service
 public class ServerHandler extends IoHandlerAdapter {
 
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
