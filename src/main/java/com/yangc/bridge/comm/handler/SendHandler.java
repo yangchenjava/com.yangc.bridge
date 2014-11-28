@@ -12,8 +12,8 @@ import org.apache.mina.core.session.IoSession;
 
 import com.google.protobuf.ByteString;
 import com.yangc.bridge.bean.ResultBean;
-import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.protobuf.ProtobufMessage;
@@ -57,15 +57,15 @@ public class SendHandler implements Runnable {
 		}
 	}
 
-	public static void sendChat(IoSession session, TBridgeChat text) throws Exception {
+	public static void sendChat(IoSession session, TBridgeChat chat) throws Exception {
 		if (StringUtils.equals(Server.CODEC, "prototype")) {
-			byte[] from = text.getFrom().getBytes(Server.CHARSET_NAME);
-			byte[] to = text.getTo().getBytes(Server.CHARSET_NAME);
-			byte[] data = text.getData().getBytes(Server.CHARSET_NAME);
+			byte[] from = chat.getFrom().getBytes(Server.CHARSET_NAME);
+			byte[] to = chat.getTo().getBytes(Server.CHARSET_NAME);
+			byte[] data = chat.getData().getBytes(Server.CHARSET_NAME);
 
 			ProtocolChat protocol = new ProtocolChat();
 			protocol.setContentType(ContentType.CHAT);
-			protocol.setUuid(text.getUuid().getBytes(Server.CHARSET_NAME));
+			protocol.setUuid(chat.getUuid().getBytes(Server.CHARSET_NAME));
 			protocol.setFromLength((short) from.length);
 			protocol.setToLength((short) to.length);
 			protocol.setDataLength(data.length);
@@ -76,10 +76,10 @@ public class SendHandler implements Runnable {
 			session.write(protocol);
 		} else {
 			ProtobufMessage.Chat.Builder builder = ProtobufMessage.Chat.newBuilder();
-			builder.setUuid(text.getUuid());
-			builder.setFrom(text.getFrom());
-			builder.setTo(text.getTo());
-			builder.setData(text.getData());
+			builder.setUuid(chat.getUuid());
+			builder.setFrom(chat.getFrom());
+			builder.setTo(chat.getTo());
+			builder.setData(chat.getData());
 
 			session.write(builder.build());
 		}
