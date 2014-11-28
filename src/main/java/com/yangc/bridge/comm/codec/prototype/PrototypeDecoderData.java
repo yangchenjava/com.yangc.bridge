@@ -9,8 +9,8 @@ import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 import com.yangc.bridge.bean.ResultBean;
+import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeFile;
-import com.yangc.bridge.bean.TBridgeText;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.Tag;
@@ -175,12 +175,12 @@ public class PrototypeDecoderData extends CumulativeProtocolDecoder {
 					crc += b[i];
 				}
 				if (in.get() == crc && in.get() == Tag.FINAL) {
-					TBridgeText text = new TBridgeText();
-					text.setUuid(uuid);
-					text.setFrom(from);
-					text.setTo(to);
-					text.setData(data);
-					out.write(text);
+					TBridgeChat chat = new TBridgeChat();
+					chat.setUuid(uuid);
+					chat.setFrom(from);
+					chat.setTo(to);
+					chat.setData(data);
+					out.write(chat);
 				}
 			}
 		} else {

@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.handler.ServerHandler;
-import com.yangc.bridge.service.ChatService;
+import com.yangc.bridge.service.CommonService;
 
 @Service
 public class ResultProcessor {
 
 	@Autowired
-	private ChatService chatService;
+	private CommonService commonService;
 
 	private ThreadPoolExecutor threadPool;
 
@@ -47,7 +47,7 @@ public class ResultProcessor {
 			try {
 				if (this.result.isSuccess()) {
 					String uuid = this.result.getUuid();
-					chatService.updateChatStatusByUuid(uuid);
+					commonService.updateCommonStatusByUuid(uuid);
 					File file = new File(FileUtils.getTempDirectoryPath() + "/com.yangc.bridge/" + this.username + "/" + uuid);
 					if (file.exists()) {
 						file.delete();

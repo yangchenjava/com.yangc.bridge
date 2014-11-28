@@ -17,40 +17,40 @@ import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeCommon;
 import com.yangc.bridge.bean.TBridgeFile;
-import com.yangc.bridge.bean.TBridgeText;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.handler.SendHandler;
 import com.yangc.bridge.comm.protocol.ContentType;
-import com.yangc.bridge.service.ChatService;
+import com.yangc.bridge.service.CommonService;
 import com.yangc.utils.encryption.Md5Utils;
 
 @Service
-public class TextAndFileProcessor {
+public class ChatAndFileProcessor {
 
-	private static final Map<String, LinkedBlockingQueue<TBridgeChat>> CHAT_QUEUE = new HashMap<String, LinkedBlockingQueue<TBridgeChat>>();
+	private static final Map<String, LinkedBlockingQueue<TBridgeCommon>> COMMON_QUEUE = new HashMap<String, LinkedBlockingQueue<TBridgeCommon>>();
 
 	@Autowired
 	private SessionCache sessionCache;
 	@Autowired
-	private ChatService chatService;
+	private CommonService commonService;
 
 	private ExecutorService executorService;
 
-	public TextAndFileProcessor() {
+	public ChatAndFileProcessor() {
 		this.executorService = Executors.newCachedThreadPool();
 	}
 
-	public void process(IoSession session, TBridgeChat chat) throws InterruptedException {
-		String toUsername = chat.getTo();
-		synchronized (CHAT_QUEUE) {
-			if (CHAT_QUEUE.containsKey(toUsername)) {
-				LinkedBlockingQueue<TBridgeChat> queue = CHAT_QUEUE.get(toUsername);
-				queue.put(chat);
+	public void process(IoSession session, TBridgeCommon common) throws InterruptedException {
+		String toUsername = common.getTo();
+		synchronized (COMMON_QUEUE) {
+			if (COMMON_QUEUE.containsKey(toUsername)) {
+				LinkedBlockingQueue<TBridgeCommon> queue = COMMON_QUEUE.get(toUsername);
+				queue.put(common);
 			} else {
-				LinkedBlockingQueue<TBridgeChat> queue = new LinkedBlockingQueue<TBridgeChat>();
-				queue.put(chat);
-				CHAT_QUEUE.put(toUsername, queue);
+				LinkedBlockingQueue<TBridgeCommon> queue = new LinkedBlockingQueue<TBridgeCommon>();
+				queue.put(common);
+				COMMON_QUEUE.put(toUsername, queue);
 				this.executorService.execute(new Task(session.getService(), toUsername));
 			}
 		}
@@ -65,43 +65,43 @@ public class TextAndFileProcessor {
 			this.toUsername = toUsername;
 		}
 
-		private void sendResult(TBridgeChat chat) throws Exception {
-			Long fromSessionId = sessionCache.getSessionId(chat.getFrom());
+		private void sendResult(TBridgeCommon common) throws Exception {
+			Long fromSessionId = sessionCache.getSessionId(common.getFrom());
 			if (fromSessionId != null) {
 				ResultBean result = new ResultBean();
-				result.setUuid(chat.getUuid());
+				result.setUuid(common.getUuid());
 				result.setSuccess(true);
 				result.setData("success");
 				SendHandler.sendResult(this.service.getManagedSessions().get(fromSessionId), result);
 			}
 		}
 
-		private void saveChat(TBridgeChat chat) {
-			TBridgeChat c = new TBridgeChat();
-			BeanUtils.copyProperties(chat, c);
-			chatService.addChat(c);
-			chat.setId(c.getId());
+		private void saveChat(TBridgeCommon common) {
+			TBridgeCommon c = new TBridgeCommon();
+			BeanUtils.copyProperties(common, c);
+			commonService.addCommon(c);
+			common.setId(c.getId());
 		}
 
 		@Override
 		public void run() {
 			Long toSessionId = sessionCache.getSessionId(this.toUsername);
-			LinkedBlockingQueue<TBridgeChat> queue = CHAT_QUEUE.get(this.toUsername);
+			LinkedBlockingQueue<TBridgeCommon> queue = COMMON_QUEUE.get(this.toUsername);
 			while (true) {
 				try {
 					while (!queue.isEmpty()) {
-						TBridgeChat chat = queue.poll();
-						if (chat instanceof TBridgeText) {
-							this.sendResult(chat);
-							this.saveChat(chat);
+						TBridgeCommon common = queue.poll();
+						if (common instanceof TBridgeChat) {
+							this.sendResult(common);
+							this.saveChat(common);
 
-							TBridgeText text = (TBridgeText) chat;
-							chatService.addText(text);
+							TBridgeChat chat = (TBridgeChat) common;
+							commonService.addChat(chat);
 							if (toSessionId != null) {
-								SendHandler.sendChat(this.service.getManagedSessions().get(toSessionId), text);
+								SendHandler.sendChat(this.service.getManagedSessions().get(toSessionId), chat);
 							}
 						} else {
-							TBridgeFile file = (TBridgeFile) chat;
+							TBridgeFile file = (TBridgeFile) common;
 							if (file.getContentType() == ContentType.TRANSMIT_FILE) {
 								File dir = new File(FileUtils.getTempDirectory(), "com.yangc.bridge/" + this.toUsername);
 								if (!dir.exists() || !dir.isDirectory()) {
@@ -118,9 +118,9 @@ public class TextAndFileProcessor {
 								raf.close();
 
 								if (targetFile.length() == file.getFileSize() && Md5Utils.getMD5String(targetFile).equals(file.getFileMd5())) {
-									this.sendResult(chat);
-									this.saveChat(chat);
-									chatService.addFile(file);
+									this.sendResult(common);
+									this.saveChat(common);
+									commonService.addFile(file);
 								}
 							}
 
@@ -139,9 +139,9 @@ public class TextAndFileProcessor {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				synchronized (CHAT_QUEUE) {
+				synchronized (COMMON_QUEUE) {
 					if (queue.isEmpty()) {
-						CHAT_QUEUE.remove(this.toUsername);
+						COMMON_QUEUE.remove(this.toUsername);
 						break;
 					}
 				}

@@ -1,55 +1,21 @@
 package com.yangc.bridge.bean;
 
-import com.yangc.bean.BaseBean;
+public class TBridgeChat extends TBridgeCommon {
 
-public class TBridgeChat extends BaseBean {
+	private static final long serialVersionUID = 4407463520709519024L;
 
-	private static final long serialVersionUID = -8248931483988118867L;
+	private String data;
 
-	private String uuid;
-	private String from;
-	private String to;
-	private Long chatType;
-	private Long status = 0L;
-
-	public String getUuid() {
-		return uuid;
+	public TBridgeChat() {
+		this.setType(0L);
 	}
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
+	public String getData() {
+		return data;
 	}
 
-	public String getFrom() {
-		return from;
-	}
-
-	public void setFrom(String from) {
-		this.from = from;
-	}
-
-	public String getTo() {
-		return to;
-	}
-
-	public void setTo(String to) {
-		this.to = to;
-	}
-
-	public Long getChatType() {
-		return chatType;
-	}
-
-	public void setChatType(Long chatType) {
-		this.chatType = chatType;
-	}
-
-	public Long getStatus() {
-		return status;
-	}
-
-	public void setStatus(Long status) {
-		this.status = status;
+	public void setData(String data) {
+		this.data = data;
 	}
 
 }

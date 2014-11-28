@@ -11,14 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeCommon;
 import com.yangc.bridge.bean.TBridgeFile;
-import com.yangc.bridge.bean.TBridgeText;
-import com.yangc.bridge.service.ChatService;
+import com.yangc.bridge.service.CommonService;
 import com.yangc.dao.BaseDao;
 import com.yangc.dao.JdbcDao;
 
 @Service
-public class ChatServiceImpl implements ChatService {
+public class CommonServiceImpl implements CommonService {
 
 	@Autowired
 	private BaseDao baseDao;
@@ -26,13 +26,13 @@ public class ChatServiceImpl implements ChatService {
 	private JdbcDao jdbcDao;
 
 	@Override
-	public void addChat(TBridgeChat chat) {
-		this.baseDao.save(chat);
+	public void addCommon(TBridgeCommon common) {
+		this.baseDao.save(common);
 	}
 
 	@Override
-	public void addText(TBridgeText text) {
-		this.baseDao.save(text);
+	public void addChat(TBridgeChat chat) {
+		this.baseDao.save(chat);
 	}
 
 	@Override
@@ -41,33 +41,33 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public void updateChatStatusByUuid(String uuid) {
-		String sql = JdbcDao.SQL_MAPPING.get("bridge.chat.updateChatStatusByUuid");
+	public void updateCommonStatusByUuid(String uuid) {
+		String sql = JdbcDao.SQL_MAPPING.get("bridge.common.updateCommonStatusByUuid");
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("uuid", uuid);
 		this.jdbcDao.saveOrUpdate(sql, paramMap);
 	}
 
 	@Override
-	public List<TBridgeChat> getUnreadChatListByTo(String to) {
-		String sql = JdbcDao.SQL_MAPPING.get("bridge.chat.getUnreadChatListByTo");
+	public List<TBridgeCommon> getUnreadCommonListByTo(String to) {
+		String sql = JdbcDao.SQL_MAPPING.get("bridge.common.getUnreadCommonListByTo");
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("to", to);
 		List<Map<String, Object>> mapList = this.jdbcDao.findAll(sql, paramMap);
 		if (CollectionUtils.isEmpty(mapList)) return null;
 
-		List<TBridgeChat> chats = new ArrayList<TBridgeChat>();
+		List<TBridgeCommon> chats = new ArrayList<TBridgeCommon>();
 		for (Map<String, Object> map : mapList) {
-			Long chatType = MapUtils.getLong(map, "CHAT_TYPE");
-			if (chatType == 0) {
-				TBridgeText text = new TBridgeText();
+			Long type = MapUtils.getLong(map, "TYPE");
+			if (type == 0) {
+				TBridgeChat text = new TBridgeChat();
 				text.setId(MapUtils.getLong(map, "ID"));
 				text.setUuid(MapUtils.getString(map, "UUID"));
 				text.setFrom(MapUtils.getString(map, "FROM_USERNAME"));
 				text.setTo(MapUtils.getString(map, "TO_USERNAME"));
 				text.setData(MapUtils.getString(map, "DATA"));
 				chats.add(text);
-			} else if (chatType == 1) {
+			} else if (type == 1) {
 				TBridgeFile file = new TBridgeFile();
 				file.setId(MapUtils.getLong(map, "ID"));
 				file.setUuid(MapUtils.getString(map, "UUID"));

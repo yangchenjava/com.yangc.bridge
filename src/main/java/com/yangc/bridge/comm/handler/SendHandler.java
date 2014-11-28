@@ -13,7 +13,7 @@ import org.apache.mina.core.session.IoSession;
 import com.google.protobuf.ByteString;
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeFile;
-import com.yangc.bridge.bean.TBridgeText;
+import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.protobuf.ProtobufMessage;
@@ -57,7 +57,7 @@ public class SendHandler implements Runnable {
 		}
 	}
 
-	public static void sendChat(IoSession session, TBridgeText text) throws Exception {
+	public static void sendChat(IoSession session, TBridgeChat text) throws Exception {
 		if (StringUtils.equals(Server.CODEC, "prototype")) {
 			byte[] from = text.getFrom().getBytes(Server.CHARSET_NAME);
 			byte[] to = text.getTo().getBytes(Server.CHARSET_NAME);
