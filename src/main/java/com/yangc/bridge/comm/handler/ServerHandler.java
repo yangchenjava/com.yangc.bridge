@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeFile;
-import com.yangc.bridge.bean.TBridgeText;
+import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.handler.processor.LoginProcessor;
 import com.yangc.bridge.comm.handler.processor.ResultProcessor;
-import com.yangc.bridge.comm.handler.processor.TextAndFileProcessor;
+import com.yangc.bridge.comm.handler.processor.ChatAndFileProcessor;
 
 @Service
 public class ServerHandler extends IoHandlerAdapter {
@@ -34,7 +34,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	@Autowired
 	private LoginProcessor loginProcessor;
 	@Autowired
-	private TextAndFileProcessor textAndFileProcessor;
+	private ChatAndFileProcessor textAndFileProcessor;
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -114,8 +114,8 @@ public class ServerHandler extends IoHandlerAdapter {
 			this.resultReceived(session, (ResultBean) message);
 		} else if (message instanceof UserBean) {
 			this.loginReceived(session, (UserBean) message);
-		} else if (message instanceof TBridgeText) {
-			this.textReceived(session, (TBridgeText) message);
+		} else if (message instanceof TBridgeChat) {
+			this.textReceived(session, (TBridgeChat) message);
 		} else if (message instanceof TBridgeFile) {
 			this.fileReceived(session, (TBridgeFile) message);
 		} else {
@@ -135,7 +135,7 @@ public class ServerHandler extends IoHandlerAdapter {
 		this.loginProcessor.process(session, user);
 	}
 
-	private void textReceived(IoSession session, TBridgeText text) throws Exception {
+	private void textReceived(IoSession session, TBridgeChat text) throws Exception {
 		if (this.validateAuthentication(session)) {
 			this.textAndFileProcessor.process(session, text);
 		} else {

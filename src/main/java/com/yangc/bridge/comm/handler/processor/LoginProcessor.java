@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeCommon;
 import com.yangc.bridge.bean.TBridgeFile;
-import com.yangc.bridge.bean.TBridgeText;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.handler.SendHandler;
 import com.yangc.bridge.comm.handler.ServerHandler;
-import com.yangc.bridge.service.ChatService;
+import com.yangc.bridge.service.CommonService;
 import com.yangc.system.bean.TSysUser;
 import com.yangc.system.service.UserService;
 import com.yangc.utils.Message;
@@ -33,7 +33,7 @@ public class LoginProcessor {
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private ChatService chatService;
+	private CommonService commonService;
 
 	private ThreadPoolExecutor threadPool;
 
@@ -95,13 +95,13 @@ public class LoginProcessor {
 				}
 				// 登录成功, 如果存在未读消息, 则发送
 				else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
-					List<TBridgeChat> chats = chatService.getUnreadChatListByTo(this.user.getUsername());
-					if (CollectionUtils.isNotEmpty(chats)) {
-						for (TBridgeChat chat : chats) {
-							if (chat instanceof TBridgeText) {
-								SendHandler.sendChat(this.session, (TBridgeText) chat);
-							} else if (chat instanceof TBridgeFile) {
-								SendHandler.sendFile(this.session, (TBridgeFile) chat);
+					List<TBridgeCommon> commons = commonService.getUnreadCommonListByTo(this.user.getUsername());
+					if (CollectionUtils.isNotEmpty(commons)) {
+						for (TBridgeCommon common : commons) {
+							if (common instanceof TBridgeChat) {
+								SendHandler.sendChat(this.session, (TBridgeChat) common);
+							} else if (common instanceof TBridgeFile) {
+								SendHandler.sendFile(this.session, (TBridgeFile) common);
 							}
 						}
 					}

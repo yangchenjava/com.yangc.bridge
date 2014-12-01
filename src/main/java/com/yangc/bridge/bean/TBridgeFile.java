@@ -1,6 +1,6 @@
 package com.yangc.bridge.bean;
 
-public class TBridgeFile extends TBridgeChat {
+public class TBridgeFile extends TBridgeCommon {
 
 	private static final long serialVersionUID = 4407463520709519024L;
 
@@ -13,7 +13,7 @@ public class TBridgeFile extends TBridgeChat {
 	private byte[] data;
 
 	public TBridgeFile() {
-		this.setChatType(1L);
+		this.setType(1L);
 	}
 
 	public String getFileName() {
