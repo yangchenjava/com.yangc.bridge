@@ -11,13 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
-import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.TBridgeChat;
+import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
 import com.yangc.bridge.comm.cache.SessionCache;
+import com.yangc.bridge.comm.handler.processor.ChatAndFileProcessor;
 import com.yangc.bridge.comm.handler.processor.LoginProcessor;
 import com.yangc.bridge.comm.handler.processor.ResultProcessor;
-import com.yangc.bridge.comm.handler.processor.ChatAndFileProcessor;
 
 @Service
 public class ServerHandler extends IoHandlerAdapter {
@@ -34,7 +34,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	@Autowired
 	private LoginProcessor loginProcessor;
 	@Autowired
-	private ChatAndFileProcessor textAndFileProcessor;
+	private ChatAndFileProcessor chatAndFileProcessor;
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -115,7 +115,7 @@ public class ServerHandler extends IoHandlerAdapter {
 		} else if (message instanceof UserBean) {
 			this.loginReceived(session, (UserBean) message);
 		} else if (message instanceof TBridgeChat) {
-			this.textReceived(session, (TBridgeChat) message);
+			this.chatReceived(session, (TBridgeChat) message);
 		} else if (message instanceof TBridgeFile) {
 			this.fileReceived(session, (TBridgeFile) message);
 		} else {
@@ -135,9 +135,9 @@ public class ServerHandler extends IoHandlerAdapter {
 		this.loginProcessor.process(session, user);
 	}
 
-	private void textReceived(IoSession session, TBridgeChat text) throws Exception {
+	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
 		if (this.validateAuthentication(session)) {
-			this.textAndFileProcessor.process(session, text);
+			this.chatAndFileProcessor.process(session, chat);
 		} else {
 			session.close(true);
 		}
@@ -145,7 +145,7 @@ public class ServerHandler extends IoHandlerAdapter {
 
 	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
 		if (this.validateAuthentication(session)) {
-			this.textAndFileProcessor.process(session, file);
+			this.chatAndFileProcessor.process(session, file);
 		} else {
 			session.close(true);
 		}
