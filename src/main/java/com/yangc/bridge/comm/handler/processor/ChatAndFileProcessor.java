@@ -100,7 +100,7 @@ public class ChatAndFileProcessor {
 							if (toSessionId != null) {
 								SendHandler.sendChat(this.service.getManagedSessions().get(toSessionId), chat);
 							}
-						} else {
+						} else if (common instanceof TBridgeFile) {
 							TBridgeFile file = (TBridgeFile) common;
 							if (file.getContentType() == ContentType.TRANSMIT_FILE) {
 								File dir = new File(FileUtils.getTempDirectory(), "com.yangc.bridge/" + this.toUsername);
@@ -109,7 +109,8 @@ public class ChatAndFileProcessor {
 									dir.mkdirs();
 								}
 								File targetFile = new File(dir, file.getUuid());
-								if (!targetFile.exists()) {
+								if (!targetFile.exists() || !targetFile.isFile()) {
+									targetFile.delete();
 									targetFile.createNewFile();
 								}
 								RandomAccessFile raf = new RandomAccessFile(targetFile, "rw");
