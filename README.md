@@ -31,9 +31,9 @@ protocol buffer - google的一种数据交换的格式。<br />
 0x68 [contentType(0x03)] [uuid] [fromLength] [toLength] [from] [to] 0x68 [fileNameLength] [fileName] [fileSize] [crc] 0x16
 
 ### 5.TRANSMIT_FILE
-发送文件，如果接收方没有在线，将转为离线文件，待下次登录时，会询问是否接收离线文件。<br />
+发送文件，如果接收方没有在线，将转为离线文件，待下次登录时，将离线文件推送给接收方。<br />
 > 协议：<br />
-0x68 [contentType(0x04)] [uuid] [fromLength] [toLength] [dataLength] [from] [to] 0x68 [transmitStatus] [fileNameLength] [fileName] [fileSize] [fileMd5] [offset] [data] [crc] 0x16
+0x68 [contentType(0x04)] [uuid] [fromLength] [toLength] [dataLength] [from] [to] 0x68 [fileNameLength] [fileName] [fileSize] [fileMd5] [offset] [data] [crc] 0x16
 
 ### 6.HEART
 发送心跳，保证连接可用。<br />
