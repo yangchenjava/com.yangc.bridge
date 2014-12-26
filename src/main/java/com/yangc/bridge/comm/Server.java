@@ -138,7 +138,12 @@ public class Server {
 			if (session != null) {
 				ClientStatus clientStatus = new ClientStatus();
 				clientStatus.setUsername(entry.getKey());
-				clientStatus.setIpAddress(((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress());
+				if (session.getRemoteAddress() != null) {
+					InetAddress address = ((InetSocketAddress) session.getRemoteAddress()).getAddress();
+					if (address != null) {
+						clientStatus.setIpAddress(address.getHostAddress());
+					}
+				}
 				clientStatus.setSessionId(entry.getValue());
 				clientStatus.setLastIoTime(DateFormatUtils.format(session.getLastIoTime(), "yyyy-MM-dd HH:mm:ss"));
 				clientStatusList.add(clientStatus);
