@@ -13,15 +13,15 @@ public class SessionCache {
 
 	private static final Logger logger = Logger.getLogger(SessionCache.class);
 
-	private Cache<String, Long> cache;
+	private Cache cache;
 
 	public SessionCache() {
 		if (StringUtils.equals(Message.getMessage("bridge.cache"), "native")) {
 			logger.info("==========native缓存连接信息=========");
-			this.cache = new NativeCache<String, Long>();
+			this.cache = new NativeCache();
 		} else {
 			logger.info("==========redis缓存连接信息=========");
-			this.cache = new RedisCache<String, Long>();
+			this.cache = new RedisCache();
 		}
 	}
 

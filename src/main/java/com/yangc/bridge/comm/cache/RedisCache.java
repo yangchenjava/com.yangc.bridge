@@ -1,38 +1,30 @@
 package com.yangc.bridge.comm.cache;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.TreeMap;
 
-import org.apache.shiro.cache.CacheException;
+import org.apache.commons.lang3.StringUtils;
 
 import redis.clients.jedis.ShardedJedis;
 
 import com.yangc.utils.Message;
 import com.yangc.utils.cache.RedisUtils;
-import com.yangc.utils.io.SerializeUtils;
 
-public class RedisCache<K, V> implements Cache<K, V> {
+public class RedisCache implements Cache {
 
-	private byte[] cacheName = Message.getMessage("bridge.cache_name").getBytes();
+	private static final String CACHE_NAME = Message.getMessage("bridge.cache_name");
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public V get(K key) {
-		if (key != null) {
+	public Long get(String key) {
+		if (StringUtils.isNotBlank(key)) {
 			RedisUtils cache = RedisUtils.getInstance();
 			ShardedJedis jedis = null;
 			try {
 				jedis = cache.getJedis();
-				return (V) SerializeUtils.deserialize(jedis.hget(this.cacheName, SerializeUtils.serialize(key)));
+				return jedis.zscore(CACHE_NAME, key).longValue();
 			} catch (Exception e) {
 				e.printStackTrace();
 				cache.returnBrokenResource(jedis);
-				throw new CacheException();
 			} finally {
 				cache.returnResource(jedis);
 			}
@@ -41,18 +33,17 @@ public class RedisCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public V put(K key, V value) {
-		if (key != null && value != null) {
+	public Long put(String key, Long value) {
+		if (StringUtils.isNotBlank(key) && value != null) {
 			RedisUtils cache = RedisUtils.getInstance();
 			ShardedJedis jedis = null;
 			try {
 				jedis = cache.getJedis();
-				jedis.hset(this.cacheName, SerializeUtils.serialize(key), SerializeUtils.serialize(value));
+				jedis.zadd(CACHE_NAME, value.doubleValue(), key);
 				return value;
 			} catch (Exception e) {
 				e.printStackTrace();
 				cache.returnBrokenResource(jedis);
-				throw new CacheException();
 			} finally {
 				cache.returnResource(jedis);
 			}
@@ -61,20 +52,18 @@ public class RedisCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public V remove(K key) {
-		if (key != null) {
+	public Long remove(String key) {
+		if (StringUtils.isNotBlank(key)) {
 			RedisUtils cache = RedisUtils.getInstance();
 			ShardedJedis jedis = null;
 			try {
 				jedis = cache.getJedis();
-				V value = (V) SerializeUtils.deserialize(jedis.hget(this.cacheName, SerializeUtils.serialize(key)));
-				jedis.hdel(this.cacheName, SerializeUtils.serialize(key));
+				Long value = jedis.zscore(CACHE_NAME, key).longValue();
+				jedis.zrem(CACHE_NAME, key);
 				return value;
 			} catch (Exception e) {
 				e.printStackTrace();
 				cache.returnBrokenResource(jedis);
-				throw new CacheException();
 			} finally {
 				cache.returnResource(jedis);
 			}
@@ -88,23 +77,23 @@ public class RedisCache<K, V> implements Cache<K, V> {
 		ShardedJedis jedis = null;
 		try {
 			jedis = cache.getJedis();
-			jedis.del(this.cacheName);
+			jedis.del(CACHE_NAME);
 		} catch (Exception e) {
 			e.printStackTrace();
 			cache.returnBrokenResource(jedis);
-			throw new CacheException();
 		} finally {
 			cache.returnResource(jedis);
 		}
 	}
 
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(String key) {
 		RedisUtils cache = RedisUtils.getInstance();
 		ShardedJedis jedis = null;
 		try {
 			jedis = cache.getJedis();
-			return jedis.hexists(this.cacheName, SerializeUtils.serialize(key));
+			jedis.zscore(CACHE_NAME, key);
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			cache.returnBrokenResource(jedis);
@@ -115,12 +104,12 @@ public class RedisCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public int size() {
+	public long size() {
 		RedisUtils cache = RedisUtils.getInstance();
 		ShardedJedis jedis = null;
 		try {
 			jedis = cache.getJedis();
-			return jedis.hlen(this.cacheName).intValue();
+			return jedis.zcard(CACHE_NAME);
 		} catch (Exception e) {
 			e.printStackTrace();
 			cache.returnBrokenResource(jedis);
@@ -131,58 +120,12 @@ public class RedisCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Set<K> keys() {
+	public Map<String, Long> map() {
 		RedisUtils cache = RedisUtils.getInstance();
 		ShardedJedis jedis = null;
 		try {
 			jedis = cache.getJedis();
-			Set<K> keys = new HashSet<K>();
-			for (byte[] b : jedis.hkeys(this.cacheName)) {
-				keys.add((K) SerializeUtils.deserialize(b));
-			}
-			return keys;
-		} catch (Exception e) {
-			e.printStackTrace();
-			cache.returnBrokenResource(jedis);
-		} finally {
-			cache.returnResource(jedis);
-		}
-		return null;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<V> values() {
-		RedisUtils cache = RedisUtils.getInstance();
-		ShardedJedis jedis = null;
-		try {
-			jedis = cache.getJedis();
-			List<V> values = new ArrayList<V>();
-			for (byte[] b : jedis.hvals(this.cacheName)) {
-				values.add((V) SerializeUtils.deserialize(b));
-			}
-			return values;
-		} catch (Exception e) {
-			e.printStackTrace();
-			cache.returnBrokenResource(jedis);
-		} finally {
-			cache.returnResource(jedis);
-		}
-		return null;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public Map<K, V> map() {
-		RedisUtils cache = RedisUtils.getInstance();
-		ShardedJedis jedis = null;
-		try {
-			jedis = cache.getJedis();
-			Map<K, V> map = new HashMap<K, V>();
-			for (Entry<byte[], byte[]> entry : jedis.hgetAll(this.cacheName).entrySet()) {
-				map.put((K) SerializeUtils.deserialize(entry.getKey()), (V) SerializeUtils.deserialize(entry.getValue()));
-			}
+			Map<String, Long> map = new TreeMap<String, Long>();
 			return map;
 		} catch (Exception e) {
 			e.printStackTrace();

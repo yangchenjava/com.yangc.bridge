@@ -1,27 +1,21 @@
 package com.yangc.bridge.comm.cache;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public interface Cache<K, V> {
+public interface Cache {
 
-	public V get(K key);
+	public Long get(String key);
 
-	public V put(K key, V value);
+	public Long put(String key, Long value);
 
-	public V remove(K key);
+	public Long remove(String key);
 
 	public void clear();
 
-	public boolean containsKey(K key);
+	public boolean containsKey(String key);
 
-	public int size();
+	public long size();
 
-	public Set<K> keys();
-
-	public List<V> values();
-
-	public Map<K, V> map();
+	public Map<String, Long> map();
 
 }

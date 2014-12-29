@@ -1,36 +1,35 @@
 package com.yangc.bridge.comm.cache;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class NativeCache<K, V> implements Cache<K, V> {
+import org.apache.commons.lang3.StringUtils;
 
-	private ConcurrentMap<K, V> cache = new ConcurrentHashMap<K, V>();
+public class NativeCache implements Cache {
+
+	private ConcurrentMap<String, Long> cache = new ConcurrentHashMap<String, Long>();
 
 	@Override
-	public V get(K key) {
-		if (key != null) {
+	public Long get(String key) {
+		if (StringUtils.isNotBlank(key)) {
 			return this.cache.get(key);
 		}
 		return null;
 	}
 
 	@Override
-	public V put(K key, V value) {
-		if (key != null && value != null) {
+	public Long put(String key, Long value) {
+		if (StringUtils.isNotBlank(key) && value != null) {
 			return this.cache.put(key, value);
 		}
 		return null;
 	}
 
 	@Override
-	public V remove(K key) {
-		if (key != null) {
+	public Long remove(String key) {
+		if (StringUtils.isNotBlank(key)) {
 			return this.cache.remove(key);
 		}
 		return null;
@@ -42,32 +41,18 @@ public class NativeCache<K, V> implements Cache<K, V> {
 	}
 
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(String key) {
 		return this.cache.containsKey(key);
 	}
 
 	@Override
-	public int size() {
+	public long size() {
 		return this.cache.size();
 	}
 
 	@Override
-	public Set<K> keys() {
-		return this.cache.keySet();
-	}
-
-	@Override
-	public List<V> values() {
-		List<V> values = new ArrayList<V>();
-		for (V value : this.cache.values()) {
-			values.add(value);
-		}
-		return values;
-	}
-
-	@Override
-	public Map<K, V> map() {
-		return new HashMap<K, V>(this.cache);
+	public Map<String, Long> map() {
+		return new HashMap<String, Long>(this.cache);
 	}
 
 }
