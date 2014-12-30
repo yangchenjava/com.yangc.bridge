@@ -17,10 +17,10 @@ public class SessionCache {
 
 	public SessionCache() {
 		if (StringUtils.equals(Message.getMessage("bridge.cache"), "native")) {
-			logger.info("==========native缓存连接信息=========");
+			logger.info("==========mina-session采用native缓存=========");
 			this.cache = new NativeCache();
 		} else {
-			logger.info("==========redis缓存连接信息=========");
+			logger.info("==========mina-session采用redis缓存=========");
 			this.cache = new RedisCache();
 		}
 	}

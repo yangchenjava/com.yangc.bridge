@@ -2,9 +2,18 @@ package com.yangc.bridge.bean;
 
 public class UserBean {
 
+	private long sessionId;
 	private String uuid;
 	private String username;
 	private String password;
+
+	public long getSessionId() {
+		return this.sessionId;
+	}
+
+	public void setSessionId(long sessionId) {
+		this.sessionId = sessionId;
+	}
 
 	public String getUuid() {
 		return uuid;

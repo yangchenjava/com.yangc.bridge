@@ -1,12 +1,16 @@
 package com.yangc.bridge.comm.cache;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.Tuple;
 
+import com.yangc.common.Pagination;
+import com.yangc.common.PaginationThreadUtils;
 import com.yangc.utils.Message;
 import com.yangc.utils.cache.RedisUtils;
 
@@ -125,7 +129,33 @@ public class RedisCache implements Cache {
 		ShardedJedis jedis = null;
 		try {
 			jedis = cache.getJedis();
+
+			/* 获取分页情况 */
+			Pagination pagination = PaginationThreadUtils.get();
+			if (pagination == null) {
+				pagination = new Pagination();
+				PaginationThreadUtils.set(pagination);
+				pagination.setPageNow(1);
+			}
+			if (pagination.getTotalCount() == 0) {
+				pagination.setTotalCount(jedis.zcard(CACHE_NAME).intValue());
+			}
+			int firstResult = (pagination.getPageNow() - 1) * pagination.getPageSize();
+			/* 校验分页情况 */
+			if (firstResult >= pagination.getTotalCount() || firstResult < 0) {
+				firstResult = 0;
+				pagination.setPageNow(1);
+			}
+			/* 如果总数返回0, 直接返回空 */
+			if (pagination.getTotalCount() == 0) {
+				return null;
+			}
+			Set<Tuple> tuples = jedis.zrangeWithScores(CACHE_NAME, firstResult, firstResult + pagination.getPageSize() - 1);
+
 			Map<String, Long> map = new TreeMap<String, Long>();
+			for (Tuple tuple : tuples) {
+				map.put(tuple.getElement(), (long) tuple.getScore());
+			}
 			return map;
 		} catch (Exception e) {
 			e.printStackTrace();

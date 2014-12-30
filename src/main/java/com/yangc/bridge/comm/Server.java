@@ -97,11 +97,21 @@ public class Server {
 		return null;
 	}
 
+	/**
+	 * @功能: mina服务启动
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午2:06:18
+	 */
 	public void start() {
 		logger.info("==========mina服务启动=========");
 		this.init();
 	}
 
+	/**
+	 * @功能: 重启mina服务
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午2:06:27
+	 */
 	public void restart() {
 		logger.info("==========重启mina服务=========");
 		if (this.acceptor != null) {
@@ -112,6 +122,12 @@ public class Server {
 		this.init();
 	}
 
+	/**
+	 * @功能: mina服务是否存活
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午2:06:35
+	 * @return
+	 */
 	public boolean isActive() {
 		if (this.acceptor != null) {
 			return this.acceptor.isActive();
@@ -119,6 +135,12 @@ public class Server {
 		return false;
 	}
 
+	/**
+	 * @功能: 获取mina服务端状态
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午2:06:56
+	 * @return
+	 */
 	public ServerStatus getServerStatus() {
 		ServerStatus serverStatus = new ServerStatus();
 		serverStatus.setIpAddress(IP);
@@ -128,6 +150,12 @@ public class Server {
 		return serverStatus;
 	}
 
+	/**
+	 * @功能: 获取客户端连接的状态
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午2:07:16
+	 * @return
+	 */
 	public List<ClientStatus> getClientStatusList() {
 		Map<String, Long> map = this.sessionCache.getSessionCache();
 		Map<Long, IoSession> managedSessions = this.acceptor.getManagedSessions();
