@@ -11,12 +11,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.firewall.BlacklistFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -151,35 +150,32 @@ public class Server {
 	}
 
 	/**
-	 * @功能: 获取客户端连接的状态
+	 * @功能: 分页获取客户端连接的状态
 	 * @作者: yangc
 	 * @创建日期: 2014年12月30日 下午2:07:16
 	 * @return
 	 */
-	public List<ClientStatus> getClientStatusList() {
+	public List<ClientStatus> getClientStatusList_page() {
+		List<ClientStatus> clientStatusList = new ArrayList<ClientStatus>();
 		Map<String, Long> map = this.sessionCache.getSessionCache();
-		Map<Long, IoSession> managedSessions = this.acceptor.getManagedSessions();
-
-		List<ClientStatus> clientStatusList = new ArrayList<ClientStatus>(map.size());
-		for (Entry<String, Long> entry : map.entrySet()) {
-			IoSession session = managedSessions.get(entry.getValue());
-			if (session != null) {
+		if (MapUtils.isNotEmpty(map)) {
+			for (Entry<String, Long> entry : map.entrySet()) {
 				ClientStatus clientStatus = new ClientStatus();
 				clientStatus.setUsername(entry.getKey());
-				if (session.getRemoteAddress() != null) {
-					InetAddress address = ((InetSocketAddress) session.getRemoteAddress()).getAddress();
-					if (address != null) {
-						clientStatus.setIpAddress(address.getHostAddress());
-					}
-				}
 				clientStatus.setSessionId(entry.getValue());
-				clientStatus.setLastIoTime(DateFormatUtils.format(session.getLastIoTime(), "yyyy-MM-dd HH:mm:ss"));
 				clientStatusList.add(clientStatus);
 			}
 		}
 		return clientStatusList;
 	}
 
+	/**
+	 * @功能: 判断客户端是否在线
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午8:31:41
+	 * @param username
+	 * @return
+	 */
 	public boolean isOnline(String username) {
 		return this.sessionCache.getSessionId(username) != null;
 	}

@@ -7,11 +7,9 @@ import com.yangc.bridge.bean.ServerStatus;
 
 public interface BridgeService {
 
-	public void restartServer();
-
 	public ServerStatus getServerStatus();
 
-	public List<ClientStatus> getClientStatusList();
+	public List<ClientStatus> getClientStatusList_page();
 
 	public boolean isOnline(String username);
 

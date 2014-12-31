@@ -17,18 +17,13 @@ public class BridgeServiceImpl implements BridgeService {
 	private Server server;
 
 	@Override
-	public void restartServer() {
-		this.server.restart();
-	}
-
-	@Override
 	public ServerStatus getServerStatus() {
 		return this.server.getServerStatus();
 	}
 
 	@Override
-	public List<ClientStatus> getClientStatusList() {
-		return this.server.getClientStatusList();
+	public List<ClientStatus> getClientStatusList_page() {
+		return this.server.getClientStatusList_page();
 	}
 
 	@Override

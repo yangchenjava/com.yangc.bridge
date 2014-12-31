@@ -1,52 +1,196 @@
 package com.yangc.bridge.comm.cache;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import com.yangc.utils.Message;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.Tuple;
 
+import com.yangc.common.Pagination;
+import com.yangc.common.PaginationThreadUtils;
+import com.yangc.utils.Message;
+import com.yangc.utils.cache.RedisUtils;
+
+/**
+ * @功能: 使用redis的sortedset,key:CACHE_NAME,member:username,score:sessionId
+ * @作者: yangc
+ * @创建日期: 2014年12月30日 下午7:22:23
+ */
 @Service
 public class SessionCache {
 
-	private static final Logger logger = Logger.getLogger(SessionCache.class);
+	private static final String CACHE_NAME = Message.getMessage("bridge.cache_name");
 
-	private Cache cache;
+	/**
+	 * @功能: 获取username对应的sessionId
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午7:22:23
+	 * @param username
+	 * @return
+	 */
+	public Long getSessionId(String username) {
+		if (StringUtils.isNotBlank(username)) {
+			RedisUtils cache = RedisUtils.getInstance();
+			ShardedJedis jedis = null;
+			try {
+				jedis = cache.getJedis();
+				Double sessionId = jedis.zscore(CACHE_NAME, username);
+				if (sessionId != null) {
+					return sessionId.longValue();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				cache.returnBrokenResource(jedis);
+			} finally {
+				cache.returnResource(jedis);
+			}
+		}
+		return null;
+	}
 
-	public SessionCache() {
-		if (StringUtils.equals(Message.getMessage("bridge.cache"), "native")) {
-			logger.info("==========mina-session采用native缓存=========");
-			this.cache = new NativeCache();
-		} else {
-			logger.info("==========mina-session采用redis缓存=========");
-			this.cache = new RedisCache();
+	/**
+	 * @功能: 保存username对应sessionId
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午7:24:59
+	 * @param username
+	 * @param sessionId
+	 */
+	public void putSessionId(String username, Long sessionId) {
+		if (StringUtils.isNotBlank(username) && sessionId != null) {
+			RedisUtils cache = RedisUtils.getInstance();
+			ShardedJedis jedis = null;
+			try {
+				jedis = cache.getJedis();
+				jedis.zadd(CACHE_NAME, sessionId.doubleValue(), username);
+			} catch (Exception e) {
+				e.printStackTrace();
+				cache.returnBrokenResource(jedis);
+			} finally {
+				cache.returnResource(jedis);
+			}
 		}
 	}
 
-	public Long getSessionId(String username) {
-		return this.cache.get(username);
-	}
-
-	public void putSessionId(String username, Long sessionId) {
-		this.cache.put(username, sessionId);
-	}
-
+	/**
+	 * @功能: 移除username
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午7:25:36
+	 * @param username
+	 * @return
+	 */
 	public Long removeSessionId(String username) {
-		return this.cache.remove(username);
+		if (StringUtils.isNotBlank(username)) {
+			RedisUtils cache = RedisUtils.getInstance();
+			ShardedJedis jedis = null;
+			try {
+				jedis = cache.getJedis();
+				Double sessionId = jedis.zscore(CACHE_NAME, username);
+				if (sessionId != null) {
+					jedis.zrem(CACHE_NAME, username);
+					return sessionId.longValue();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				cache.returnBrokenResource(jedis);
+			} finally {
+				cache.returnResource(jedis);
+			}
+		}
+		return null;
 	}
 
+	/**
+	 * @功能: 清空缓存,慎用
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午7:26:06
+	 */
 	public void clear() {
-		this.cache.clear();
+		RedisUtils cache = RedisUtils.getInstance();
+		ShardedJedis jedis = null;
+		try {
+			jedis = cache.getJedis();
+			jedis.del(CACHE_NAME);
+		} catch (Exception e) {
+			e.printStackTrace();
+			cache.returnBrokenResource(jedis);
+		} finally {
+			cache.returnResource(jedis);
+		}
 	}
 
+	/**
+	 * @功能: 查看缓存是否包含该username
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午7:26:57
+	 * @param username
+	 * @return
+	 */
 	public boolean contains(String username) {
-		return this.cache.containsKey(username);
+		RedisUtils cache = RedisUtils.getInstance();
+		ShardedJedis jedis = null;
+		try {
+			jedis = cache.getJedis();
+			jedis.zscore(CACHE_NAME, username);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			cache.returnBrokenResource(jedis);
+		} finally {
+			cache.returnResource(jedis);
+		}
+		return false;
 	}
 
+	/**
+	 * @功能: 分页获取用户连接信息
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午7:27:40
+	 * @return
+	 */
 	public Map<String, Long> getSessionCache() {
-		return this.cache.map();
+		RedisUtils cache = RedisUtils.getInstance();
+		ShardedJedis jedis = null;
+		try {
+			jedis = cache.getJedis();
+
+			/* 获取分页情况 */
+			Pagination pagination = PaginationThreadUtils.get();
+			if (pagination == null) {
+				pagination = new Pagination();
+				PaginationThreadUtils.set(pagination);
+				pagination.setPageNow(1);
+			}
+			if (pagination.getTotalCount() == 0) {
+				pagination.setTotalCount(jedis.zcard(CACHE_NAME).intValue());
+			}
+			int firstResult = (pagination.getPageNow() - 1) * pagination.getPageSize();
+			/* 校验分页情况 */
+			if (firstResult >= pagination.getTotalCount() || firstResult < 0) {
+				firstResult = 0;
+				pagination.setPageNow(1);
+			}
+			/* 如果总数返回0, 直接返回空 */
+			if (pagination.getTotalCount() == 0) {
+				return null;
+			}
+			Set<Tuple> tuples = jedis.zrangeWithScores(CACHE_NAME, firstResult, firstResult + pagination.getPageSize() - 1);
+
+			Map<String, Long> map = new TreeMap<String, Long>();
+			for (Tuple tuple : tuples) {
+				map.put(tuple.getElement(), (long) tuple.getScore());
+			}
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			cache.returnBrokenResource(jedis);
+		} finally {
+			cache.returnResource(jedis);
+		}
+		return null;
 	}
 
 }

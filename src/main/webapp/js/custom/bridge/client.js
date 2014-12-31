@@ -2,9 +2,7 @@ Ext.define("Client", {
     extend: "Ext.data.Model",
     fields: [
 		{name: "username",   type: "string"},
-		{name: "ipAddress",  type: "string"},
-		{name: "sessionId",  type: "int"},
-		{name: "lastIoTime", type: "string"}
+		{name: "sessionId",  type: "int"}
     ]
 });
 
@@ -12,12 +10,17 @@ Ext.onReady(function(){
 	/** ------------------------------------- store ------------------------------------- */
 	var store_clientGrid = Ext.create("Ext.data.Store", {
 		model: "Client",
+		pageSize: 20,
 		proxy: {
 			type: "ajax",
 			actionMethods: {
 				create: "POST", read: "POST", update: "POST", destroy: "POST"
 			},
-			url: basePath + "resource/bridge/getClientStatusList"
+			url: basePath + "resource/bridge/getClientStatusList_page",
+			reader: {
+            	root: "dataGrid",
+                totalProperty: "totalCount"
+            }
 		},
 		autoLoad: true
 	});
@@ -31,49 +34,32 @@ Ext.onReady(function(){
 		border: false,
         collapsible: false,
         multiSelect: false,
+        scroll: false,
         viewConfig: {
             stripeRows: true,
             enableTextSelection: true
         },
         columns: [
             {text: "用户名", flex: 1, align: "center", dataIndex: "username"},
-            {text: "IP地址", flex: 1, align: "center", dataIndex: "ipAddress"},
-            {text: "sessionId", flex: 1, align: "center", dataIndex: "sessionId"},
-            {text: "最后读写时间", flex: 1, align: "center", dataIndex: "lastIoTime"}
+            {text: "sessionId", flex: 1, align: "center", dataIndex: "sessionId"}
         ],
         tbar: new Ext.Toolbar({
         	height: 30,
 			items: [
 		        {width: 5,  disabled: true},
-		        {width: 55, text: "重启", handler: restartServer, icon: basePath + "js/lib/ext4.2/icons/restart.png"}, "-",
-		        {width: 55, text: "刷新", handler: refreshClientGrid, icon: basePath + "js/lib/ext4.2/icons/refresh.gif"}, "-",
-		        {width: 100, disabled: true},
 		        {width: 440, xtype: "label", id: "serverStatus"},
 			    {width: 16, height: 16, xtype: "image", id: "serverActive"}
 		    ]
+        }),
+        bbar: Ext.create("Ext.PagingToolbar", {
+        	store: store_clientGrid,
+            displayInfo: true,
+            displayMsg: "当前显示{0} - {1}条，共 {2} 条记录",
+            emptyMsg: "当前没有任何记录"
         })
     });
 	
     /** ------------------------------------- handler ------------------------------------- */
-    function refreshClientGrid(){
-    	grid_client.getSelectionModel().deselectAll();
-    	store_clientGrid.load();
-    }
-    
-    function restartServer(){
-		message.confirm("确定要重启mina服务？", function(){
-			$.post(basePath + "resource/bridge/restartServer", function(data){
-				if (data.success) {
-					message.info(data.message);
-					serverStatus();
-					refreshClientGrid();
-				} else {
-					message.error(data.message);
-				}
-			});
-		});
-    }
-    
     function serverStatus(){
     	$.post(basePath + "resource/bridge/getServerStatus", function(data){
 			if (data) {
