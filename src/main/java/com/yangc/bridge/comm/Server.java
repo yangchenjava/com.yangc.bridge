@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.firewall.BlacklistFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -107,7 +108,7 @@ public class Server {
 	}
 
 	/**
-	 * @功能: 重启mina服务
+	 * @功能: 重启mina服务(mina集群时别用!!!)
 	 * @作者: yangc
 	 * @创建日期: 2014年12月30日 下午2:06:27
 	 */
@@ -119,6 +120,19 @@ public class Server {
 		}
 		this.sessionCache.clear();
 		this.init();
+	}
+
+	/**
+	 * @功能: 获取当前服务端维护的session
+	 * @作者: yangc
+	 * @创建日期: 2015年1月6日 下午3:55:12
+	 * @return
+	 */
+	public Map<Long, IoSession> getManagedSessions() {
+		if (this.acceptor != null) {
+			return this.acceptor.getManagedSessions();
+		}
+		return null;
 	}
 
 	/**

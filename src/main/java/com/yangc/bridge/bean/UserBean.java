@@ -1,6 +1,10 @@
 package com.yangc.bridge.bean;
 
-public class UserBean {
+import java.io.Serializable;
+
+public class UserBean implements Serializable {
+
+	private static final long serialVersionUID = -598500672679808385L;
 
 	private long sessionId;
 	private String uuid;
