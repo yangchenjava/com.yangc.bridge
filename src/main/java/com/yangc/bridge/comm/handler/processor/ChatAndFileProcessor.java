@@ -8,19 +8,30 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.service.IoService;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
 import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeCommon;
 import com.yangc.bridge.bean.TBridgeFile;
+import com.yangc.bridge.bean.UserBean;
+import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.handler.SendHandler;
+import com.yangc.bridge.comm.handler.ServerHandler;
 import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.service.CommonService;
 import com.yangc.utils.encryption.Md5Utils;
@@ -34,6 +45,8 @@ public class ChatAndFileProcessor {
 	private SessionCache sessionCache;
 	@Autowired
 	private CommonService commonService;
+	@Autowired
+	private JmsTemplate jmsTemplate;
 
 	private ExecutorService executorService;
 
@@ -76,7 +89,7 @@ public class ChatAndFileProcessor {
 			}
 		}
 
-		private void saveChat(TBridgeCommon common) {
+		private void saveCommon(TBridgeCommon common) {
 			TBridgeCommon c = new TBridgeCommon();
 			BeanUtils.copyProperties(common, c);
 			commonService.addCommon(c);
@@ -93,15 +106,28 @@ public class ChatAndFileProcessor {
 						TBridgeCommon common = queue.poll();
 						if (common instanceof TBridgeChat) {
 							this.sendResult(common);
-							this.saveChat(common);
+							this.saveCommon(common);
 
-							TBridgeChat chat = (TBridgeChat) common;
+							final TBridgeChat chat = (TBridgeChat) common;
 							commonService.addChat(chat);
 							if (toSessionId != null) {
-								SendHandler.sendChat(this.service.getManagedSessions().get(toSessionId), chat);
+								IoSession session = this.service.getManagedSessions().get(toSessionId);
+								if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), this.toUsername)) {
+									SendHandler.sendChat(session, chat);
+								} else {
+									jmsTemplate.send(new MessageCreator() {
+										@Override
+										public Message createMessage(Session session) throws JMSException {
+											ObjectMessage message = session.createObjectMessage();
+											message.setStringProperty("IP", Server.IP);
+											message.setObject(chat);
+											return message;
+										}
+									});
+								}
 							}
 						} else if (common instanceof TBridgeFile) {
-							TBridgeFile file = (TBridgeFile) common;
+							final TBridgeFile file = (TBridgeFile) common;
 							if (file.getContentType() == ContentType.TRANSMIT_FILE) {
 								File dir = new File(FileUtils.getTempDirectory(), "com.yangc.bridge/" + this.toUsername);
 								if (!dir.exists() || !dir.isDirectory()) {
@@ -120,19 +146,32 @@ public class ChatAndFileProcessor {
 
 								if (targetFile.length() == file.getFileSize() && Md5Utils.getMD5String(targetFile).equals(file.getFileMd5())) {
 									this.sendResult(common);
-									this.saveChat(common);
+									this.saveCommon(common);
 									commonService.addFile(file);
 								}
 							}
 
 							if (toSessionId != null) {
-								switch (file.getContentType()) {
-								case ContentType.READY_FILE:
-									SendHandler.sendReadyFile(this.service.getManagedSessions().get(toSessionId), file);
-									break;
-								case ContentType.TRANSMIT_FILE:
-									SendHandler.sendTransmitFile(this.service.getManagedSessions().get(toSessionId), file);
-									break;
+								IoSession session = this.service.getManagedSessions().get(toSessionId);
+								if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), this.toUsername)) {
+									switch (file.getContentType()) {
+									case ContentType.READY_FILE:
+										SendHandler.sendReadyFile(session, file);
+										break;
+									case ContentType.TRANSMIT_FILE:
+										SendHandler.sendTransmitFile(session, file);
+										break;
+									}
+								} else {
+									jmsTemplate.send(new MessageCreator() {
+										@Override
+										public Message createMessage(Session session) throws JMSException {
+											ObjectMessage message = session.createObjectMessage();
+											message.setStringProperty("IP", Server.IP);
+											message.setObject(file);
+											return message;
+										}
+									});
 								}
 							}
 						}

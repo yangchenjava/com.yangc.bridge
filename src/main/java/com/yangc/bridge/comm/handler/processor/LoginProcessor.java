@@ -5,10 +5,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
 
 import com.yangc.bridge.bean.ResultBean;
@@ -16,6 +22,7 @@ import com.yangc.bridge.bean.TBridgeChat;
 import com.yangc.bridge.bean.TBridgeCommon;
 import com.yangc.bridge.bean.TBridgeFile;
 import com.yangc.bridge.bean.UserBean;
+import com.yangc.bridge.comm.Server;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.handler.SendHandler;
 import com.yangc.bridge.comm.handler.ServerHandler;
@@ -34,6 +41,8 @@ public class LoginProcessor {
 	private UserService userService;
 	@Autowired
 	private CommonService commonService;
+	@Autowired
+	private JmsTemplate jmsTemplate;
 
 	private ThreadPoolExecutor threadPool;
 
@@ -72,9 +81,25 @@ public class LoginProcessor {
 				} else {
 					Long sessionId = sessionCache.getSessionId(this.user.getUsername());
 					if (sessionId != null) {
+						// IoSession s = this.session.getService().getManagedSessions().get(sessionId);
+						// if (s != null) s.close(true);
 						IoSession s = this.session.getService().getManagedSessions().get(sessionId);
-						if (s != null) s.close(true);
+						if (s != null && StringUtils.equals(((UserBean) s.getAttribute(ServerHandler.USER)).getUsername(), user.getUsername())) {
+							s.close(true);
+						} else {
+							user.setSessionId(sessionId);
+							jmsTemplate.send(new MessageCreator() {
+								@Override
+								public javax.jms.Message createMessage(Session session) throws JMSException {
+									ObjectMessage message = session.createObjectMessage();
+									message.setStringProperty("IP", Server.IP);
+									message.setObject(user);
+									return message;
+								}
+							});
+						}
 					}
+					user.setSessionId(this.session.getId());
 					this.session.setAttribute(ServerHandler.USER, user);
 					// 添加缓存
 					sessionCache.putSessionId(this.user.getUsername(), this.session.getId());
