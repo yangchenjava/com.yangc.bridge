@@ -1,6 +1,11 @@
 package com.yangc.bridge.listener;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -26,11 +31,26 @@ public class DefaultMessageListener implements MessageListener {
 
 	private static final Logger logger = Logger.getLogger(DefaultMessageListener.class);
 
+	private static final Map<String, LinkedBlockingQueue<Serializable>> MESSAGE_QUEUE = new HashMap<String, LinkedBlockingQueue<Serializable>>();
+
 	@Autowired
 	private Server server;
 	@Autowired
 	private SessionCache sessionCache;
 
+	private ExecutorService executorService;
+
+	public DefaultMessageListener() {
+		this.executorService = Executors.newCachedThreadPool();
+	}
+
+	/**
+	 * @功能: jms异步消息接收
+	 * @作者: yangc
+	 * @创建日期: 2015年1月7日 下午5:24:33
+	 * @param message
+	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
+	 */
 	@Override
 	public void onMessage(Message message) {
 		if (message != null) {
@@ -39,29 +59,74 @@ public class DefaultMessageListener implements MessageListener {
 					logger.info("MessageListener - Text=" + ((TextMessage) message).getText());
 				} else if (message instanceof ObjectMessage) {
 					ObjectMessage msg = (ObjectMessage) message;
+					// 如果不是当前服务器发布的消息
 					if (!StringUtils.equals(msg.getStringProperty("IP"), Server.IP)) {
 						Serializable obj = msg.getObject();
+
+						String username = null;
+						if (obj instanceof UserBean) username = ((UserBean) obj).getUsername();
+						else if (obj instanceof TBridgeChat) username = ((TBridgeChat) obj).getTo();
+						else if (obj instanceof TBridgeFile) username = ((TBridgeFile) obj).getTo();
+
+						// 异步处理消息,每个用户有自己的消息队列,保证了同一用户的消息是有序的
+						if (StringUtils.isNotBlank(username)) {
+							synchronized (MESSAGE_QUEUE) {
+								if (MESSAGE_QUEUE.containsKey(username)) {
+									LinkedBlockingQueue<Serializable> queue = MESSAGE_QUEUE.get(username);
+									queue.put(obj);
+								} else {
+									LinkedBlockingQueue<Serializable> queue = new LinkedBlockingQueue<Serializable>();
+									queue.put(obj);
+									MESSAGE_QUEUE.put(username, queue);
+									this.executorService.execute(new Task(username));
+								}
+							}
+						}
+					}
+				}
+			} catch (JMSException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class Task implements Runnable {
+		private String username;
+
+		private Task(String username) {
+			this.username = username;
+		}
+
+		@Override
+		public void run() {
+			LinkedBlockingQueue<Serializable> queue = MESSAGE_QUEUE.get(this.username);
+			while (true) {
+				try {
+					while (!queue.isEmpty()) {
+						Serializable obj = queue.poll();
 						if (obj instanceof UserBean) {
 							UserBean user = (UserBean) obj;
-							IoSession session = this.server.getManagedSessions().get(user.getSessionId());
-							if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), user.getUsername())) {
+							IoSession session = server.getManagedSessions().get(user.getSessionId());
+							if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
 								session.close(true);
 							}
 						} else if (obj instanceof TBridgeChat) {
 							TBridgeChat chat = (TBridgeChat) obj;
-							Long sessionId = this.sessionCache.getSessionId(chat.getTo());
+							Long sessionId = sessionCache.getSessionId(this.username);
 							if (sessionId != null) {
-								IoSession session = this.server.getManagedSessions().get(sessionId);
-								if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), chat.getTo())) {
+								IoSession session = server.getManagedSessions().get(sessionId);
+								if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
 									SendHandler.sendChat(session, chat);
 								}
 							}
 						} else if (obj instanceof TBridgeFile) {
 							TBridgeFile file = (TBridgeFile) obj;
-							Long sessionId = this.sessionCache.getSessionId(file.getTo());
+							Long sessionId = sessionCache.getSessionId(this.username);
 							if (sessionId != null) {
-								IoSession session = this.server.getManagedSessions().get(sessionId);
-								if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), file.getTo())) {
+								IoSession session = server.getManagedSessions().get(sessionId);
+								if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
 									if (file.getContentType() == ContentType.READY_FILE) {
 										SendHandler.sendReadyFile(session, file);
 									} else {
@@ -71,11 +136,15 @@ public class DefaultMessageListener implements MessageListener {
 							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (JMSException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
+				synchronized (MESSAGE_QUEUE) {
+					if (queue.isEmpty()) {
+						MESSAGE_QUEUE.remove(this.username);
+						break;
+					}
+				}
 			}
 		}
 	}

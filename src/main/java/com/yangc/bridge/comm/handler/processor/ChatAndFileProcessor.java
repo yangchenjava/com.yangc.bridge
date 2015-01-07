@@ -54,26 +54,37 @@ public class ChatAndFileProcessor {
 		this.executorService = Executors.newCachedThreadPool();
 	}
 
+	/**
+	 * @功能: 处理消息转发逻辑
+	 * @作者: yangc
+	 * @创建日期: 2015年1月7日 下午5:31:33
+	 * @param session
+	 * @param common
+	 * @throws InterruptedException
+	 */
 	public void process(IoSession session, TBridgeCommon common) throws InterruptedException {
+		// 异步处理消息,每个用户有自己的消息队列,保证了同一用户的消息是有序的
 		String toUsername = common.getTo();
-		synchronized (COMMON_QUEUE) {
-			if (COMMON_QUEUE.containsKey(toUsername)) {
-				LinkedBlockingQueue<TBridgeCommon> queue = COMMON_QUEUE.get(toUsername);
-				queue.put(common);
-			} else {
-				LinkedBlockingQueue<TBridgeCommon> queue = new LinkedBlockingQueue<TBridgeCommon>();
-				queue.put(common);
-				COMMON_QUEUE.put(toUsername, queue);
-				this.executorService.execute(new Task(session.getService(), toUsername));
+		if (StringUtils.isNotBlank(toUsername)) {
+			synchronized (COMMON_QUEUE) {
+				if (COMMON_QUEUE.containsKey(toUsername)) {
+					LinkedBlockingQueue<TBridgeCommon> queue = COMMON_QUEUE.get(toUsername);
+					queue.put(common);
+				} else {
+					LinkedBlockingQueue<TBridgeCommon> queue = new LinkedBlockingQueue<TBridgeCommon>();
+					queue.put(common);
+					COMMON_QUEUE.put(toUsername, queue);
+					this.executorService.execute(new Task(session.getService(), toUsername));
+				}
 			}
 		}
 	}
 
-	class Task implements Runnable {
+	private class Task implements Runnable {
 		private IoService service;
 		private String toUsername;
 
-		public Task(IoService service, String toUsername) {
+		private Task(IoService service, String toUsername) {
 			this.service = service;
 			this.toUsername = toUsername;
 		}

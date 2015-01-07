@@ -28,6 +28,13 @@ public class ResultProcessor {
 		this.threadPool = new ThreadPoolExecutor(5, 10, 1, TimeUnit.HOURS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
+	/**
+	 * @功能: 处理消息响应结果
+	 * @作者: yangc
+	 * @创建日期: 2015年1月7日 下午5:29:31
+	 * @param session
+	 * @param result
+	 */
 	public void process(IoSession session, ResultBean result) {
 		String username = ((UserBean) session.getAttribute(ServerHandler.USER)).getUsername();
 		this.threadPool.execute(new Task(result, username));

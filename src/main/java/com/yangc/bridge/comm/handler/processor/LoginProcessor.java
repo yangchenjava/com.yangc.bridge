@@ -51,12 +51,19 @@ public class LoginProcessor {
 		this.threadPool = new ThreadPoolExecutor(5, 10, 1, TimeUnit.HOURS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
+	/**
+	 * @功能: 处理登录逻辑
+	 * @作者: yangc
+	 * @创建日期: 2015年1月7日 下午5:31:08
+	 * @param session
+	 * @param user
+	 */
 	public void process(IoSession session, UserBean user) {
 		// 处理登录逻辑
 		this.threadPool.execute(new Task(session, user));
 	}
 
-	class Task implements Runnable {
+	private class Task implements Runnable {
 		private IoSession session;
 		private UserBean user;
 
