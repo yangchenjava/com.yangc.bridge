@@ -1,6 +1,7 @@
 package com.yangc.bridge.comm.handler.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
@@ -150,10 +151,20 @@ public class ChatAndFileProcessor {
 									targetFile.delete();
 									targetFile.createNewFile();
 								}
-								RandomAccessFile raf = new RandomAccessFile(targetFile, "rw");
-								raf.seek(raf.length());
-								raf.write(file.getData(), 0, file.getOffset());
-								raf.close();
+								RandomAccessFile raf = null;
+								try {
+									raf = new RandomAccessFile(targetFile, "rw");
+									raf.seek(raf.length());
+									raf.write(file.getData(), 0, file.getOffset());
+								} catch (IOException e) {
+									e.printStackTrace();
+								} finally {
+									try {
+										if (raf != null) raf.close();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
 
 								if (targetFile.length() == file.getFileSize() && Md5Utils.getMD5String(targetFile).equals(file.getFileMd5())) {
 									this.sendResult(common);
