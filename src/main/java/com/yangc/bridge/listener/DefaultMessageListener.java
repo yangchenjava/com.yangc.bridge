@@ -78,7 +78,7 @@ public class DefaultMessageListener implements MessageListener {
 									LinkedBlockingQueue<Serializable> queue = new LinkedBlockingQueue<Serializable>();
 									queue.put(obj);
 									MESSAGE_QUEUE.put(username, queue);
-									this.executorService.execute(new Task(username));
+									this.executorService.execute(new Task(username, queue));
 								}
 							}
 						}
@@ -94,18 +94,19 @@ public class DefaultMessageListener implements MessageListener {
 
 	private class Task implements Runnable {
 		private String username;
+		private LinkedBlockingQueue<Serializable> queue;
 
-		private Task(String username) {
+		private Task(String username, LinkedBlockingQueue<Serializable> queue) {
 			this.username = username;
+			this.queue = queue;
 		}
 
 		@Override
 		public void run() {
-			LinkedBlockingQueue<Serializable> queue = MESSAGE_QUEUE.get(this.username);
 			while (true) {
 				try {
-					while (!queue.isEmpty()) {
-						Serializable obj = queue.poll();
+					while (!this.queue.isEmpty()) {
+						Serializable obj = this.queue.poll();
 						if (obj instanceof UserBean) {
 							UserBean user = (UserBean) obj;
 							IoSession session = server.getManagedSessions().get(user.getSessionId());
@@ -140,7 +141,7 @@ public class DefaultMessageListener implements MessageListener {
 					e.printStackTrace();
 				}
 				synchronized (MESSAGE_QUEUE) {
-					if (queue.isEmpty()) {
+					if (this.queue.isEmpty()) {
 						MESSAGE_QUEUE.remove(this.username);
 						break;
 					}
