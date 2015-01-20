@@ -9,7 +9,7 @@ Protocol Buffer - google的一种数据交换的格式。<br />
 > 1. 自定义协议，协议内容如下；<br />
 > 2. 通过protobuf实现，项目中有定义好的proto文件；
 
-在resources文件夹中，有jmeter测试最大连接数的测试用例，目前2w条长连接在线，保持简单的心跳，没有问题！
+在resources文件夹中，有jmeter测试最大连接数的测试用例。
 
 ### 1.RESULT
 每个request的发生都要返回对应的response，又称之为响应报文。<br />
