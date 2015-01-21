@@ -87,7 +87,7 @@ public class ServerHandler extends IoHandlerAdapter {
 			}
 		}
 		logger.info("sessionIdle - " + remoteAddress);
-		if (status.equals(IdleStatus.BOTH_IDLE)) {
+		if (status.equals(IdleStatus.READER_IDLE)) {
 			session.close(true);
 		}
 	}

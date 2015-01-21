@@ -48,7 +48,7 @@ public class LoginProcessor {
 
 	public LoginProcessor() {
 		// 初始化线程池
-		this.threadPool = new ThreadPoolExecutor(5, 10, 1, TimeUnit.HOURS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
+		this.threadPool = new ThreadPoolExecutor(5, 10, 3, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
 	/**

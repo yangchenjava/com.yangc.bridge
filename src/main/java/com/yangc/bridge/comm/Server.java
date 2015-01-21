@@ -56,7 +56,7 @@ public class Server {
 		// 最大客户端等待队列
 		// this.acceptor.setBacklog(50);
 		// 设置空闲时间
-		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, TIMEOUT);
+		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.READER_IDLE, TIMEOUT);
 		// 设置每一个非主服务监听的端口可以重用
 		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
