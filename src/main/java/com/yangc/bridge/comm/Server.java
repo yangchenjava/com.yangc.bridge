@@ -68,8 +68,8 @@ public class Server {
 		}
 		// 编解码
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
-		// 线程池
-		// filterChain.addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
+		// 线程池(消息无序)
+		// filterChain.addLast("threadPool", new ExecutorFilter(new UnorderedThreadPoolExecutor(5, 16)));
 		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));
