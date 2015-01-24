@@ -4,12 +4,12 @@ com.yangc.bridge
 ### 基于Mina的初级推送服务器实现
 Mina - 强大的网络应用程序框架，封装了java nio，基于事件驱动的异步api。<br />
 ActiveMQ - apache的一款消息服务器，这里主要用于多台推送服务器间进行消息传送，达到负载均衡的作用。<br />
-protocol buffer - google的一种数据交换的格式。<br />
+Protocol Buffer - google的一种数据交换的格式。<br />
 实现两种协议方式（通过配置文件进行协议切换，均可达到通信目的）：
 > 1. 自定义协议，协议内容如下；<br />
 > 2. 通过protobuf实现，项目中有定义好的proto文件；
 
-在resources文件夹中，有jmeter测试最大连接数的测试用例，目前2w条长连接在线，保持简单的心跳，没有问题！
+在resources文件夹中，有jmeter测试最大连接数的测试用例。
 
 ### 1.RESULT
 每个request的发生都要返回对应的response，又称之为响应报文。<br />

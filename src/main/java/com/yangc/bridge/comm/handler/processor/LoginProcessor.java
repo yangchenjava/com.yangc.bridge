@@ -48,7 +48,7 @@ public class LoginProcessor {
 
 	public LoginProcessor() {
 		// 初始化线程池
-		this.threadPool = new ThreadPoolExecutor(5, 10, 1, TimeUnit.HOURS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
+		this.threadPool = new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
 	/**
@@ -59,7 +59,6 @@ public class LoginProcessor {
 	 * @param user
 	 */
 	public void process(IoSession session, UserBean user) {
-		// 处理登录逻辑
 		this.threadPool.execute(new Task(session, user));
 	}
 

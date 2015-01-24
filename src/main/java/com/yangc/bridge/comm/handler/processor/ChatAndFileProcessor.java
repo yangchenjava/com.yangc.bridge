@@ -1,6 +1,7 @@
 package com.yangc.bridge.comm.handler.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class ChatAndFileProcessor {
 					LinkedBlockingQueue<TBridgeCommon> queue = new LinkedBlockingQueue<TBridgeCommon>();
 					queue.put(common);
 					COMMON_QUEUE.put(toUsername, queue);
-					this.executorService.execute(new Task(session.getService(), toUsername));
+					this.executorService.execute(new Task(session.getService(), toUsername, queue));
 				}
 			}
 		}
@@ -83,10 +84,12 @@ public class ChatAndFileProcessor {
 	private class Task implements Runnable {
 		private IoService service;
 		private String toUsername;
+		private LinkedBlockingQueue<TBridgeCommon> queue;
 
-		private Task(IoService service, String toUsername) {
+		private Task(IoService service, String toUsername, LinkedBlockingQueue<TBridgeCommon> queue) {
 			this.service = service;
 			this.toUsername = toUsername;
+			this.queue = queue;
 		}
 
 		private void sendResult(TBridgeCommon common) throws Exception {
@@ -110,11 +113,10 @@ public class ChatAndFileProcessor {
 		@Override
 		public void run() {
 			Long toSessionId = sessionCache.getSessionId(this.toUsername);
-			LinkedBlockingQueue<TBridgeCommon> queue = COMMON_QUEUE.get(this.toUsername);
 			while (true) {
 				try {
-					while (!queue.isEmpty()) {
-						TBridgeCommon common = queue.poll();
+					while (!this.queue.isEmpty()) {
+						TBridgeCommon common = this.queue.poll();
 						if (common instanceof TBridgeChat) {
 							this.sendResult(common);
 							this.saveCommon(common);
@@ -150,10 +152,20 @@ public class ChatAndFileProcessor {
 									targetFile.delete();
 									targetFile.createNewFile();
 								}
-								RandomAccessFile raf = new RandomAccessFile(targetFile, "rw");
-								raf.seek(raf.length());
-								raf.write(file.getData(), 0, file.getOffset());
-								raf.close();
+								RandomAccessFile raf = null;
+								try {
+									raf = new RandomAccessFile(targetFile, "rw");
+									raf.seek(raf.length());
+									raf.write(file.getData(), 0, file.getOffset());
+								} catch (IOException e) {
+									e.printStackTrace();
+								} finally {
+									try {
+										if (raf != null) raf.close();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
 
 								if (targetFile.length() == file.getFileSize() && Md5Utils.getMD5String(targetFile).equals(file.getFileMd5())) {
 									this.sendResult(common);
@@ -191,7 +203,7 @@ public class ChatAndFileProcessor {
 					e.printStackTrace();
 				}
 				synchronized (COMMON_QUEUE) {
-					if (queue.isEmpty()) {
+					if (this.queue.isEmpty()) {
 						COMMON_QUEUE.remove(this.toUsername);
 						break;
 					}

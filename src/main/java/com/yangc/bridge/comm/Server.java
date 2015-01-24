@@ -56,7 +56,7 @@ public class Server {
 		// 最大客户端等待队列
 		// this.acceptor.setBacklog(50);
 		// 设置空闲时间
-		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, TIMEOUT);
+		this.acceptor.getSessionConfig().setIdleTime(IdleStatus.READER_IDLE, TIMEOUT);
 		// 设置每一个非主服务监听的端口可以重用
 		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
@@ -68,8 +68,8 @@ public class Server {
 		}
 		// 编解码
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
-		// 线程池
-		// filterChain.addLast("threadPool", new ExecutorFilter(Executors.newCachedThreadPool()));
+		// 线程池(消息无序)
+		// filterChain.addLast("threadPool", new ExecutorFilter(new UnorderedThreadPoolExecutor(5, 16)));
 		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));
