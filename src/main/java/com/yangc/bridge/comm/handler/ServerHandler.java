@@ -108,9 +108,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		logger.info("messageReceived");
-		if (message instanceof Byte) {
-			SendHandler.sendHeart(session);
-		} else if (message instanceof ResultBean) {
+		if (message instanceof ResultBean) {
 			this.resultReceived(session, (ResultBean) message);
 		} else if (message instanceof UserBean) {
 			this.loginReceived(session, (UserBean) message);

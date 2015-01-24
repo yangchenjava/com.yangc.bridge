@@ -19,6 +19,8 @@ import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.firewall.BlacklistFilter;
+import org.apache.mina.filter.keepalive.KeepAliveFilter;
+import org.apache.mina.filter.keepalive.KeepAliveRequestTimeoutHandler;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ import com.yangc.bridge.bean.ClientStatus;
 import com.yangc.bridge.bean.ServerStatus;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.factory.DataCodecFactory;
+import com.yangc.bridge.comm.factory.KeepAliveFactory;
 import com.yangc.bridge.comm.handler.ServerHandler;
 import com.yangc.utils.Message;
 
@@ -66,10 +69,15 @@ public class Server {
 		if (blacklistFilter != null) {
 			filterChain.addLast("blacklist", blacklistFilter);
 		}
-		// 编解码
-		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
 		// 线程池(消息无序)
 		// filterChain.addLast("threadPool", new ExecutorFilter(new UnorderedThreadPoolExecutor(5, 16)));
+		// 编解码
+		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
+		// 心跳响应
+		KeepAliveFilter keepAliveFilter = new KeepAliveFilter(new KeepAliveFactory(), KeepAliveRequestTimeoutHandler.NOOP);
+		keepAliveFilter.setForwardEvent(true);
+		keepAliveFilter.setRequestInterval(TIMEOUT);
+		filterChain.addLast("heartBeat", keepAliveFilter);
 		this.acceptor.setHandler(this.serverHandler);
 		try {
 			this.acceptor.bind(new InetSocketAddress(IP, PORT));

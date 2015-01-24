@@ -19,22 +19,11 @@ import com.yangc.bridge.comm.protocol.ContentType;
 import com.yangc.bridge.comm.protocol.protobuf.ProtobufMessage;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolChat;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolFile;
-import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 import com.yangc.bridge.comm.protocol.prototype.ProtocolResult;
 
 public class SendHandler implements Runnable {
 
 	private SendHandler() {
-	}
-
-	public static void sendHeart(IoSession session) {
-		if (session != null && session.isConnected()) {
-			if (StringUtils.equals(Server.CODEC, "prototype")) {
-				session.write(new ProtocolHeart());
-			} else {
-				session.write(ProtobufMessage.Heart.newBuilder().build());
-			}
-		}
 	}
 
 	public static void sendResult(IoSession session, ResultBean result) throws Exception {
