@@ -122,7 +122,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	}
 
 	private void resultReceived(IoSession session, ResultBean result) throws Exception {
-		if (session.getAttribute(USER) != null) {
+		if (session.containsAttribute(USER)) {
 			this.resultProcessor.process(session, result);
 		} else {
 			session.close(true);
@@ -134,7 +134,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	}
 
 	private void chatReceived(IoSession session, TBridgeChat chat) throws Exception {
-		if (session.getAttribute(USER) != null) {
+		if (session.containsAttribute(USER)) {
 			this.chatAndFileProcessor.process(session, chat);
 		} else {
 			session.close(true);
@@ -142,7 +142,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	}
 
 	private void fileReceived(IoSession session, TBridgeFile file) throws Exception {
-		if (session.getAttribute(USER) != null) {
+		if (session.containsAttribute(USER)) {
 			this.chatAndFileProcessor.process(session, file);
 		} else {
 			session.close(true);

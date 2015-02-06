@@ -18,6 +18,7 @@
 	</bean>
 
 	<bean id="messageListener" class="com.yangc.bridge.listener.DefaultMessageListener" />
+
 	<bean id="destination" class="org.apache.activemq.command.ActiveMQTopic">
 		<constructor-arg value="${activemq.destination}" />
 	</bean>
@@ -31,7 +32,9 @@
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="jmsFactory" />
 		<property name="defaultDestination" ref="destination" />
+		<!-- "true" for the Publish/Subscribe domain (Topics), "false" for the Point-to-Point domain (Queues) -->
 		<property name="pubSubDomain" value="true" />
+		<!-- 不持久化 -->
 		<property name="deliveryMode" value="1" />
 	</bean>
 </beans>
