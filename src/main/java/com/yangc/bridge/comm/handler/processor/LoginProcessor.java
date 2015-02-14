@@ -74,7 +74,8 @@ public class LoginProcessor {
 		@Override
 		public void run() {
 			try {
-				List<TSysUser> users = userService.getUserListByUsernameAndPassword(this.user.getUsername(), Md5Utils.getMD5(this.user.getPassword()));
+				String username = this.user.getUsername();
+				List<TSysUser> users = userService.getUserListByUsernameAndPassword(username, Md5Utils.getMD5(this.user.getPassword()));
 
 				ResultBean result = new ResultBean();
 				result.setUuid(this.user.getUuid());
@@ -85,15 +86,15 @@ public class LoginProcessor {
 					result.setSuccess(false);
 					result.setData("用户重复");
 				} else {
-					Long sessionId = sessionCache.getSessionId(this.user.getUsername());
+					Long sessionId = sessionCache.getSessionId(username);
 					if (sessionId != null) {
 						// IoSession s = this.session.getService().getManagedSessions().get(sessionId);
 						// if (s != null) s.close(true);
 						IoSession s = this.session.getService().getManagedSessions().get(sessionId);
-						if (s != null && StringUtils.equals(((UserBean) s.getAttribute(ServerHandler.USER)).getUsername(), user.getUsername())) {
+						if (s != null && StringUtils.equals(((UserBean) s.getAttribute(ServerHandler.USER)).getUsername(), username)) {
 							s.close(true);
 						} else {
-							user.setSessionId(sessionId);
+							this.user.setSessionId(sessionId);
 							jmsTemplate.send(new MessageCreator() {
 								@Override
 								public javax.jms.Message createMessage(Session session) throws JMSException {
@@ -105,10 +106,10 @@ public class LoginProcessor {
 							});
 						}
 					}
-					user.setSessionId(this.session.getId());
-					this.session.setAttribute(ServerHandler.USER, user);
+					this.user.setSessionId(this.session.getId());
+					this.session.setAttribute(ServerHandler.USER, this.user);
 					// 添加缓存
-					sessionCache.putSessionId(this.user.getUsername(), this.session.getId());
+					sessionCache.putSessionId(username, this.session.getId());
 
 					result.setSuccess(true);
 					result.setData("登录成功");
@@ -126,7 +127,7 @@ public class LoginProcessor {
 				}
 				// 登录成功, 如果存在未读消息, 则发送
 				else if (StringUtils.equals(Message.getMessage("bridge.offline_data"), "1")) {
-					List<TBridgeCommon> commons = commonService.getUnreadCommonListByTo(this.user.getUsername());
+					List<TBridgeCommon> commons = commonService.getUnreadCommonListByTo(username);
 					if (CollectionUtils.isNotEmpty(commons)) {
 						for (TBridgeCommon common : commons) {
 							if (common instanceof TBridgeChat) {
