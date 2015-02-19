@@ -30,6 +30,7 @@ import com.yangc.bridge.bean.ServerStatus;
 import com.yangc.bridge.comm.cache.SessionCache;
 import com.yangc.bridge.comm.factory.DataCodecFactory;
 import com.yangc.bridge.comm.factory.KeepAliveFactory;
+import com.yangc.bridge.comm.filter.TrafficCountFilter;
 import com.yangc.bridge.comm.handler.ServerHandler;
 import com.yangc.utils.Message;
 
@@ -69,6 +70,8 @@ public class Server {
 		if (blacklistFilter != null) {
 			filterChain.addLast("blacklist", blacklistFilter);
 		}
+		// 流量统计
+		filterChain.addLast("trafficCount", new TrafficCountFilter());
 		// 线程池(消息无序)
 		// filterChain.addLast("threadPool", new ExecutorFilter(new UnorderedThreadPoolExecutor(5, 16)));
 		// 编解码
