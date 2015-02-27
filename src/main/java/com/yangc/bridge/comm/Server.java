@@ -78,6 +78,7 @@ public class Server {
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
 		// 心跳响应
 		KeepAliveFilter keepAliveFilter = new KeepAliveFilter(new KeepAliveFactory(), KeepAliveRequestTimeoutHandler.NOOP);
+		// 该filter是否向下传递
 		keepAliveFilter.setForwardEvent(true);
 		keepAliveFilter.setRequestInterval(TIMEOUT);
 		filterChain.addLast("heartBeat", keepAliveFilter);
