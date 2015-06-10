@@ -1,9 +1,8 @@
 package com.yangc.bridge.comm.handler.processor;
 
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
@@ -44,11 +43,10 @@ public class LoginProcessor {
 	@Autowired
 	private JmsTemplate jmsTemplate;
 
-	private ThreadPoolExecutor threadPool;
+	private ExecutorService executorService;
 
 	public LoginProcessor() {
-		// 初始化线程池
-		this.threadPool = new ThreadPoolExecutor(5, 10, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
+		this.executorService = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	/**
@@ -59,7 +57,7 @@ public class LoginProcessor {
 	 * @param user
 	 */
 	public void process(IoSession session, UserBean user) {
-		this.threadPool.execute(new Task(session, user));
+		this.executorService.execute(new Task(session, user));
 	}
 
 	private class Task implements Runnable {
@@ -86,15 +84,17 @@ public class LoginProcessor {
 					result.setSuccess(false);
 					result.setData("用户重复");
 				} else {
-					Long sessionId = sessionCache.getSessionId(username);
-					if (sessionId != null) {
-						// IoSession s = this.session.getService().getManagedSessions().get(sessionId);
-						// if (s != null) s.close(true);
-						IoSession s = this.session.getService().getManagedSessions().get(sessionId);
-						if (s != null && StringUtils.equals(((UserBean) s.getAttribute(ServerHandler.USER)).getUsername(), username)) {
-							s.close(true);
+					Long expireSessionId = sessionCache.getSessionId(username);
+					if (expireSessionId != null) {
+						// IoSession expireSession = this.session.getService().getManagedSessions().get(expireSessionId);
+						// if (expireSession != null) expireSession.close(true);
+						IoSession expireSession = this.session.getService().getManagedSessions().get(expireSessionId);
+						if (expireSession != null && StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), username)) {
+							// 标识断线重连的session
+							((UserBean) expireSession.getAttribute(ServerHandler.USER)).setExpireSessionId(expireSessionId);
+							expireSession.close(true);
 						} else {
-							this.user.setSessionId(sessionId);
+							this.user.setExpireSessionId(expireSessionId);
 							jmsTemplate.send(new MessageCreator() {
 								@Override
 								public javax.jms.Message createMessage(Session session) throws JMSException {
@@ -106,7 +106,6 @@ public class LoginProcessor {
 							});
 						}
 					}
-					this.user.setSessionId(this.session.getId());
 					this.session.setAttribute(ServerHandler.USER, this.user);
 					// 添加缓存
 					sessionCache.putSessionId(username, this.session.getId());

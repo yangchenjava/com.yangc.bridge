@@ -10,6 +10,15 @@ import com.yangc.bridge.comm.protocol.prototype.ProtocolHeart;
 
 public class KeepAliveFactory implements KeepAliveMessageFactory {
 
+	/**
+	 * @功能: 是否为客户端的请求消息
+	 * @作者: yangc
+	 * @创建日期: 2015年6月9日 下午10:41:39
+	 * @param session
+	 * @param message
+	 * @return
+	 * @see org.apache.mina.filter.keepalive.KeepAliveMessageFactory#isRequest(org.apache.mina.core.session.IoSession, java.lang.Object)
+	 */
 	@Override
 	public boolean isRequest(IoSession session, Object message) {
 		return message instanceof Byte;
@@ -25,6 +34,15 @@ public class KeepAliveFactory implements KeepAliveMessageFactory {
 		return null;
 	}
 
+	/**
+	 * @功能: 返回发给客户端的响应消息
+	 * @作者: yangc
+	 * @创建日期: 2015年6月9日 下午10:42:20
+	 * @param session
+	 * @param request
+	 * @return
+	 * @see org.apache.mina.filter.keepalive.KeepAliveMessageFactory#getResponse(org.apache.mina.core.session.IoSession, java.lang.Object)
+	 */
 	@Override
 	public Object getResponse(IoSession session, Object request) {
 		if (StringUtils.equals(Server.CODEC, "prototype")) {

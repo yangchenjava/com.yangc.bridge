@@ -6,17 +6,17 @@ public class UserBean implements Serializable {
 
 	private static final long serialVersionUID = -598500672679808385L;
 
-	private long sessionId;
+	private long expireSessionId;
 	private String uuid;
 	private String username;
 	private String password;
 
-	public long getSessionId() {
-		return this.sessionId;
+	public long getExpireSessionId() {
+		return expireSessionId;
 	}
 
-	public void setSessionId(long sessionId) {
-		this.sessionId = sessionId;
+	public void setExpireSessionId(long expireSessionId) {
+		this.expireSessionId = expireSessionId;
 	}
 
 	public String getUuid() {

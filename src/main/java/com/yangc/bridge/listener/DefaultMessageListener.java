@@ -109,9 +109,11 @@ public class DefaultMessageListener implements MessageListener {
 						Serializable obj = this.queue.poll();
 						if (obj instanceof UserBean) {
 							UserBean user = (UserBean) obj;
-							IoSession session = server.getManagedSessions().get(user.getSessionId());
-							if (session != null && StringUtils.equals(((UserBean) session.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
-								session.close(true);
+							IoSession expireSession = server.getManagedSessions().get(user.getExpireSessionId());
+							if (expireSession != null && StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
+								// 标识断线重连的session
+								((UserBean) expireSession.getAttribute(ServerHandler.USER)).setExpireSessionId(user.getExpireSessionId());
+								expireSession.close(true);
 							}
 						} else if (obj instanceof TBridgeChat) {
 							TBridgeChat chat = (TBridgeChat) obj;

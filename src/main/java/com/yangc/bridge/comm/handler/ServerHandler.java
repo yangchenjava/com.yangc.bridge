@@ -24,8 +24,8 @@ public class ServerHandler extends IoHandlerAdapter {
 
 	private static final Logger logger = Logger.getLogger(ServerHandler.class);
 
-	public static final String USER = "user";
-	public static final String LOGIN_COUNT = "login_count";
+	public static final String USER = "USER";
+	public static final String LOGIN_COUNT = "LOGIN_COUNT";
 
 	@Autowired
 	private SessionCache sessionCache;
@@ -70,9 +70,9 @@ public class ServerHandler extends IoHandlerAdapter {
 			}
 		}
 		logger.info("sessionClosed - " + remoteAddress);
-		// 移除缓存
+		// 移除缓存(断线重连的session已经替换原有session,故排除)
 		UserBean user = (UserBean) session.getAttribute(USER);
-		if (user != null) {
+		if (user != null && session.getId() != user.getExpireSessionId()) {
 			this.sessionCache.removeSessionId(user.getUsername());
 		}
 	}

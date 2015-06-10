@@ -76,10 +76,11 @@ public class Server {
 		// filterChain.addLast("threadPool", new ExecutorFilter(new UnorderedThreadPoolExecutor(5, 16)));
 		// 编解码
 		filterChain.addLast("codec", new ProtocolCodecFilter(new DataCodecFactory()));
-		// 心跳响应
+		// 心跳响应(注:keepAliveRequestTimeout,心跳包请求后无反馈的超时时间)
 		KeepAliveFilter keepAliveFilter = new KeepAliveFilter(new KeepAliveFactory(), KeepAliveRequestTimeoutHandler.NOOP);
-		// 该filter是否向下传递
+		// 该filter是否向下传递,否则sessionIdle不会被调用
 		keepAliveFilter.setForwardEvent(true);
+		// 间隔时间,接受一个心跳请求,否则该连接进入空闲状态并且发出idle方法回调
 		keepAliveFilter.setRequestInterval(TIMEOUT);
 		filterChain.addLast("heartBeat", keepAliveFilter);
 		this.acceptor.setHandler(this.serverHandler);
