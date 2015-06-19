@@ -27,37 +27,43 @@ public class ProtobufDecoderData extends CumulativeProtocolDecoder {
 			}
 			int position = in.position();
 			if (in.get() == Tag.START) {
-				byte contentType = in.get();
-				if (contentType == ContentType.HEART) {
+				switch (in.get()) {
+				case ContentType.HEART:
 					if (!this.decodeHeart(position, in, out)) {
 						in.reset();
 						return false;
 					}
-				} else if (contentType == ContentType.RESULT) {
+					break;
+				case ContentType.RESULT:
 					if (!this.decodeResult(position, in, out)) {
 						in.reset();
 						return false;
 					}
-				} else if (contentType == ContentType.LOGIN) {
+					break;
+				case ContentType.LOGIN:
 					if (!this.decodeLogin(position, in, out)) {
 						in.reset();
 						return false;
 					}
-				} else if (contentType == ContentType.CHAT) {
+					break;
+				case ContentType.CHAT:
 					if (!this.decodeChat(position, in, out)) {
 						in.reset();
 						return false;
 					}
-				} else if (contentType == ContentType.READY_FILE) {
+					break;
+				case ContentType.READY_FILE:
 					if (!this.decodeReadyFile(position, in, out)) {
 						in.reset();
 						return false;
 					}
-				} else if (contentType == ContentType.TRANSMIT_FILE) {
+					break;
+				case ContentType.TRANSMIT_FILE:
 					if (!this.decodeTransmitFile(position, in, out)) {
 						in.reset();
 						return false;
 					}
+					break;
 				}
 			}
 			if (in.hasRemaining()) {
