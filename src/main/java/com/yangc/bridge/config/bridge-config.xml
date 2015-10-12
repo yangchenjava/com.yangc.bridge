@@ -17,11 +17,11 @@
 		</property>
 	</bean>
 
-	<bean id="messageListener" class="com.yangc.bridge.listener.DefaultMessageListener" />
-
 	<bean id="destination" class="org.apache.activemq.command.ActiveMQTopic">
 		<constructor-arg value="${activemq.destination}" />
 	</bean>
+
+	<bean id="messageListener" class="com.yangc.bridge.listener.DefaultMessageListener" />
 
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="jmsFactory" />
