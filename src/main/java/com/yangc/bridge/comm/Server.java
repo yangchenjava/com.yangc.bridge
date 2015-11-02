@@ -70,7 +70,7 @@ public class Server {
 		this.acceptor.getSessionConfig().setReuseAddress(true);
 		// 设置过滤器
 		DefaultIoFilterChainBuilder filterChain = this.acceptor.getFilterChain();
-		this.addSslSupport(filterChain);
+		// this.addSslSupport(filterChain);
 		// this.addLoggingSupport(filterChain);
 		this.addBlacklistSupport(filterChain);
 		// this.addTrafficCountSupport(filterChain);
@@ -91,6 +91,7 @@ public class Server {
 	 * @创建日期: 2015年7月11日 上午1:31:00
 	 * @param filterChain
 	 */
+	@SuppressWarnings("unused")
 	private void addSslSupport(DefaultIoFilterChainBuilder filterChain) {
 		SslFilter sslFilter = new SslFilter(new SslContextBuilder().build());
 		// 双向认证,服务端需要认证客户端
@@ -199,11 +200,12 @@ public class Server {
 	public void restart() {
 		logger.info("==========重启mina服务=========");
 		if (this.acceptor != null) {
-			this.acceptor.dispose();
+			this.acceptor.unbind();
+			this.acceptor.dispose(true);
 			this.acceptor = null;
 		}
 		this.sessionCache.clear();
-		this.init();
+		this.start();
 	}
 
 	/**
