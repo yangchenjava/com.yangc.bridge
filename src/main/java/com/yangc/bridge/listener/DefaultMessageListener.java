@@ -14,7 +14,8 @@ import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,7 +30,7 @@ import com.yangc.bridge.comm.protocol.ContentType;
 
 public class DefaultMessageListener implements MessageListener {
 
-	private static final Logger logger = Logger.getLogger(DefaultMessageListener.class);
+	private static final Logger logger = LogManager.getLogger(DefaultMessageListener.class);
 
 	private static final Map<String, LinkedBlockingQueue<Serializable>> MESSAGE_QUEUE = new HashMap<String, LinkedBlockingQueue<Serializable>>();
 

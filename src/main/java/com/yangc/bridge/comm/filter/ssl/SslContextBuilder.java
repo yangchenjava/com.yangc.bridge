@@ -4,7 +4,8 @@ import java.io.File;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.mina.filter.ssl.KeyStoreFactory;
 import org.apache.mina.filter.ssl.SslContextFactory;
 
@@ -12,7 +13,7 @@ import com.yangc.utils.Message;
 
 public class SslContextBuilder {
 
-	private static final Logger logger = Logger.getLogger(SslContextBuilder.class);
+	private static final Logger logger = LogManager.getLogger(SslContextBuilder.class);
 
 	private static final String KEYSTORE_PASSWORD = Message.getMessage("bridge.keystore");
 	private static final String TRUSTSTORE_PASSWORD = Message.getMessage("bridge.truststore");

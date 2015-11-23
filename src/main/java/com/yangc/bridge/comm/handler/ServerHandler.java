@@ -3,7 +3,8 @@ package com.yangc.bridge.comm.handler;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
@@ -22,7 +23,7 @@ import com.yangc.bridge.comm.handler.processor.ResultProcessor;
 @Service
 public class ServerHandler extends IoHandlerAdapter {
 
-	private static final Logger logger = Logger.getLogger(ServerHandler.class);
+	private static final Logger logger = LogManager.getLogger(ServerHandler.class);
 
 	public static final String USER = "USER";
 	public static final String LOGIN_COUNT = "LOGIN_COUNT";
