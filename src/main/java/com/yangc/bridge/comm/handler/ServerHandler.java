@@ -46,7 +46,7 @@ public class ServerHandler extends IoHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("sessionCreated - " + remoteAddress);
+		logger.info("sessionCreated - {}", remoteAddress);
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class ServerHandler extends IoHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("sessionOpened - " + remoteAddress);
+		logger.info("sessionOpened - {}", remoteAddress);
 	}
 
 	@Override
@@ -70,8 +70,8 @@ public class ServerHandler extends IoHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("sessionClosed - " + remoteAddress);
-		// 移除缓存(断线重连的session已经替换原有session,故排除)
+		logger.info("sessionClosed - {}", remoteAddress);
+		// 移除缓存(断线重连的session已经替换原有session, 故排除)
 		UserBean user = (UserBean) session.getAttribute(USER);
 		if (user != null && session.getId() != user.getExpireSessionId()) {
 			this.sessionCache.removeSessionId(user.getUsername());
@@ -87,7 +87,7 @@ public class ServerHandler extends IoHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("sessionIdle - " + remoteAddress);
+		logger.info("sessionIdle - {}", remoteAddress);
 		if (status.equals(IdleStatus.READER_IDLE)) {
 			session.close(true);
 		}

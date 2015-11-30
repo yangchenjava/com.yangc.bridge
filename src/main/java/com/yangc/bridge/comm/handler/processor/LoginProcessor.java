@@ -46,7 +46,7 @@ public class LoginProcessor {
 	private ExecutorService executorService;
 
 	public LoginProcessor() {
-		this.executorService = Executors.newSingleThreadScheduledExecutor();
+		this.executorService = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -89,7 +89,8 @@ public class LoginProcessor {
 						// IoSession expireSession = this.session.getService().getManagedSessions().get(expireSessionId);
 						// if (expireSession != null) expireSession.close(true);
 						IoSession expireSession = this.session.getService().getManagedSessions().get(expireSessionId);
-						if (expireSession != null && StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), username)) {
+						if (expireSession != null && expireSession.getAttribute(ServerHandler.USER) != null
+								&& StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), username)) {
 							// 标识断线重连的session
 							((UserBean) expireSession.getAttribute(ServerHandler.USER)).setExpireSessionId(expireSessionId);
 							expireSession.close(true);

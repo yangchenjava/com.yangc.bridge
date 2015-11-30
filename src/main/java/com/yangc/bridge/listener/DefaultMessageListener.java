@@ -111,7 +111,8 @@ public class DefaultMessageListener implements MessageListener {
 						if (obj instanceof UserBean) {
 							UserBean user = (UserBean) obj;
 							IoSession expireSession = server.getManagedSessions().get(user.getExpireSessionId());
-							if (expireSession != null && StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
+							if (expireSession != null && expireSession.getAttribute(ServerHandler.USER) != null
+									&& StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
 								// 标识断线重连的session
 								((UserBean) expireSession.getAttribute(ServerHandler.USER)).setExpireSessionId(user.getExpireSessionId());
 								expireSession.close(true);
