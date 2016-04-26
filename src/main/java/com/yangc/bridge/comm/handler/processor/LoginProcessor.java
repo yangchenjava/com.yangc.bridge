@@ -8,7 +8,7 @@ import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +93,8 @@ public class LoginProcessor {
 								&& StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), username)) {
 							// 标识断线重连的session
 							((UserBean) expireSession.getAttribute(ServerHandler.USER)).setExpireSessionId(expireSessionId);
-							expireSession.close(true);
+							// expireSession.close(true);
+							expireSession.closeNow();
 						} else {
 							this.user.setExpireSessionId(expireSessionId);
 							jmsTemplate.send(new MessageCreator() {
@@ -120,7 +121,8 @@ public class LoginProcessor {
 				if (!result.isSuccess()) {
 					Integer loginCount = (Integer) this.session.getAttribute(ServerHandler.LOGIN_COUNT, 1);
 					if (loginCount > 2) {
-						this.session.close(false);
+						// this.session.close(false);
+						this.session.closeOnFlush();
 					} else {
 						this.session.setAttribute(ServerHandler.LOGIN_COUNT, ++loginCount);
 					}

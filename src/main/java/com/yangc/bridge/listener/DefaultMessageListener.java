@@ -115,7 +115,8 @@ public class DefaultMessageListener implements MessageListener {
 									&& StringUtils.equals(((UserBean) expireSession.getAttribute(ServerHandler.USER)).getUsername(), this.username)) {
 								// 标识断线重连的session
 								((UserBean) expireSession.getAttribute(ServerHandler.USER)).setExpireSessionId(user.getExpireSessionId());
-								expireSession.close(true);
+								// expireSession.close(true);
+								expireSession.closeNow();
 							}
 						} else if (obj instanceof TBridgeChat) {
 							TBridgeChat chat = (TBridgeChat) obj;

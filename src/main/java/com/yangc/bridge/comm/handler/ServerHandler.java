@@ -89,7 +89,8 @@ public class ServerHandler extends IoHandlerAdapter {
 		}
 		logger.info("sessionIdle - {}", remoteAddress);
 		if (status.equals(IdleStatus.READER_IDLE)) {
-			session.close(true);
+			// session.close(true);
+			session.closeNow();
 		}
 	}
 
@@ -103,7 +104,8 @@ public class ServerHandler extends IoHandlerAdapter {
 			}
 		}
 		logger.error("exceptionCaught - " + remoteAddress + cause.getMessage(), cause);
-		session.close(true);
+		// session.close(true);
+		session.closeNow();
 	}
 
 	@Override
@@ -118,7 +120,8 @@ public class ServerHandler extends IoHandlerAdapter {
 		} else if (message instanceof TBridgeFile) {
 			this.fileReceived(session, (TBridgeFile) message);
 		} else {
-			session.close(true);
+			// session.close(true);
+			session.closeNow();
 		}
 	}
 
@@ -126,7 +129,8 @@ public class ServerHandler extends IoHandlerAdapter {
 		if (session.containsAttribute(USER)) {
 			this.resultProcessor.process(session, result);
 		} else {
-			session.close(true);
+			// session.close(true);
+			session.closeNow();
 		}
 	}
 
@@ -138,7 +142,8 @@ public class ServerHandler extends IoHandlerAdapter {
 		if (session.containsAttribute(USER)) {
 			this.chatAndFileProcessor.process(session, chat);
 		} else {
-			session.close(true);
+			// session.close(true);
+			session.closeNow();
 		}
 	}
 
@@ -146,7 +151,8 @@ public class ServerHandler extends IoHandlerAdapter {
 		if (session.containsAttribute(USER)) {
 			this.chatAndFileProcessor.process(session, file);
 		} else {
-			session.close(true);
+			// session.close(true);
+			session.closeNow();
 		}
 	}
 

@@ -197,7 +197,8 @@ public class WhitelistFilter extends IoFilterAdapter {
 
 	private void blockSession(IoSession session) {
 		LOGGER.warn("Remote address not in the whitelist; closing.");
-		session.close(true);
+		// session.close(true);
+		session.closeNow();
 	}
 
 	private boolean isBlocked(IoSession session) {
