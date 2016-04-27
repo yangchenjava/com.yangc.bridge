@@ -18,12 +18,12 @@
 		</property>
 		<property name="from" type="java.lang.String">
 			<column name="FROM_USERNAME" length="200">
-				<comment>发送人</comment>
+				<comment>发送者</comment>
 			</column>
 		</property>
 		<property name="to" type="java.lang.String">
 			<column name="TO_USERNAME" length="200">
-				<comment>接收人</comment>
+				<comment>接收者</comment>
 			</column>
 		</property>
 		<property name="type" type="java.lang.Long">
@@ -41,5 +41,33 @@
 				<comment>创建时间</comment>
 			</column>
 		</property>
+		<joined-subclass name="com.yangc.bridge.bean.TBridgeChat" table="T_BRIDGE_CHAT">
+			<comment>文本表</comment>
+			<key column="ID" />
+			<property name="data" type="java.lang.String">
+				<column name="DATA" length="1000">
+					<comment>文本内容</comment>
+				</column>
+			</property>
+		</joined-subclass>
+		<joined-subclass name="com.yangc.bridge.bean.TBridgeFile" table="T_BRIDGE_FILE">
+			<comment>文件表</comment>
+			<key column="ID" />
+			<property name="fileName" type="java.lang.String">
+				<column name="FILE_NAME" length="200">
+					<comment>文件名</comment>
+				</column>
+			</property>
+			<property name="fileSize" type="java.lang.Long">
+				<column name="FILE_SIZE" precision="22" scale="0">
+					<comment>文件大小</comment>
+				</column>
+			</property>
+			<property name="fileMd5" type="java.lang.String">
+				<column name="FILE_MD5" length="50">
+					<comment>文件md5</comment>
+				</column>
+			</property>
+		</joined-subclass>
 	</class>
 </hibernate-mapping>
