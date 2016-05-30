@@ -20,7 +20,7 @@
 		<listener-class>com.yangc.bridge.listener.MinaLoaderListener</listener-class>
 	</listener>
 
-	<!-- shiro过滤 -->
+	<!-- shiro过滤,会去spring上下文中匹配名称为shiroFilter的bean -->
 	<filter>
 		<filter-name>shiroFilter</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>

@@ -1,0 +1,20 @@
+1.rec q(receive queue)消息堆积,连接可以进来但是服务器收不到发送消息?
+业务处理出现阻塞了,解码即使错误但processor线程还是在处理read事件,rec q就不会出现堆积.
+netty分为boss  worker两种线程,mina也是如此   一种叫acceptor   处理accept事件    客户端连接到服务器的时候accpetor 获取到连接channel  这时候连接就建立成功了,
+然后acceptor 封装channel  其他属性包装为session 放在队列里面,然后processor从队列里面取到session  把channel注册到selector上,processor处理channel的read  write事件,
+如果handler的session open create 方法没有被执行  说明processor没有从队列里面取到新连接,
+processor线程阻塞在其他地方了  所以就出现连接建立成功   但收不到数据的问题
+
+2.有些连接接收发送数据正常  有些连接建立成功但发送数据不行是怎么回事?
+acceptor获取到channel之后会放到队列里面,获取到channel后acceptor会从processor池中选出一个processor(轮询选举)，如果某个连接不幸的分配到阻塞的processor  那他的请求就不能被处理
+
+3.如果连接都在同一个processor上面，但出现有的连接读数据正常，有的不正常或者延迟很长时间？
+processor读写这块是循环依次处理每个session的读写，单个session读的话，是把channel的数据读到缓冲区为止才退出，如果某个连接不停发送大量数据，
+那processor就一直读，造成其他连接的延迟
+
+4.为什么引入executorfilter或者业务线程池还是会有问题？
+线程池分为cached 和fixed 两种，cached是没有限制线程的个数   fixd是有最大值，如果数据量特别大  使用的fixd类型的    在线程已经达到最大值，
+并且任务队列也塞满的时候就会在executor.execute出现阻塞，直到队列有空位，那么向线程池提交任务的线程就会被阻塞，
+比如这个线程是processor或者executorfilter的线程，processor线程就直接卡死了   使用executor的症状会在时间更久体现出来  最终也是processor阻塞，
+如果使用cached类型   那么线程会不停的创建    达到几千个都是有可能的，使用线程池最好设置policy机制     可以自定义   比如发邮件给运维人员
+
