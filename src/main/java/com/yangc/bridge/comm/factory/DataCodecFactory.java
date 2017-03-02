@@ -18,26 +18,35 @@ import com.yangc.bridge.comm.codec.prototype.PrototypeEncoderData;
 
 public class DataCodecFactory implements ProtocolCodecFactory {
 
+	private final ProtocolEncoder encoder;
+	private final ProtocolDecoder decoder;
+
+	public DataCodecFactory() {
+		if (StringUtils.equals(Server.CODEC, "protobuf")) {
+			this.encoder = new ProtobufEncoderData();
+		} else if (StringUtils.equals(Server.CODEC, "messagepack")) {
+			this.encoder = new MessagePackEncoderData();
+		} else {
+			this.encoder = new PrototypeEncoderData();
+		}
+
+		if (StringUtils.equals(Server.CODEC, "protobuf")) {
+			this.decoder = new ProtobufDecoderData();
+		} else if (StringUtils.equals(Server.CODEC, "messagepack")) {
+			this.decoder = new MessagePackDecoderData();
+		} else {
+			this.decoder = new PrototypeDecoderData(Charset.forName(Server.CHARSET_NAME).newDecoder());
+		}
+	}
+
 	@Override
 	public ProtocolEncoder getEncoder(IoSession session) throws Exception {
-		if (StringUtils.equals(Server.CODEC, "protobuf")) {
-			return new ProtobufEncoderData();
-		}
-		if (StringUtils.equals(Server.CODEC, "messagepack")) {
-			return new MessagePackEncoderData();
-		}
-		return new PrototypeEncoderData();
+		return this.encoder;
 	}
 
 	@Override
 	public ProtocolDecoder getDecoder(IoSession session) throws Exception {
-		if (StringUtils.equals(Server.CODEC, "protobuf")) {
-			return new ProtobufDecoderData();
-		}
-		if (StringUtils.equals(Server.CODEC, "messagepack")) {
-			return new MessagePackDecoderData();
-		}
-		return new PrototypeDecoderData(Charset.forName(Server.CHARSET_NAME).newDecoder());
+		return this.decoder;
 	}
 
 }

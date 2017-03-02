@@ -24,11 +24,10 @@ public class MessagePackDecoderData extends CumulativeProtocolDecoder {
 	@Override
 	protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 		if (in.hasRemaining()) {
-			in.mark();
 			if (in.remaining() < 2) {
-				in.reset();
 				return false;
 			}
+			in.mark();
 			int position = in.position();
 			if (in.get() == Tag.START) {
 				switch (in.get()) {
